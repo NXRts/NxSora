@@ -1,0 +1,364 @@
+"""
+Island Controller
+Central QObject bridge linking all backend services directly to QML.
+"""
+
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtProperty, pyqtSlot, QTimer
+from services.mpris import MprisService
+from services.volume import VolumeService
+from services.system import SystemService
+from services.notifications import NotificationService
+from services.timer import TimerService
+import config
+
+
+class IslandController(QObject):
+    # Core state change signal
+    stateChanged = pyqtSignal(str)
+    isExpandedChanged = pyqtSignal(bool)
+    
+    # Media signals
+    mediaChanged = pyqtSignal()
+    mediaProgressChanged = pyqtSignal()
+    
+    # Volume signals
+    volumeChanged = pyqtSignal()
+    
+    # System signals
+    statsChanged = pyqtSignal()
+    batteryChanged = pyqtSignal()
+    
+    # Notification signal
+    notificationChanged = pyqtSignal()
+    
+    # Timer signal
+    timerChanged = pyqtSignal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        
+        # Sub-services
+        self.mpris = MprisService(self)
+        self.volume_service = VolumeService(self)
+        self.system = SystemService(self)
+        self.notifications = NotificationService(self)
+        self.timer_service = TimerService(self)
+
+        # Island UI State:
+        # "idle", "music", "hud-volume", "hud-battery", "hud-notification", "expanded-music", "expanded-hub"
+        self._state = "idle"
+        self._is_expanded = False
+        self._previous_compact_state = "idle"
+
+        # Notification data
+        self._notif_app = ""
+        self._notif_title = ""
+        self._notif_body = ""
+
+        # HUD Revert Timer
+        self._hud_timer = QTimer(self)
+        self._hud_timer.setSingleShot(True)
+        self._hud_timer.timeout.connect(self._revert_hud)
+
+        # Wire up sub-services
+        self.mpris.mediaChanged.connect(self._on_media_changed)
+        self.mpris.positionChanged.connect(self._on_media_progress)
+        self.volume_service.volumeChanged.connect(self._on_volume_changed)
+        self.system.statsUpdated.connect(self._on_stats_updated)
+        self.system.batteryChanged.connect(self._on_battery_updated)
+        self.system.powerPluggedEvent.connect(self._on_power_plugged_event)
+        self.notifications.notificationReceived.connect(self._on_notification_received)
+        self.timer_service.timerTick.connect(self._on_timer_tick)
+        self.timer_service.timerFinished.connect(self._on_timer_finished)
+
+        # Initial state setup
+        if self.mpris.status in ("Playing", "Paused") and self.mpris.title:
+            self._state = "music"
+        else:
+            self._state = "idle"
+
+    # --- State Management ---
+
+    def _set_state(self, new_state):
+        if self._state != new_state:
+            self._state = new_state
+            self.stateChanged.emit(self._state)
+            
+            expanded = new_state.startswith("expanded-")
+            if self._is_expanded != expanded:
+                self._is_expanded = expanded
+                self.isExpandedChanged.emit(self._is_expanded)
+
+    def _revert_hud(self):
+        if self._is_expanded:
+            return
+        if self.mpris.status == "Playing" or (self.mpris.title and self.mpris.status == "Paused"):
+            self._set_state("music")
+        else:
+            self._set_state("idle")
+
+    # --- Sub-service event handlers ---
+
+    def _on_media_changed(self):
+        self.mediaChanged.emit()
+        if not self._is_expanded and not self._state.startswith("hud-"):
+            if self.mpris.status == "Playing" or (self.mpris.title and self.mpris.status == "Paused"):
+                self._set_state("music")
+            else:
+                self._set_state("idle")
+
+    def _on_media_progress(self, pos, dur):
+        self.mediaProgressChanged.emit()
+
+    def _on_volume_changed(self, vol, is_muted):
+        self.volumeChanged.emit()
+        # Trigger HUD popup if not already in expanded card
+        if not self._is_expanded:
+            self._set_state("hud-volume")
+            self._hud_timer.start(config.CONFIG.get("hud_volume_timeout", 2200))
+
+    def _on_stats_updated(self, cpu, ram, text):
+        self.statsChanged.emit()
+
+    def _on_battery_updated(self, pct, plugged):
+        self.batteryChanged.emit()
+
+    def _on_power_plugged_event(self, plugged, pct):
+        self.batteryChanged.emit()
+        if not self._is_expanded:
+            self._set_state("hud-battery")
+            self._hud_timer.start(config.CONFIG.get("hud_battery_timeout", 3000))
+
+    def _on_notification_received(self, app_name, summary, body):
+        self._notif_app = app_name
+        self._notif_title = summary
+        self._notif_body = body
+        self.notificationChanged.emit()
+        if not self._is_expanded:
+            self._set_state("hud-notification")
+            self._hud_timer.start(config.CONFIG.get("hud_notification_timeout", 5000))
+
+    def _on_timer_tick(self, rem, text):
+        self.timerChanged.emit()
+
+    def _on_timer_finished(self):
+        self.timerChanged.emit()
+        self.notifications.trigger_test("Timer Selesai!", "Waktu countdown telah berakhir.")
+
+    # --- PyQT Properties for QML ---
+
+    @pyqtProperty(str, notify=stateChanged)
+    def state(self):
+        return self._state
+
+    @pyqtProperty(bool, notify=isExpandedChanged)
+    def isExpanded(self):
+        return self._is_expanded
+
+    # Media Properties
+    @pyqtProperty(str, notify=mediaChanged)
+    def mediaTitle(self):
+        return self.mpris.title or "Tidak ada media"
+
+    @pyqtProperty(str, notify=mediaChanged)
+    def mediaArtist(self):
+        return self.mpris.artist or "Tidak ada artis"
+
+    @pyqtProperty(str, notify=mediaChanged)
+    def mediaAlbum(self):
+        return self.mpris.album or ""
+
+    @pyqtProperty(str, notify=mediaChanged)
+    def mediaArtUrl(self):
+        return self.mpris.art_url
+
+    @pyqtProperty(str, notify=mediaChanged)
+    def mediaStatus(self):
+        return self.mpris.status
+
+    @pyqtProperty(bool, notify=mediaChanged)
+    def mediaIsPlaying(self):
+        return self.mpris.status == "Playing"
+
+    @pyqtProperty(bool, notify=mediaChanged)
+    def mediaHasTrack(self):
+        return bool(self.mpris.title)
+
+    @pyqtProperty(float, notify=mediaProgressChanged)
+    def mediaPosition(self):
+        return self.mpris.position
+
+    @pyqtProperty(float, notify=mediaProgressChanged)
+    def mediaDuration(self):
+        return self.mpris.duration
+
+    @pyqtProperty(float, notify=mediaProgressChanged)
+    def mediaPositionRatio(self):
+        if self.mpris.duration > 0:
+            return min(1.0, max(0.0, self.mpris.position / self.mpris.duration))
+        return 0.0
+
+    @pyqtProperty(str, notify=mediaProgressChanged)
+    def mediaPositionFormatted(self):
+        mins = int(self.mpris.position) // 60
+        secs = int(self.mpris.position) % 60
+        return f"{mins:02d}:{secs:02d}"
+
+    @pyqtProperty(str, notify=mediaProgressChanged)
+    def mediaDurationFormatted(self):
+        mins = int(self.mpris.duration) // 60
+        secs = int(self.mpris.duration) % 60
+        return f"{mins:02d}:{secs:02d}"
+
+    # Volume Properties
+    @pyqtProperty(float, notify=volumeChanged)
+    def volume(self):
+        return self.volume_service.volume
+
+    @pyqtProperty(int, notify=volumeChanged)
+    def volumePercent(self):
+        return int(round(self.volume_service.volume * 100))
+
+    @pyqtProperty(bool, notify=volumeChanged)
+    def isMuted(self):
+        return self.volume_service.is_muted
+
+    # Battery Properties
+    @pyqtProperty(int, notify=batteryChanged)
+    def batteryPercent(self):
+        return int(round(self.system.battery_percent))
+
+    @pyqtProperty(bool, notify=batteryChanged)
+    def isCharging(self):
+        return self.system.power_plugged
+
+    @pyqtProperty(bool, notify=batteryChanged)
+    def hasBattery(self):
+        return self.system.has_battery
+
+    @pyqtProperty(str, notify=batteryChanged)
+    def batteryStatusText(self):
+        if self.system.power_plugged:
+            return f"Mengisi Daya {self.batteryPercent}%"
+        return f"Baterai {self.batteryPercent}%"
+
+    # System Stats
+    @pyqtProperty(int, notify=statsChanged)
+    def cpuPercent(self):
+        return int(round(self.system.cpu_percent))
+
+    @pyqtProperty(int, notify=statsChanged)
+    def ramPercent(self):
+        return int(round(self.system.ram_percent))
+
+    @pyqtProperty(str, notify=statsChanged)
+    def ramText(self):
+        return self.system.ram_text
+
+    # Notification Properties
+    @pyqtProperty(str, notify=notificationChanged)
+    def notifApp(self):
+        return self._notif_app
+
+    @pyqtProperty(str, notify=notificationChanged)
+    def notifTitle(self):
+        return self._notif_title
+
+    @pyqtProperty(str, notify=notificationChanged)
+    def notifBody(self):
+        return self._notif_body
+
+    # Timer Properties
+    @pyqtProperty(int, notify=timerChanged)
+    def timerRemaining(self):
+        return self.timer_service.remaining_seconds
+
+    @pyqtProperty(str, notify=timerChanged)
+    def timerFormatted(self):
+        mins = self.timer_service.remaining_seconds // 60
+        secs = self.timer_service.remaining_seconds % 60
+        return f"{mins:02d}:{secs:02d}"
+
+    @pyqtProperty(bool, notify=timerChanged)
+    def timerRunning(self):
+        return self.timer_service.is_running
+
+    # --- Slots / Invocable Actions for QML ---
+
+    @pyqtSlot()
+    def toggleExpand(self):
+        """Toggle between compact pill and expanded view"""
+        if self._is_expanded:
+            self.collapse()
+        else:
+            if self.mediaHasTrack:
+                self._set_state("expanded-music")
+            else:
+                self._set_state("expanded-hub")
+
+    @pyqtSlot()
+    def collapse(self):
+        self._hud_timer.stop()
+        if self.mpris.status == "Playing" or (self.mpris.title and self.mpris.status == "Paused"):
+            self._set_state("music")
+        else:
+            self._set_state("idle")
+
+    @pyqtSlot()
+    def expandMusic(self):
+        self._set_state("expanded-music")
+
+    @pyqtSlot()
+    def expandHub(self):
+        self._set_state("expanded-hub")
+
+    # Media controls
+    @pyqtSlot()
+    def mediaPlayPause(self):
+        self.mpris.play_pause()
+
+    @pyqtSlot()
+    def mediaNext(self):
+        self.mpris.next()
+
+    @pyqtSlot()
+    def mediaPrevious(self):
+        self.mpris.previous()
+
+    @pyqtSlot(float)
+    def mediaSeek(self, ratio):
+        self.mpris.seek_ratio(ratio)
+
+    # Volume controls
+    @pyqtSlot(float)
+    def setVolume(self, val):
+        self.volume_service.set_volume(val)
+
+    @pyqtSlot(float)
+    def changeVolume(self, delta):
+        self.volume_service.change_volume(delta)
+
+    @pyqtSlot()
+    def toggleMute(self):
+        self.volume_service.toggle_mute()
+
+    # Timer controls
+    @pyqtSlot(int)
+    def startTimer(self, seconds):
+        self.timer_service.start_timer(seconds)
+
+    @pyqtSlot()
+    def toggleTimer(self):
+        self.timer_service.toggle()
+
+    @pyqtSlot()
+    def resetTimer(self):
+        self.timer_service.reset()
+
+    # Test helpers
+    @pyqtSlot()
+    def triggerTestNotification(self):
+        self.notifications.trigger_test(
+            "Dynamic Island Aktif!",
+            "Semua sistem KDE Plasma 6 Wayland berfungsi normal."
+        )
