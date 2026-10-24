@@ -7,15 +7,18 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PID_FILE="/tmp/dynamic_island_kde.pid"
 LOCK_FILE="/tmp/dynamic_island_kde.lock"
 
+export WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-wayland-1}"
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+export QT_QPA_PLATFORM="wayland"
+
 case "$1" in
     --daemon|-d)
         if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
             echo "Dynamic Island sudah berjalan (PID: $(cat "$PID_FILE"))."
             exit 0
         fi
-        # Remove orphaned lock if any dead process left it
         rm -f "$LOCK_FILE"
-        PYTHONUNBUFFERED=1 nohup python3 "$DIR/main.py" > /tmp/dynamic_island_kde.log 2>&1 &
+        PYTHONUNBUFFERED=1 nohup python3 "$DIR/main.py" >> /tmp/dynamic_island_kde.log 2>&1 &
         PID=$!
         echo $PID > "$PID_FILE"
         echo "Dynamic Island berjalan di background (PID: $PID)."

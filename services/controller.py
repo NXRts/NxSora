@@ -34,6 +34,11 @@ class IslandController(QObject):
     # Timer signal
     timerChanged = pyqtSignal()
 
+    # Network & Utility signals
+    networkChanged = pyqtSignal()
+    nightLightChanged = pyqtSignal()
+    activeHubPageChanged = pyqtSignal(int)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         
@@ -45,10 +50,11 @@ class IslandController(QObject):
         self.timer_service = TimerService(self)
 
         # Island UI State:
-        # "idle", "music", "hud-volume", "hud-battery", "hud-notification", "expanded-music", "expanded-hub"
+        # "idle", "music", "hud-volume", "hud-battery", "hud-notification", "expanded-hub"
         self._state = "idle"
         self._is_expanded = False
         self._previous_compact_state = "idle"
+        self._active_hub_page = 0
 
         # Notification data
         self._notif_app = ""
@@ -70,6 +76,8 @@ class IslandController(QObject):
         self.notifications.notificationReceived.connect(self._on_notification_received)
         self.timer_service.timerTick.connect(self._on_timer_tick)
         self.timer_service.timerFinished.connect(self._on_timer_finished)
+        self.system.networkUpdated.connect(lambda d, u: self.networkChanged.emit())
+        self.system.nightLightChanged.connect(lambda a: self.nightLightChanged.emit())
 
         # Initial state setup
         if self.mpris.status in ("Playing", "Paused") and self.mpris.title:
@@ -283,6 +291,31 @@ class IslandController(QObject):
     def timerRunning(self):
         return self.timer_service.is_running
 
+    # Network & System Info Properties
+    @pyqtProperty(str, notify=networkChanged)
+    def netDownSpeed(self):
+        return self.system.net_down_str
+
+    @pyqtProperty(str, notify=networkChanged)
+    def netUpSpeed(self):
+        return self.system.net_up_str
+
+    @pyqtProperty(str, constant=True)
+    def kernelInfo(self):
+        return self.system.kernel_info
+
+    @pyqtProperty(str, constant=True)
+    def osInfo(self):
+        return self.system.os_info
+
+    @pyqtProperty(bool, notify=nightLightChanged)
+    def nightLightActive(self):
+        return self.system.night_light_active
+
+    @pyqtProperty(int, notify=activeHubPageChanged)
+    def activeHubPage(self):
+        return self._active_hub_page
+
     # --- Slots / Invocable Actions for QML ---
 
     @pyqtSlot()
@@ -292,9 +325,11 @@ class IslandController(QObject):
             self.collapse()
         else:
             if self.mediaHasTrack:
-                self._set_state("expanded-music")
+                self._active_hub_page = 1  # Music page
             else:
-                self._set_state("expanded-hub")
+                self._active_hub_page = 0  # System page
+            self.activeHubPageChanged.emit(self._active_hub_page)
+            self._set_state("expanded-hub")
 
     @pyqtSlot()
     def collapse(self):
@@ -306,10 +341,14 @@ class IslandController(QObject):
 
     @pyqtSlot()
     def expandMusic(self):
-        self._set_state("expanded-music")
+        self._active_hub_page = 1
+        self.activeHubPageChanged.emit(1)
+        self._set_state("expanded-hub")
 
     @pyqtSlot()
     def expandHub(self):
+        self._active_hub_page = 0
+        self.activeHubPageChanged.emit(0)
         self._set_state("expanded-hub")
 
     # Media controls
@@ -362,3 +401,24 @@ class IslandController(QObject):
             "Dynamic Island Aktif!",
             "Semua sistem KDE Plasma 6 Wayland berfungsi normal."
         )
+
+    # Quick System Utilities
+    @pyqtSlot()
+    def takeScreenshot(self):
+        self.system.take_screenshot()
+
+    @pyqtSlot()
+    def lockScreen(self):
+        self.system.lock_screen()
+
+    @pyqtSlot()
+    def openTerminal(self):
+        self.system.open_terminal()
+
+    @pyqtSlot()
+    def openSettings(self):
+        self.system.open_settings()
+
+    @pyqtSlot()
+    def toggleNightLight(self):
+        self.system.toggle_night_light()

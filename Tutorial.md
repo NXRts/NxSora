@@ -64,11 +64,15 @@ Agar Dynamic Island otomatis aktif setiap kali Anda menyalakan PC/laptop atau lo
 
 Dynamic Island dirancang dengan prinsip **100% Click-Through**: Anda tetap bisa mengklik jendela, tombol browser, atau tab yang berada di sekitar kapsul tanpa terhalang.
 
-| Aksi Kursor | Efek pada Dynamic Island |
+| Aksi Kursor / Keyboard | Efek pada Dynamic Island |
 | :--- | :--- |
-| **Klik Kiri pada Kapsul** | Membuka tampilan kartu penuh (*Expanded Card*) untuk melihat detail musik atau Control Hub. |
+| **Klik Kiri pada Kapsul** | Membuka tampilan kartu penuh (*Expanded Card*). |
 | **Klik Kanan pada Kapsul** | Pintasan cepat untuk toggle buka / tutup kartu. |
-| **Scroll Roda Mouse di atas Kapsul** | Mengatur volume suara sistem (scroll ke atas untuk memperbesar, ke bawah untuk mengecilkan). |
+| **Tombol `<` dan `>` di Header** | Berpindah halaman kartu ke samping (4 halaman menu beragam). |
+| **Klik Titik Indikator (`● ○ ○ ○`)** | Langsung melompat ke halaman menu yang dipilih. |
+| **Tombol Panah Keyboard (`←` / `→`)** | Berpindah halaman menu secara instan saat kartu terbuka. |
+| **Geser / Drag Mouse Horisontal** | Menggeser (*swipe*) halaman menu ke samping secara mulus. |
+| **Scroll Roda Mouse di atas Kapsul** | Mengatur volume suara sistem secara langsung. |
 | **Klik pada Garis Durasi Musik** | Melompat (*seek*) langsung ke menit tertentu dalam lagu/video. |
 | **Tombol ✕ di Sudut Kartu** | Menutup kembali tampilan kartu menjadi kapsul minimalis. |
 
@@ -76,44 +80,33 @@ Dynamic Island dirancang dengan prinsip **100% Click-Through**: Anda tetap bisa 
 
 ## 4. Fitur-Fitur Utama & Cara Pakai
 
-### A. Pemutar Musik (Spotify, Browser, VLC)
-* **Kapsul Otomatis Mendeteksi Media**: Saat Anda memutar lagu di Spotify atau video di YouTube (Firefox / Chrome / Brave), kapsul otomatis memanjang menampilkan ikon album, judul lagu, dan visualizer audio dinamis yang bergoyang.
-* **Tampilan Kartu Penuh**: Klik kapsul untuk membuka player lengkap.
-  * Tekan tombol **Play / Pause** (tengah bulat biru).
-  * Tekan **Previous (⏮)** untuk lagu sebelumnya.
-  * Tekan **Next (⏭)** untuk lagu berikutnya.
-  * Klik garis durasi biru untuk melompat menit lagu.
-  * Atur slider volume suara tepat di dalam kartu musik.
+### A. Dynamic Control Hub Berhalaman (Multi-Page Hub)
+Gunakan tombol navigasi **`<`** dan **`>`** (atau geser / klik titik indikator) untuk berpindah antara 4 halaman menu:
 
-### B. Pengatur Volume & Scroll Mouse
-* Setiap kali Anda menekan tombol volume fisik di keyboard, Dynamic Island memunculkan bar indikator suara dengan angka persentase.
-* Anda juga bisa mengarahkan mouse ke kapsul lalu memutar roda mouse untuk mengatur volume secara instan.
-* Kapsul volume akan menyusut kembali secara otomatis setelah 2 detik tidak ada aktivitas.
+1. **Halaman 1: 📊 Sistem & Monitoring**:
+   * **CPU Usage**: Persentase pemakaian prosesor dan grafik bar.
+   * **RAM Usage**: Persentase pemakaian RAM beserta angka memori terpakai (misal: `4.5 / 15.4 GB`).
+   * **Battery Health**: Indikator baterai dan status pengisian.
+   * **Pomodoro / Quick Timer**: Preset timer 1m, 5m, 25m dengan live countdown.
+   * **Quick Mute**: Tombol satu klik untuk mematikan/menyalakan suara.
 
-### C. Status Baterai & Charger
-* Saat kabel pengisi daya (charger laptop) dicolokkan, Dynamic Island memunculkan kapsul hijau cerah bertuliskan *"Mengisi Daya XX%"*.
-* Saat charger dilepas, status akan beralih menjadi *"Baterai XX%"*.
+2. **Halaman 2: 🎵 Pemutar Musik Lengkap**:
+   * Menampilkan sampul lagu besar, judul lagu, dan nama artis.
+   * Garis durasi interaktif (bisa diklik untuk melompat menit lagu).
+   * Tombol kontrol Prev (⏮), Play/Pause (▶ / ⏸), Next (⏭), dan slider volume langsung.
+   * Tampilan estetis saat tidak ada musik aktif.
 
-### D. Notifikasi Desktop
-* Setiap ada pesan atau notifikasi masuk (Discord, Telegram, WhatsApp Web, email, atau sistem), Dynamic Island otomatis membesar menampilkan logo notifikasi, nama pengirim, judul, serta cuplikan pesan.
-* Notifikasi akan menutup kembali secara otomatis setelah 5 detik.
-* Uji fitur ini kapan saja dengan perintah: `./run.sh --test-notif`.
+3. **Halaman 3: ⚡ Pintasan Cepat (Quick Tools)**:
+   * 📸 **Screenshot**: Satu klik untuk mengambil cuplikan area layar dengan Spectacle.
+   * 🌙 **Night Light**: Mengaktifkan/menonaktifkan filter cahaya biru malam hari KWin.
+   * 🔒 **Kunci Layar**: Mengunci sesi desktop seketika (`loginctl lock-session`).
+   * 💻 **Konsole**: Membuka terminal KDE dengan cepat.
+   * ⚙️ **Pengaturan**: Membuka System Settings KDE.
+   * 🔔 **Uji Notifikasi**: Memunculkan pop-up notifikasi uji coba.
 
-### E. Control Hub & Monitoring Sistem
-* Saat tidak ada musik yang sedang berputar, klik kapsul jam di atas untuk membuka **Dynamic Control Hub**.
-* Di dalam Control Hub Anda dapat memantau:
-  * **CPU Usage**: Persentase pemakaian prosesor dan grafik bar.
-  * **RAM Usage**: Persentase pemakaian RAM beserta angka memori terpakai (misal: `4.5 / 15.4 GB`).
-  * **Battery Health**: Indikator baterai dan status pengisian.
-  * **Quick Mute**: Tombol cepat untuk mematikan/menyalakan suara.
-
-### F. Quick Timer / Pomodoro
-* Buka **Control Hub**, lalu pilih preset timer cepat:
-  * `1m` (1 menit)
-  * `5m` (5 menit)
-  * `25m` (25 menit / Pomodoro kerja)
-* Saat timer berjalan, waktu mundur akan terus ditampilkan secara *real-time* di kapsul standby.
-* Saat waktu habis, Dynamic Island akan mengirimkan notifikasi pemberitahuan.
+4. **Halaman 4: 🌐 Jaringan & Informasi Sistem**:
+   * **Speedometer Internet Live**: Kecepatan unduh (`↓`) dan unggah (`↑`) *real-time*.
+   * **Info Sistem**: Versi distro CachyOS, Kernel Linux, dan status Wayland Layer-Shell.
 
 ---
 

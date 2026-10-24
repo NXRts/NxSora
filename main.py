@@ -68,6 +68,10 @@ def main():
     controller = IslandController()
     app_cfg = AppConfig()
 
+    app._controller = controller
+    app._app_cfg = app_cfg
+    app._engine = engine
+
     engine.rootContext().setContextProperty("IslandController", controller)
     engine.rootContext().setContextProperty("AppConfig", app_cfg)
 
