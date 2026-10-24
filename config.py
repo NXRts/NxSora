@@ -30,8 +30,8 @@ CONFIG = {
     "expanded_music_width": 390,
     "expanded_music_height": 185,
     
-    "expanded_hub_width": 400,
-    "expanded_hub_height": 235,
+    "expanded_hub_width": 420,
+    "expanded_hub_height": 245,
     
     # Auto-collapse timeouts in milliseconds
     "hud_volume_timeout": 2200,

@@ -16,8 +16,8 @@ Rectangle {
             case "hud-volume": return 240;
             case "hud-battery": return 240;
             case "hud-notification": return 340;
-            case "expanded-music": return 390;
-            case "expanded-hub": return 400;
+            case "expanded-music": return 420;
+            case "expanded-hub": return 420;
             default: return 150;
         }
     }
@@ -29,8 +29,8 @@ Rectangle {
             case "hud-volume": return 38;
             case "hud-battery": return 38;
             case "hud-notification": return 64;
-            case "expanded-music": return 185;
-            case "expanded-hub": return 235;
+            case "expanded-music": return 245;
+            case "expanded-hub": return 245;
             default: return 34;
         }
     }
@@ -143,19 +143,11 @@ Rectangle {
             Behavior on opacity { NumberAnimation { duration: 180 } }
         }
 
-        // 6. Expanded Music Card
-        ExpandedMusic {
-            anchors.fill: parent
-            visible: opacity > 0
-            opacity: IslandController.state === "expanded-music" ? 1.0 : 0.0
-            Behavior on opacity { NumberAnimation { duration: 200 } }
-        }
-
-        // 7. Expanded Control Hub Card
+        // 6. Expanded Multi-Page Control Hub (Includes Music, System, Tools, and Network)
         ExpandedHub {
             anchors.fill: parent
             visible: opacity > 0
-            opacity: IslandController.state === "expanded-hub" ? 1.0 : 0.0
+            opacity: (IslandController.state === "expanded-hub" || IslandController.state === "expanded-music") ? 1.0 : 0.0
             Behavior on opacity { NumberAnimation { duration: 200 } }
         }
     }
