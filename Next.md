@@ -1,87 +1,92 @@
-# 🗺️ Roadmap Fitur Masa Depan: Projek Dynamic Island
+# 🗺️ Roadmap & Analisis Fitur: Projek Dynamic Island
 **Platform:** CachyOS Linux | KDE Plasma 6 (Wayland) | Python 3 + PyQt6 + QML (Layer-Shell)
 
-Dokumen ini memuat rencana pengembangan fitur baru, inovasi pengalaman pengguna (*UX*), serta rekomendasi fitur prioritas untuk menjadikan **Projek Dynamic Island** solusi Dynamic Island paling canggih, fungsional, dan estetik di ekosistem Linux desktop.
+Dokumen ini memuat rangkuman analisis mendalam dari dua referensi *notch app* terkemuka:
+1. **[Poni (poni.web.id)](https://poni.web.id/)**
+2. **[Nusa (rama2555.github.io/nusa)](https://rama2555.github.io/nusa/)**
+
+Serta rencana strategis (*implementation plan*) untuk mengadaptasi dan merealisasikan fitur-fitur terbaiknya ke dalam **Projek Dynamic Island** di CachyOS KDE Wayland.
 
 ---
 
-## 🌟 Daftar Fitur yang Direncanakan & Direkomendasikan
+## 🔬 1. Hasil Analisis Fitur Referensi
 
-### 1. 🎵 Multimedia & Audio Superpowers *(Rekomendasi Utama)*
-* [ ] **Live CAVA / PipeWire FFT Visualizer**:
-  * Mengganti animasi bar prosedural saat ini dengan gelombang spektrum audio *real-time* asli dari PipeWire (menggunakan `cava` atau modul visualizer PipeWire). Bar audio akan melompat sesuai dentuman *bass* & ritme musik yang sedang diputar.
-* [ ] **Multi-Player Source Switcher**:
-  * Jika pengguna memutar Spotify sekaligus video YouTube di Firefox/Chrome, kapsul menyediakan *badge* kecil untuk berpindah kendali antar media player dengan satu klik.
-* [ ] **Synced Lyrics (Mode Karaoke Minimalis)**:
-  * Mengambil lirik lagu yang sinkron secara *real-time* (via LRCLIB API / Spotify DBus) dan menampilkannya baris demi baris di dalam kapsul atau *expanded card*.
-* [ ] **Quick Audio Device Switcher**:
-  * Tombol cepat di Expanded Hub untuk mengganti output audio secara instan (Speaker Laptop ↔ Headphone Bluetooth / USB DAC) tanpa harus membuka System Settings KDE.
-
----
-
-### 2. 🛡️ Indikator Privasi & Status Sistem (Apple-Style Indicators)
-* [ ] **Microphone & Camera Privacy Dots**:
-  * Menampilkan titik oranye (*microphone aktif*) dan titik hijau (*webcam/kamera aktif*) di sudut kapsul saat ada aplikasi (Discord, Zoom, Browser) yang mengakses audio/video.
-  * Klik titik tersebut untuk melihat aplikasi mana yang sedang menggunakan mikrofon/kamera dan tombol pintas *Mute Microphone*.
-* [ ] **Screen Recording / Streaming HUD**:
-  * Saat OBS Studio atau KDE Spectacle sedang merekam layar, Dynamic Island menampilkan durasi rekaman dengan titik merah berkedip (*pulsing red dot*) dan tombol *Stop Recording*.
+### A. Poni (`poni.web.id`)
+* **Music Player & Adaptive Glow**: Cover album musik dengan efek pendaran cahaya (*glow*) adaptif yang mengikuti warna dominan album, live audio wave visualizer, seekbar dan media control.
+* **AI Chat & Quick Translate**: Kolom input AI mengambang di dalam notch (mendukung Gemini API, Claude, OpenAI, atau Ollama lokal) untuk tanya-jawab kilat dan terjemahan instan.
+* **Health & Wellness Tracker**:
+  * *Water Intake*: Pencatat minum air (target 8 gelas/hari) dengan tombol tambah minum.
+  * *20-20-20 Eye Break*: Pengingat istirahat mata setiap 20 menit menatap sejauh 20 kaki selama 20 detik.
+  * *Stretch & Breathing*: Panduan peregangan postur dan latihan pernapasan melingkar (*inhale-hold-exhale*).
+* **Calendar & Meeting Alerts**: Sinkronisasi agenda Google Calendar/Outlook/iCal dengan countdown pill sebelum meeting.
+* **Weather & Forecast**: Cuaca live, suhu, kelembaban, dan prakiraan per jam serta 7 hari (Open-Meteo).
+* **File Shelf**: Menaruh file sementara (*drag & drop stash*), quick zip, dan converter.
+* **System Stats & Day Progress**: Monitoring CPU, RAM, Disk, Speedometer Jaringan, dan persentase hari yang telah lewat.
+* **Desktop Pet**: Maskot kucing 3D yang melirik dan merespons kursor mouse.
 
 ---
 
-### 3. 🔍 Integrasi Cepat KDE Plasma & Wayland
-* [ ] **Spotlight / Quick Search Runner Morphing**:
-  * Menekan pintasan keyboard (misalnya `Super + Space` atau `Alt + Space`) akan mengubah Dynamic Island menjadi bilah pencarian cerdas mengambang (seperti macOS Spotlight / KRunner) untuk membuka aplikasi, mencari file, atau menghitung kalkulator matematika secara instan.
-* [ ] **Brightness & Night Light OSD**:
-  * Menangkap tombol kecerahan layar (*brightness keys*) dan menampilkan bar persentase kecerahan di Dynamic Island.
-  * Tombol *toggle* Night Color (filter cahaya biru untuk malam hari) langsung di Control Hub.
-* [ ] **Multi-Monitor Awareness**:
-  * Pilihan konfigurasi di `config.py` untuk menentukan apakah Dynamic Island tampil di *Primary Monitor*, mengikuti kursor aktif (*follow focus*), atau muncul di semua layar.
+### B. Nusa (`rama2555.github.io/nusa`)
+* **Resting Mode (Mascot Eyes)**: Saat tidak ada notifikasi atau musik, jam memudar dan berganti sepasang mata digital bersinar yang berkedip lembut (*blinking eyes*).
+* **Closed Idle Pill**: Kapsul minimalis berisikan jam digital, ring persentase baterai melingkar, dan visualizer audio mini bar saat lagu menyala.
+* **Expanded Music Hub (420x140px)**: Desain pemutar musik presisi dengan artwork, judul, artis, scrubber timeline progres + sisa waktu, serta tombol kendali.
+* **Synced Lyrics Mode (520x140px)**: Tampilan lirik karaoke terbelah dua (kiri: info lagu, kanan: baris lirik lagu yang otomatis scroll dan menyala terang baris demi baris mengikuti tempo vokal).
+* **Focus Timer (Pomodoro)**: Ring api melingkar, hitung mundur 25:00, tombol pill *Short Break* & *Focus Time*, serta lonceng pergantian waktu.
+* **Water Reminder & History Chart**: Pencatatan air dengan kuota harian (misal: 1.5/1.5 L, 100% Goal reached), tombol *Drink*, tombol *Settings*, serta grafik histogram konsumsi per jam (09, 12, 15).
+* **File Shelf (Droppable Wayland Stash)**: Drop zone berpola garis putus-putus (*Drop files here*), menampilkan kartu file miniatur dengan ikon (gambar, folder, dokumen) dan ukuran file, tombol *Clear*, dan kemampuan drag-out kapan saja.
+* **To-do List**: Rekap *4/5 Task Done Today*, daftar checklist tugas harian interaktif dengan coretan teks selesai, pill *Add Task* dan *Edit Task*.
+* **Bluetooth & Charging Peek**:
+  * *Headphones Peek (310x60px)*: Kapsul otomatis mengembang sesaat saat earbud/headphone tersambung ("AirBuds Pro Connected · 70%") dengan cincin baterai.
+  * *Charging Peek (310x60px)*: Kapsul hijau bernyawa saat kabel charger dicolok dengan petir dan persentase baterai ("Charging · 70%").
+* **Arsitektur Ultra-Ringan**: Menggunakan resource CPU 0% saat idle dan konsumsi memori <30 MB.
 
 ---
 
-### 4. 📱 Integrasi Ekosistem KDE Connect
-* [ ] **Panggilan Masuk & SMS Smartphone**:
-  * Saat smartphone Android yang terhubung via KDE Connect menerima panggilan, Dynamic Island membesar menampilkan kontak pemanggil beserta tombol *Terima / Tolak*.
-* [ ] **Indikator Baterai Ponsel**:
-  * Menampilkan persentase daya baterai smartphone di Control Hub dan memunculkan peringatan kapsul ketika baterai ponsel lemah (< 15%).
+## ⚖️ 2. Komparasi dengan Projek Dynamic Island Saat Ini
+
+| Fitur | Status Saat Ini | Rencana Adopsi dari Poni / Nusa |
+| :--- | :---: | :--- |
+| **Navigasi Multi-Halaman** | ✅ Selesai (`< >` & Dots) | Pertahankan dan perluas ke halaman baru (Lirik, Water, Todo, Shelf). |
+| **Media Player MPRIS** | ✅ Selesai (Spotify/Firefox) | Tambahkan **Synced Lyrics** (Nusa) & **Adaptive Color Glow** (Poni/Nusa). |
+| **Pomodoro Focus Timer** | ✅ Selesai (Dasar) | Percantik dengan **Ring Glow Lingkaran** dan preset *Short Break* (Nusa). |
+| **System & Network Stats** | ✅ Selesai (CPU/RAM/Net) | Tambahkan indikator Day Progress & Cuaca Lokal (Poni). |
+| **Water & Health Tracker** | ❌ Belum Ada | **Buat modul baru**: Water intake counter, 20-20-20 eye break prompt. |
+| **File Shelf (Drop Zone)** | ❌ Belum Ada | **Buat modul baru**: Drop file Wayland ke Dynamic Island untuk stash sementara. |
+| **To-Do List Harian** | ❌ Belum Ada | **Buat modul baru**: Checklist mini todo list di salah satu halaman hub. |
+| **Resting Mascot Eyes** | ❌ Belum Ada | Tambahkan animasi mata maskot berkedip saat mode idle santai. |
+| **Bluetooth / Charger Peek** | ⚠️ Sebagian (Baterai HUD) | Integrasi BlueZ DBus untuk auto-peek saat headphone tersambung. |
+| **Quick AI Assistant** | ❌ Belum Ada | Prompt tanya-jawab / terjemahan cepat inline dengan Gemini API. |
 
 ---
 
-### 5. ⚡ Smart Productivity & Live Widgets
-* [ ] **Live Weather Pill (Widget Cuaca)**:
-  * Menampilkan kondisi cuaca dan suhu lokal secara diskrit di mode standby (misal: `🌦️ 28°C Jakarta`).
-  * Klik untuk melihat ramalan cuaca 3 hari ke depan, kelembaban, dan kecepatan angin (menggunakan API Open-Meteo gratis tanpa kunci API).
-* [ ] **Real-time Network Speedometer**:
-  * Menampilkan kecepatan unduh dan unggah jaringan internet *real-time* (misal: `↓ 5.4 MB/s ↑ 820 KB/s`) di dalam Control Hub.
-* [ ] **Quick Clipboard History (Klipper Integration)**:
-  * Menu drop-down 3-5 teks/warna yang terakhir disalin ke *clipboard* dengan satu klik untuk menggunakan kembali (*copy-paste* cepat).
+## 🚀 3. Rencana Bertahap Implementasi (Execution Plan)
 
----
+### 🟢 Fase 1: Visual Glow & Audio Enhancements (High Impact, Cepat Terasa)
+1. **Adaptive Album Art Color Glow**:
+   - Ekstrak warna dominan dari file cover album lagu aktif via Python (`PIL/Pillow` atau algoritma color extraction sederhana).
+   - Kirim warna aksen via signal QML untuk memancarkan *glow/shadow* gradasi lembut di sekeliling Dynamic Island.
+2. **Resting Mascot Eyes (Mode Santai)**:
+   - Tambahkan opsi animasi sepasang mata digital berkedip lembut di kapsul tertutup saat desktop idle dan tidak ada media yang berputar.
+3. **Headphones / Bluetooth Auto-Peek**:
+   - Deteksi koneksi audio Bluetooth via D-Bus BlueZ, munculkan pill pop-up "AirPods/WH-1000XM5 Connected · Battery %" selama 3 detik.
 
-### 6. 🎨 Dynamic Theming & Engine Kustomisasi
-* [ ] **Adaptive Dynamic Island Glow (Color Extraction)**:
-  * Mengambil warna dominan dari *cover album* lagu yang sedang diputar (atau wallpaper desktop) dan menerapkannya sebagai warna glow / gradien aksen di sekeliling Dynamic Island.
-* [ ] **True KWin Wayland Blur (Glassmorphism)**:
-  * Mengintegrasikan protokol blur KWin (`org.kde.kwin.blur`) agar bagian belakang kapsul memiliki efek blur kaca buram (*frosted glass*) yang menyatu dengan jendela di bawahnya.
-* [ ] **GUI Settings App (`island-settings`)**:
-  * Jendela pengaturan visual (UI grafis) agar pengguna dapat mengatur posisi margin, mengaktifkan/menonaktifkan modul, mengubah kecepatan animasi, dan mengatur shortcut tanpa perlu menyentuh file kode `config.py`.
-* [ ] **Notch-Mode vs Floating-Pill**:
-  * Mode khusus untuk laptop yang memiliki *notch* fisik di layar (Dynamic Island menempel pas di sekitar lekukan kamera layar) vs mode melayang (*floating pill*).
+### 🟡 Fase 2: Synced Lyrics & Health Tracker (Fitur Paling Diminati)
+1. **Synced Lyrics Hub (Nusa-Style Split View)**:
+   - Saat di halaman musik, sediakan tombol lirik yang memperluas hub dan menampilkan lirik berjalan sinkron (mengambil data dari API LRCLIB gratis berdasarkan artis & judul).
+2. **Water Tracker & Health Reminder**:
+   - Buat halaman widget Water Tracker: visual gelas air dengan tombol "+250ml", indikator target harian, dan grafik ringkas.
+   - Pengingat pop-up halus berkala: minum air dan istirahat mata (20-20-20 Rule).
 
----
+### 🟠 Fase 3: Shelf File Stash & To-Do List (Produktivitas)
+1. **Wayland File Shelf (Drop Zone)**:
+   - Implementasikan area `DropArea` di QML agar file dari Dolphin/Desktop bisa di-drop ke Dynamic Island.
+   - Menampilkan thumbnail file yang tersimpan sementara di "Shelf", dan bisa di-drag keluar sewaktu-waktu.
+2. **Mini To-Do Checklist**:
+   - Halaman daftar tugas ringkas harian di Control Hub dengan checklist selesai, tombol tambah tugas, dan pencatat progres ("3/5 Selesai").
 
-## 🎯 Rencana Urutan Prioritas Implementasi
-
-| Fase | Fokus Fitur | Estimasi Kompleksitas | Dampak Visual & UX |
-| :--- | :--- | :---: | :---: |
-| **Fase 1 (Segera)** | **Adaptive Glow**, **Brightness HUD**, dan **GUI Settings Window** | Sedang | ⭐⭐⭐⭐⭐ (Sangat Tinggi) |
-| **Fase 2 (Menengah)** | **PipeWire Live Audio Spectrum (CAVA)** & **Privacy Dots (Mic/Cam)** | Sedang | ⭐⭐⭐⭐⭐ (Sangat Tinggi) |
-| **Fase 3 (Lanjutan)** | **Live Weather Widget**, **Network Monitor**, & **Synced Lyrics** | Sedang | ⭐⭐⭐⭐ (Tinggi) |
-| **Fase 4 (Ekosistem)**| **KDE Connect Phone Alerts** & **Spotlight App Search Bar** | Tinggi | ⭐⭐⭐⭐⭐ (Sangat Tinggi) |
-
----
-
-## 💡 Rekomendasi Fitur Terdekat untuk Dikerjakan Selanjutnya:
-1. **Adaptive Glow Theming**: Membuat pencahayaan tepi kapsul berubah warna secara dinamis mengikuti warna album musik (misalnya Spotify hijau, lagu bernuansa ungu glow ungu).
-2. **Brightness HUD**: Menyatukan kontrol volume dan kecerahan ke dalam Dynamic Island.
-3. **Mic & Camera Privacy Indicator**: Menambah nuansa elegan ala perangkat premium terkini.
+### 🟣 Fase 4: Live Weather, Day Progress & Quick AI Assistant
+1. **Live Weather & Day Progress Bar**:
+   - Prakiraan cuaca live tanpa API key menggunakan Open-Meteo (suhu, cuaca, kota).
+   - Bar persentase hari yang berjalan dari jam 00:00 hingga 23:59.
+2. **Quick Ask AI Pill (Poni-Style)**:
+   - Input bar ringkas di island untuk menanyakan hal cepat ke Google Gemini API atau model LLM lokal Ollama, memberikan jawaban ringkas langsung di dalam island.

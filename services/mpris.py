@@ -6,6 +6,7 @@ Integrates with Spotify, Chrome, Firefox, VLC, and other MPRIS-compliant players
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot, QTimer
 from PyQt6.QtDBus import QDBusConnection, QDBusInterface, QDBusMessage
 import os
+from services.color_extractor import ColorExtractor
 
 
 class MprisService(QObject):
@@ -20,6 +21,7 @@ class MprisService(QObject):
         self.artist = ""
         self.album = ""
         self.art_url = ""
+        self.accent_color = "#38bdf8"
         self.status = "Stopped"  # Playing, Paused, Stopped
         self.position = 0.0
         self.duration = 0.0
@@ -147,6 +149,9 @@ class MprisService(QObject):
                 self.art_url = raw_art
             else:
                 self.art_url = ""
+
+            # Extract dynamic ambient color
+            self.accent_color = ColorExtractor.get_accent_color(self.art_url, "#38bdf8")
 
             # Duration in microseconds -> seconds
             length_us = meta.get("mpris:length", 0)

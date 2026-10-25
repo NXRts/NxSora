@@ -12,7 +12,9 @@ Item {
         "Sistem & Monitoring",
         "Pemutar Musik",
         "Pintasan Cepat",
-        "Jaringan & Info"
+        "Jaringan & Info",
+        "Kesehatan & Air",
+        "Daftar Tugas (To-Do)"
     ]
 
     Connections {
@@ -1162,6 +1164,20 @@ Item {
                         }
                     }
                 }
+            }
+
+            // -----------------------------------------------------------------
+            // PAGE 4: KESEHATAN & PELACAK AIR
+            // -----------------------------------------------------------------
+            PageHealth {
+                id: pageHealth
+            }
+
+            // -----------------------------------------------------------------
+            // PAGE 5: DAFTAR TUGAS (TO-DO)
+            // -----------------------------------------------------------------
+            PageTodo {
+                id: pageTodo
             }
         }
     }

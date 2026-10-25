@@ -5,8 +5,40 @@ import QtQuick.Effects
 Rectangle {
     id: island
     color: "#07070a"
-    border.color: islandMouse.containsMouse && !IslandController.isExpanded ? "#38bdf8" : "#23232c"
-    border.width: 1
+
+    readonly property color currentAccentColor: {
+        if (IslandController.state === "music" || IslandController.isExpanded) {
+            return IslandController.mediaAccentColor || "#38bdf8"
+        }
+        return "#38bdf8"
+    }
+
+    border.color: {
+        if (islandMouse.containsMouse && !IslandController.isExpanded) {
+            return currentAccentColor
+        }
+        if (IslandController.mediaIsPlaying) {
+            return Qt.rgba(currentAccentColor.r, currentAccentColor.g, currentAccentColor.b, 0.55)
+        }
+        return "#23232c"
+    }
+    border.width: IslandController.mediaIsPlaying && !IslandController.isExpanded ? 1.5 : 1
+
+    // Ambient Music Glow Layer (Poni & Nusa Inspired)
+    Rectangle {
+        id: ambientGlow
+        anchors.fill: parent
+        radius: parent.radius
+        z: 0
+        opacity: IslandController.mediaIsPlaying ? (IslandController.isExpanded ? 0.20 : 0.35) : 0.0
+        gradient: Gradient {
+            orientation: Gradient.Vertical
+            GradientStop { position: 0.0; color: "transparent" }
+            GradientStop { position: 0.45; color: Qt.rgba(island.currentAccentColor.r, island.currentAccentColor.g, island.currentAccentColor.b, 0.10) }
+            GradientStop { position: 1.0; color: Qt.rgba(island.currentAccentColor.r, island.currentAccentColor.g, island.currentAccentColor.b, 0.42) }
+        }
+        Behavior on opacity { NumberAnimation { duration: 400 } }
+    }
 
     // Dynamic dimensions driven by IslandController.state
     readonly property real targetWidth: {
