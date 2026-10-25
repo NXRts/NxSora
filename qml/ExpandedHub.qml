@@ -33,45 +33,96 @@ Item {
         if (swipeView) swipeView.currentIndex = IslandController.activeHubPage
     }
 
+    function goToPrevPage() {
+        if (swipeView.currentIndex > 0)
+            swipeView.currentIndex--
+        else
+            swipeView.currentIndex = swipeView.count - 1
+    }
+
+    function goToNextPage() {
+        if (swipeView.currentIndex < swipeView.count - 1)
+            swipeView.currentIndex++
+        else
+            swipeView.currentIndex = 0
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 14
         spacing: 10
 
         // =====================================================================
-        // HEADER: < [Title + Page Indicator Dots] > [Close Button]
+        // =====================================================================
+        // HEADER: [ < | > ] [Title + Page Indicator Dots] [Close Button]
         // =====================================================================
         RowLayout {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: 10
 
-            // < Previous Page Button
+            // Navigation Arrows Capsule (< >)
             Rectangle {
-                id: prevBtn
-                width: 28
+                id: navCapsule
+                width: 62
                 height: 28
                 radius: 14
-                color: prevMouse.containsMouse ? "#2f313f" : "#1a1b24"
-                border.color: prevMouse.containsMouse ? "#475569" : "#282937"
+                color: "#181a26"
+                border.color: "#282b3d"
                 border.width: 1
 
-                Image {
-                    anchors.centerIn: parent
-                    width: 12
-                    height: 12
-                    source: "file://" + AppConfig.assetsDir + "/chevron-left.svg"
-                }
-
-                MouseArea {
-                    id: prevMouse
+                RowLayout {
                     anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        if (swipeView.currentIndex > 0)
-                            swipeView.currentIndex--
-                        else
-                            swipeView.currentIndex = swipeView.count - 1
+                    spacing: 0
+
+                    // < Button
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        Image {
+                            anchors.centerIn: parent
+                            width: 12
+                            height: 12
+                            source: "file://" + AppConfig.assetsDir + "/chevron-left.svg"
+                            opacity: prevMouse.containsMouse ? 1.0 : 0.7
+                        }
+
+                        MouseArea {
+                            id: prevMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.goToPrevPage()
+                        }
+                    }
+
+                    // Divider
+                    Rectangle {
+                        width: 1
+                        height: 14
+                        color: "#282b3d"
+                    }
+
+                    // > Button
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        Image {
+                            anchors.centerIn: parent
+                            width: 12
+                            height: 12
+                            source: "file://" + AppConfig.assetsDir + "/chevron-right.svg"
+                            opacity: nextMouse.containsMouse ? 1.0 : 0.7
+                        }
+
+                        MouseArea {
+                            id: nextMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.goToNextPage()
+                        }
                     }
                 }
             }
@@ -79,7 +130,7 @@ Item {
             // Title & Indicator Dots
             ColumnLayout {
                 Layout.alignment: Qt.AlignVCenter
-                spacing: 2
+                spacing: 3
 
                 Text {
                     text: root.pageTitles[swipeView.currentIndex] || "Control Hub"
@@ -113,37 +164,6 @@ Item {
                                 onClicked: swipeView.currentIndex = index
                             }
                         }
-                    }
-                }
-            }
-
-            // > Next Page Button
-            Rectangle {
-                id: nextBtn
-                width: 28
-                height: 28
-                radius: 14
-                color: nextMouse.containsMouse ? "#2f313f" : "#1a1b24"
-                border.color: nextMouse.containsMouse ? "#475569" : "#282937"
-                border.width: 1
-
-                Image {
-                    anchors.centerIn: parent
-                    width: 12
-                    height: 12
-                    source: "file://" + AppConfig.assetsDir + "/chevron-right.svg"
-                }
-
-                MouseArea {
-                    id: nextMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        if (swipeView.currentIndex < swipeView.count - 1)
-                            swipeView.currentIndex++
-                        else
-                            swipeView.currentIndex = 0
                     }
                 }
             }
@@ -188,8 +208,8 @@ Item {
 
             // Allow keyboard Left/Right arrow navigation
             focus: true
-            Keys.onLeftPressed: prevBtn.children[1].clicked()
-            Keys.onRightPressed: nextBtn.children[1].clicked()
+            Keys.onLeftPressed: root.goToPrevPage()
+            Keys.onRightPressed: root.goToNextPage()
 
             // -----------------------------------------------------------------
             // PAGE 0: SISTEM & MONITORING
