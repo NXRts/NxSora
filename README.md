@@ -6,8 +6,10 @@ Aplikasi **Dynamic Island** native, modern, dan berkinerja tinggi untuk **KDE Pl
 
 ## ✨ Fitur-Fitur Utama ("Full Fungsi")
 
-1. **Floating Native Wayland Overlay (Layer-Shell)**:
-   - Mengambang dengan anggun di bagian atas tengah layar.
+1. **Sleek Flush Notch Native Wayland Overlay (Layer-Shell)**:
+   - Menempel rapat (*flush margin 0*) tepat di bawah panel atas KDE Plasma tanpa celah mengambang yang menutupi tab aplikasi.
+   - Dilengkapi lekukan telinga halus (*concave ear curves*) ala Nusa & MacBook yang menyatu mulus dan organik dengan panel atas.
+   - Profil ultra-ramping (*idle height* hanya 28px) sehingga tab browser / text editor (VS Code) di bawahnya tidak lagi tertutupi.
    - Menggunakan ukuran dinamis (`hitbox`), sehingga seluruh area layar lainnya tetap **100% tembus klik (click-through)** ke aplikasi di bawahnya.
    - Animasi elastis (*spring & ease-in-out physics*) 60–144 FPS yang halus ala Apple Dynamic Island.
 

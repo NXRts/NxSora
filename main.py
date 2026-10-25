@@ -40,6 +40,8 @@ class AppConfig(QObject):
 def main():
     # Graceful exit on Ctrl+C in terminal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
+    if hasattr(signal, "SIGHUP"):
+        signal.signal(signal.SIGHUP, signal.SIG_IGN)
 
     # Force Wayland platform
     os.environ["QT_QPA_PLATFORM"] = "wayland"

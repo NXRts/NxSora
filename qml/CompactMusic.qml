@@ -3,8 +3,8 @@ import QtQuick.Layouts
 
 Item {
     id: root
-    implicitWidth: 240
-    implicitHeight: 36
+    implicitWidth: 230
+    implicitHeight: 30
 
     RowLayout {
         anchors.fill: parent
@@ -14,9 +14,9 @@ Item {
 
         // Album Art / Music Icon
         Rectangle {
-            width: 24
-            height: 24
-            radius: 6
+            width: 20
+            height: 20
+            radius: 5
             color: "#18181f"
             clip: true
 
@@ -29,8 +29,8 @@ Item {
 
             Image {
                 anchors.centerIn: parent
-                width: 14
-                height: 14
+                width: 12
+                height: 12
                 source: "file://" + AppConfig.assetsDir + "/music.svg"
                 visible: IslandController.mediaArtUrl === ""
             }
@@ -70,10 +70,10 @@ Item {
 
             Repeater {
                 model: [
-                    { minH: 4, maxH: 14, dur: 380 },
-                    { minH: 3, maxH: 16, dur: 460 },
-                    { minH: 5, maxH: 15, dur: 320 },
-                    { minH: 4, maxH: 12, dur: 420 }
+                    { minH: 3, maxH: 11, dur: 380 },
+                    { minH: 2, maxH: 13, dur: 460 },
+                    { minH: 4, maxH: 12, dur: 320 },
+                    { minH: 3, maxH: 9, dur: 420 }
                 ]
 
                 Rectangle {

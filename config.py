@@ -10,25 +10,25 @@ QML_DIR = BASE_DIR / "qml"
 ASSETS_DIR = BASE_DIR / "assets"
 
 CONFIG = {
-    # Position and Margins
-    "top_margin": 10,
+    # Position and Margins (0 for flush attachment to top panel)
+    "top_margin": 0,
     
-    # Pill Dimensions (Compact)
-    "idle_width": 150,
-    "idle_height": 34,
+    # Pill Dimensions (Compact Notch)
+    "idle_width": 140,
+    "idle_height": 28,
     
-    "music_compact_width": 240,
-    "music_compact_height": 36,
+    "music_compact_width": 230,
+    "music_compact_height": 30,
     
-    "hud_width": 240,
-    "hud_height": 40,
+    "hud_width": 230,
+    "hud_height": 32,
     
-    "notification_width": 340,
-    "notification_height": 66,
+    "notification_width": 330,
+    "notification_height": 56,
     
     # Card Dimensions (Expanded)
-    "expanded_music_width": 390,
-    "expanded_music_height": 185,
+    "expanded_music_width": 420,
+    "expanded_music_height": 245,
     
     "expanded_hub_width": 420,
     "expanded_hub_height": 245,

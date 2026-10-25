@@ -3,8 +3,8 @@ import QtQuick.Layouts
 
 Item {
     id: root
-    implicitWidth: 150
-    implicitHeight: 34
+    implicitWidth: 140
+    implicitHeight: 28
 
     property real eyeScaleY: 1.0
 
