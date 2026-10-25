@@ -14,10 +14,10 @@ Item {
         // =====================================================================
         Rectangle {
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.preferredHeight: 96
             radius: 14
-            color: "#121420"
-            border.color: "#1e2235"
+            color: "#111420"
+            border.color: "#1e2238"
             border.width: 1
 
             ColumnLayout {
@@ -31,14 +31,14 @@ Item {
                     spacing: 8
 
                     Rectangle {
-                        width: 24
-                        height: 24
+                        width: 22
+                        height: 22
                         radius: 6
-                        color: "#0284c7"
+                        color: "#0369a1"
                         Text {
                             anchors.centerIn: parent
                             text: "💧"
-                            font.pixelSize: 12
+                            font.pixelSize: 11
                         }
                     }
 
@@ -51,22 +51,33 @@ Item {
 
                     Item { Layout.fillWidth: true }
 
-                    Text {
-                        text: IslandController.waterPercent + "% Target"
-                        color: IslandController.waterPercent >= 100 ? "#22c55e" : "#38bdf8"
-                        font.pixelSize: 11
-                        font.weight: Font.DemiBold
+                    Rectangle {
+                        height: 20
+                        radius: 10
+                        color: IslandController.waterPercent >= 100 ? "#052e16" : "#082f49"
+                        border.color: IslandController.waterPercent >= 100 ? "#22c55e" : "#0284c7"
+                        border.width: 1
+                        implicitWidth: percentText.implicitWidth + 14
+
+                        Text {
+                            id: percentText
+                            anchors.centerIn: parent
+                            text: IslandController.waterPercent + "% Target"
+                            color: IslandController.waterPercent >= 100 ? "#4ade80" : "#38bdf8"
+                            font.pixelSize: 10
+                            font.weight: Font.Bold
+                        }
                     }
                 }
 
-                // Volume Progress Big Text
+                // Volume Big Text & Action Buttons
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 6
 
                     Text {
                         text: (IslandController.waterIntake / 1000.0).toFixed(2)
-                        color: "#f8fafc"
+                        color: "#ffffff"
                         font.pixelSize: 22
                         font.weight: Font.Bold
                     }
@@ -74,7 +85,8 @@ Item {
                     Text {
                         text: "/ " + (IslandController.waterGoal / 1000.0).toFixed(1) + " Liter"
                         color: "#94a3b8"
-                        font.pixelSize: 12
+                        font.pixelSize: 11
+                        font.weight: Font.Medium
                         Layout.alignment: Qt.AlignBaseline
                     }
 
@@ -82,9 +94,9 @@ Item {
 
                     // Quick Drink Button (+250ml)
                     Rectangle {
-                        width: 90
-                        height: 28
-                        radius: 14
+                        width: 86
+                        height: 26
+                        radius: 13
                         color: drinkMouse.containsMouse ? "#0284c7" : "#0369a1"
                         border.color: "#38bdf8"
                         border.width: 1
@@ -94,12 +106,12 @@ Item {
                             spacing: 4
                             Text {
                                 text: "🥤"
-                                font.pixelSize: 11
+                                font.pixelSize: 10
                             }
                             Text {
                                 text: "+250 ml"
                                 color: "#ffffff"
-                                font.pixelSize: 11
+                                font.pixelSize: 10
                                 font.weight: Font.Bold
                             }
                         }
@@ -115,9 +127,9 @@ Item {
 
                     // Reset button
                     Rectangle {
-                        width: 28
-                        height: 28
-                        radius: 14
+                        width: 26
+                        height: 26
+                        radius: 13
                         color: resetMouse.containsMouse ? "#334155" : "#1e293b"
                         border.color: "#334155"
                         border.width: 1
@@ -125,8 +137,8 @@ Item {
                         Text {
                             anchors.centerIn: parent
                             text: "↺"
-                            color: "#94a3b8"
-                            font.pixelSize: 13
+                            color: resetMouse.containsMouse ? "#f8fafc" : "#94a3b8"
+                            font.pixelSize: 12
                             font.weight: Font.Bold
                         }
 
@@ -143,15 +155,15 @@ Item {
                 // Horizontal Progress Bar
                 Rectangle {
                     Layout.fillWidth: true
-                    height: 8
-                    radius: 4
+                    height: 6
+                    radius: 3
                     color: "#1e293b"
                     clip: true
 
                     Rectangle {
                         width: parent.width * IslandController.waterProgressRatio
                         height: parent.height
-                        radius: 4
+                        radius: 3
                         gradient: Gradient {
                             orientation: Gradient.Horizontal
                             GradientStop { position: 0.0; color: "#06b6d4" }
@@ -166,70 +178,80 @@ Item {
         }
 
         // =====================================================================
-        // SECTION 2: EYE BREAK (20-20-20 RULE) & MASCOT TOGGLE
+        // SECTION 2: EYE BREAK (20-20-20) & MASCOT MODE (UNIFIED DUAL-CARD)
         // =====================================================================
-        RowLayout {
+        Rectangle {
             Layout.fillWidth: true
-            spacing: 10
+            Layout.preferredHeight: 62
+            radius: 12
+            color: "#111420"
+            border.color: "#1e2238"
+            border.width: 1
 
-            // 20-20-20 Eye Break Card
-            Rectangle {
-                Layout.fillWidth: true
-                height: 64
-                radius: 12
-                color: "#121420"
-                border.color: "#1e2235"
-                border.width: 1
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 12
+                anchors.rightMargin: 12
+                spacing: 10
 
+                // --- LEFT: JEDA MATA 20-20-20 ---
                 RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: 10
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
                     spacing: 8
 
                     Rectangle {
-                        width: 28
-                        height: 28
-                        radius: 14
-                        color: "#059669"
+                        width: 26
+                        height: 26
+                        radius: 13
+                        color: "#065f46"
+                        border.color: "#059669"
+                        border.width: 1
                         Text {
                             anchors.centerIn: parent
                             text: "👁️"
-                            font.pixelSize: 13
+                            font.pixelSize: 11
                         }
                     }
 
                     ColumnLayout {
-                        spacing: 2
+                        Layout.fillWidth: true
+                        spacing: 1
+
                         Text {
-                            text: "Jeda Mata 20-20-20"
+                            text: "Jeda 20-20-20"
                             color: "#f8fafc"
                             font.pixelSize: 11
                             font.weight: Font.Bold
+                            elide: Text.ElideRight
                         }
+
                         Text {
-                            text: "Sisa: " + IslandController.eyeBreakFormatted
+                            text: "Sisa " + IslandController.eyeBreakFormatted
                             color: "#34d399"
                             font.pixelSize: 10
                             font.weight: Font.DemiBold
                         }
                     }
 
-                    Item { Layout.fillWidth: true }
-
                     Rectangle {
-                        width: 60
+                        width: 24
                         height: 24
                         radius: 12
-                        color: eyeMouse.containsMouse ? "#047857" : "#065f46"
+                        color: eyeResetMouse.containsMouse ? "#047857" : "#064e3b"
+                        border.color: "#059669"
+                        border.width: 1
+
                         Text {
                             anchors.centerIn: parent
-                            text: "Reset"
-                            color: "#ecfdf5"
-                            font.pixelSize: 10
+                            text: "↺"
+                            color: "#a7f3d0"
+                            font.pixelSize: 11
                             font.weight: Font.Bold
                         }
+
                         MouseArea {
-                            id: eyeMouse
+                            id: eyeResetMouse
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
@@ -237,75 +259,78 @@ Item {
                         }
                     }
                 }
-            }
 
-            // Mode Maskot Mata (Nusa Style) Card
-            Rectangle {
-                Layout.fillWidth: true
-                height: 64
-                radius: 12
-                color: mascotCardMouse.containsMouse ? "#191c2c" : "#121420"
-                border.color: IslandController.mascotMode ? "#38bdf8" : "#1e2235"
-                border.width: 1
+                // Vertical Divider Line
+                Rectangle {
+                    width: 1
+                    height: 34
+                    color: "#1e2538"
+                }
 
+                // --- RIGHT: MASKOT SANTAI TOGGLE ---
                 RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: 10
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
                     spacing: 8
 
                     Rectangle {
-                        width: 28
-                        height: 28
-                        radius: 14
-                        color: IslandController.mascotMode ? "#0284c7" : "#334155"
+                        width: 26
+                        height: 26
+                        radius: 13
+                        color: IslandController.mascotMode ? "#075985" : "#1e293b"
+                        border.color: IslandController.mascotMode ? "#38bdf8" : "#334155"
+                        border.width: 1
                         Text {
                             anchors.centerIn: parent
                             text: "👀"
-                            font.pixelSize: 13
+                            font.pixelSize: 11
                         }
                     }
 
                     ColumnLayout {
-                        spacing: 2
+                        Layout.fillWidth: true
+                        spacing: 1
+
                         Text {
                             text: "Maskot Santai"
                             color: "#f8fafc"
                             font.pixelSize: 11
                             font.weight: Font.Bold
+                            elide: Text.ElideRight
                         }
+
                         Text {
-                            text: IslandController.mascotMode ? "Mata Berkedip Aktif" : "Jam Digital Standar"
+                            text: IslandController.mascotMode ? "Mata Berkedip" : "Jam Digital"
                             color: IslandController.mascotMode ? "#38bdf8" : "#94a3b8"
                             font.pixelSize: 10
+                            elide: Text.ElideRight
                         }
                     }
-
-                    Item { Layout.fillWidth: true }
 
                     Rectangle {
                         width: 32
                         height: 18
                         radius: 9
-                        color: IslandController.mascotMode ? "#38bdf8" : "#334155"
+                        color: IslandController.mascotMode ? "#0284c7" : "#334155"
+                        border.color: IslandController.mascotMode ? "#38bdf8" : "#475569"
+                        border.width: 1
 
                         Rectangle {
-                            width: 14
-                            height: 14
-                            radius: 7
+                            width: 12
+                            height: 12
+                            radius: 6
                             anchors.verticalCenter: parent.verticalCenter
-                            x: IslandController.mascotMode ? parent.width - width - 2 : 2
+                            x: IslandController.mascotMode ? parent.width - width - 3 : 3
                             color: "#ffffff"
-                            Behavior on x { NumberAnimation { duration: 150 } }
+                            Behavior on x { NumberAnimation { duration: 160; easing.type: Easing.OutQuad } }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: IslandController.toggleMascotMode()
                         }
                     }
-                }
-
-                MouseArea {
-                    id: mascotCardMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: IslandController.toggleMascotMode()
                 }
             }
         }

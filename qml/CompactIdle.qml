@@ -71,4 +71,19 @@ Item {
             visible: IslandController.hasBattery
         }
     }
+
+    // Direct click handler when in Clock mode
+    MouseArea {
+        anchors.fill: parent
+        enabled: !IslandController.mascotMode
+        cursorShape: Qt.PointingHandCursor
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: (mouse) => {
+            if (mouse.button === Qt.RightButton) {
+                IslandController.toggleMascotMode()
+            } else {
+                IslandController.toggleExpand()
+            }
+        }
+    }
 }

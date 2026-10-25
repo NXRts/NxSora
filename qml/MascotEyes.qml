@@ -16,7 +16,6 @@ Item {
         repeat: true
         onTriggered: {
             blinkAnimation.start()
-            // Randomize next interval between 3s and 6s
             blinkTimer.interval = 3000 + Math.random() * 3000
         }
     }
@@ -39,21 +38,21 @@ Item {
         }
     }
 
-    // Gentle ambient glow behind the eyes
+    // Gentle ambient glow behind the eyes (Nusa style)
     Rectangle {
         anchors.centerIn: parent
-        width: 70
-        height: 24
-        radius: 12
+        width: 76
+        height: 22
+        radius: 11
         color: "#19b8ff"
-        opacity: mascotMouse.containsMouse ? 0.35 : 0.18
+        opacity: mascotMouse.containsMouse ? 0.32 : 0.15
         Behavior on opacity { NumberAnimation { duration: 250 } }
     }
 
     // The two eyes
     Row {
         anchors.centerIn: parent
-        spacing: 16
+        spacing: 18
 
         // Left Eye
         Rectangle {
@@ -63,11 +62,11 @@ Item {
             radius: Math.min(width, height) / 2
             color: "#ffffff"
             transformOrigin: Item.Center
-            scale: mascotMouse.containsMouse ? 1.18 : 1.0
+            scale: mascotMouse.containsMouse ? 1.15 : 1.0
 
-            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+            Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
 
-            // Eye reflection highlight
+            // Highlight shine
             Rectangle {
                 anchors.top: parent.top
                 anchors.right: parent.right
@@ -88,11 +87,11 @@ Item {
             radius: Math.min(width, height) / 2
             color: "#ffffff"
             transformOrigin: Item.Center
-            scale: mascotMouse.containsMouse ? 1.18 : 1.0
+            scale: mascotMouse.containsMouse ? 1.15 : 1.0
 
-            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+            Behavior on scale { NumberAnimation { duration: 180; easing.type: Easing.OutBack } }
 
-            // Eye reflection highlight
+            // Highlight shine
             Rectangle {
                 anchors.top: parent.top
                 anchors.right: parent.right
@@ -111,8 +110,14 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            blinkAnimation.start()
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: (mouse) => {
+            if (mouse.button === Qt.RightButton) {
+                IslandController.toggleMascotMode()
+            } else {
+                blinkAnimation.start()
+                IslandController.toggleExpand()
+            }
         }
     }
 }
