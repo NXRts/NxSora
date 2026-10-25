@@ -376,6 +376,12 @@ class IslandController(QObject):
         self.activeHubPageChanged.emit(0)
         self._set_state("expanded-hub")
 
+    @pyqtSlot(int)
+    def openHubPage(self, page_index):
+        self._active_hub_page = max(0, min(page_index, 5))
+        self.activeHubPageChanged.emit(self._active_hub_page)
+        self._set_state("expanded-hub")
+
     # Media controls
     @pyqtSlot()
     def mediaPlayPause(self):

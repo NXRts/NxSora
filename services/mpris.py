@@ -108,28 +108,38 @@ class MprisService(QObject):
 
     @pyqtSlot(QDBusMessage)
     def _on_properties_changed(self, msg):
-        if not self.active_player:
-            self.refresh_players()
-            return
-        self._update_player_state()
+        try:
+            if not self.active_player:
+                self.refresh_players()
+                return
+            self._update_player_state()
+        except Exception as e:
+            print(f"[MPRIS] Warning in properties changed: {e}")
 
     def _update_player_state(self):
         if not self.active_player:
             return
 
-        p_iface = QDBusInterface(self.active_player, "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Properties", self.bus)
-        
-        # Get PlaybackStatus
-        status_reply = p_iface.call("Get", "org.mpris.MediaPlayer2.Player", "PlaybackStatus")
-        if status_reply.arguments():
-            self.status = str(status_reply.arguments()[0])
-        else:
-            self.status = "Stopped"
+        try:
+            p_iface = QDBusInterface(self.active_player, "/org/mpris/MediaPlayer2", "org.freedesktop.DBus.Properties", self.bus)
+            
+            # Get PlaybackStatus
+            status_reply = p_iface.call("Get", "org.mpris.MediaPlayer2.Player", "PlaybackStatus")
+            if status_reply.arguments():
+                self.status = str(status_reply.arguments()[0])
+            else:
+                self.status = "Stopped"
 
-        # Get Metadata
-        meta_reply = p_iface.call("Get", "org.mpris.MediaPlayer2.Player", "Metadata")
-        if meta_reply.arguments():
-            meta = meta_reply.arguments()[0]
+            # Get Metadata
+            meta_reply = p_iface.call("Get", "org.mpris.MediaPlayer2.Player", "Metadata")
+            meta = {}
+            if meta_reply.arguments():
+                raw_meta = meta_reply.arguments()[0]
+                if isinstance(raw_meta, dict):
+                    meta = raw_meta
+                elif hasattr(raw_meta, "value") and isinstance(raw_meta.value(), dict):
+                    meta = raw_meta.value()
+
             # Title
             self.title = str(meta.get("xesam:title", ""))
             
@@ -160,15 +170,17 @@ class MprisService(QObject):
             except (ValueError, TypeError):
                 self.duration = 0.0
 
-        self._poll_position()
-        
-        if self.status == "Playing":
-            if not self.poll_timer.isActive():
-                self.poll_timer.start()
-        else:
-            self.poll_timer.stop()
+            self._poll_position()
+            
+            if self.status == "Playing":
+                if not self.poll_timer.isActive():
+                    self.poll_timer.start()
+            else:
+                self.poll_timer.stop()
 
-        self.mediaChanged.emit()
+            self.mediaChanged.emit()
+        except Exception as e:
+            print(f"[MPRIS] Warning updating player state: {e}")
 
     def _poll_position(self):
         if not self.active_player:
@@ -210,9 +222,12 @@ class MprisService(QObject):
         p_iface = QDBusInterface(self.active_player, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", self.bus)
         
         meta_reply = p_iface.call("Get", "org.mpris.MediaPlayer2.Player", "Metadata")
-        track_id = "/org/mpris/MediaPlayer2/CurrentTrack"
         if meta_reply.arguments():
-            track_id = meta_reply.arguments()[0].get("mpris:trackid", track_id)
+            raw_meta = meta_reply.arguments()[0]
+            if isinstance(raw_meta, dict):
+                track_id = raw_meta.get("mpris:trackid", track_id)
+            elif hasattr(raw_meta, "value") and isinstance(raw_meta.value(), dict):
+                track_id = raw_meta.value().get("mpris:trackid", track_id)
         
         p_iface.call("SetPosition", track_id, target_pos_us)
         self.position = ratio * self.duration

@@ -17,34 +17,49 @@ Item {
         "Daftar Tugas (To-Do)"
     ]
 
+    function jumpToPageInstant(idx) {
+        if (!swipeView) return;
+        if (swipeView.contentItem) {
+            swipeView.contentItem.highlightMoveDuration = 0;
+            swipeView.currentIndex = idx;
+            swipeView.contentItem.positionViewAtIndex(idx, ListView.Beginning);
+        } else {
+            swipeView.currentIndex = idx;
+        }
+    }
+
     Connections {
         target: IslandController
         function onActiveHubPageChanged() {
-            if (swipeView) swipeView.currentIndex = IslandController.activeHubPage
+            root.jumpToPageInstant(IslandController.activeHubPage);
         }
         function onIsExpandedChanged() {
-            if (swipeView && IslandController.isExpanded) {
-                swipeView.currentIndex = IslandController.activeHubPage
+            if (IslandController.isExpanded) {
+                root.jumpToPageInstant(IslandController.activeHubPage);
             }
         }
     }
 
     Component.onCompleted: {
-        if (swipeView) swipeView.currentIndex = IslandController.activeHubPage
+        root.jumpToPageInstant(IslandController.activeHubPage);
     }
 
     function goToPrevPage() {
+        if (!swipeView) return;
+        if (swipeView.contentItem) swipeView.contentItem.highlightMoveDuration = 240;
         if (swipeView.currentIndex > 0)
-            swipeView.currentIndex--
+            swipeView.currentIndex--;
         else
-            swipeView.currentIndex = swipeView.count - 1
+            swipeView.currentIndex = swipeView.count - 1;
     }
 
     function goToNextPage() {
+        if (!swipeView) return;
+        if (swipeView.contentItem) swipeView.contentItem.highlightMoveDuration = 240;
         if (swipeView.currentIndex < swipeView.count - 1)
-            swipeView.currentIndex++
+            swipeView.currentIndex++;
         else
-            swipeView.currentIndex = 0
+            swipeView.currentIndex = 0;
     }
 
     ColumnLayout {
@@ -161,7 +176,10 @@ Item {
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: swipeView.currentIndex = index
+                                onClicked: {
+                                    if (swipeView.contentItem) swipeView.contentItem.highlightMoveDuration = 240;
+                                    swipeView.currentIndex = index;
+                                }
                             }
                         }
                     }
@@ -203,7 +221,7 @@ Item {
             id: swipeView
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: 0
+            currentIndex: IslandController.activeHubPage
             clip: true
 
             // Allow keyboard Left/Right arrow navigation
