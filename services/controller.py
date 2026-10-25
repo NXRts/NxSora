@@ -9,6 +9,8 @@ from services.volume import VolumeService
 from services.system import SystemService
 from services.notifications import NotificationService
 from services.timer import TimerService
+from services.health import HealthService
+from services.todo import TodoService
 import config
 
 
@@ -39,6 +41,16 @@ class IslandController(QObject):
     nightLightChanged = pyqtSignal()
     activeHubPageChanged = pyqtSignal(int)
 
+    # Health & Wellness signals
+    waterChanged = pyqtSignal()
+    eyeBreakChanged = pyqtSignal()
+
+    # To-Do Task signals
+    tasksChanged = pyqtSignal()
+
+    # Mascot mode
+    mascotModeChanged = pyqtSignal(bool)
+
     def __init__(self, parent=None):
         super().__init__(parent)
         
@@ -48,6 +60,11 @@ class IslandController(QObject):
         self.system = SystemService(self)
         self.notifications = NotificationService(self)
         self.timer_service = TimerService(self)
+        self.health = HealthService(self)
+        self.todo = TodoService(self)
+
+        # Mascot mode toggle (Resting Eyes vs Digital Clock)
+        self._mascot_mode = False
 
         # Island UI State:
         # "idle", "music", "hud-volume", "hud-battery", "hud-notification", "expanded-hub"
@@ -78,6 +95,10 @@ class IslandController(QObject):
         self.timer_service.timerFinished.connect(self._on_timer_finished)
         self.system.networkUpdated.connect(lambda d, u: self.networkChanged.emit())
         self.system.nightLightChanged.connect(lambda a: self.nightLightChanged.emit())
+        self.health.waterChanged.connect(lambda: self.waterChanged.emit())
+        self.health.eyeBreakChanged.connect(lambda: self.eyeBreakChanged.emit())
+        self.health.eyeBreakAlert.connect(self._on_eye_break_alert)
+        self.todo.tasksChanged.connect(lambda: self.tasksChanged.emit())
 
         # Initial state setup
         if self.mpris.status in ("Playing", "Paused") and self.mpris.title:
@@ -179,6 +200,10 @@ class IslandController(QObject):
     @pyqtProperty(str, notify=mediaChanged)
     def mediaArtUrl(self):
         return self.mpris.art_url
+
+    @pyqtProperty(str, notify=mediaChanged)
+    def mediaAccentColor(self):
+        return getattr(self.mpris, "accent_color", "#38bdf8")
 
     @pyqtProperty(str, notify=mediaChanged)
     def mediaStatus(self):
@@ -422,3 +447,95 @@ class IslandController(QObject):
     @pyqtSlot()
     def toggleNightLight(self):
         self.system.toggle_night_light()
+
+    def _on_eye_break_alert(self):
+        self.notifications.trigger_test(
+            "Istirahat Mata (20-20-20)",
+            "Pandang objek sejauh 20 kaki (6 meter) selama 20 detik untuk mengistirahatkan mata."
+        )
+
+    # --- Mascot Mode Properties ---
+    @pyqtProperty(bool, notify=mascotModeChanged)
+    def mascotMode(self):
+        return self._mascot_mode
+
+    @pyqtSlot()
+    def toggleMascotMode(self):
+        self._mascot_mode = not self._mascot_mode
+        self.mascotModeChanged.emit(self._mascot_mode)
+
+    # --- Health & Water Properties ---
+    @pyqtProperty(int, notify=waterChanged)
+    def waterIntake(self):
+        return self.health.waterIntake
+
+    @pyqtProperty(int, notify=waterChanged)
+    def waterGoal(self):
+        return self.health.waterGoal
+
+    @pyqtProperty(float, notify=waterChanged)
+    def waterProgressRatio(self):
+        return self.health.waterProgressRatio
+
+    @pyqtProperty(int, notify=waterChanged)
+    def waterPercent(self):
+        return self.health.waterPercent
+
+    @pyqtProperty(str, notify=waterChanged)
+    def waterFormatted(self):
+        return self.health.waterFormatted
+
+    @pyqtProperty(int, notify=eyeBreakChanged)
+    def eyeBreakRemaining(self):
+        return self.health.eyeBreakRemaining
+
+    @pyqtProperty(str, notify=eyeBreakChanged)
+    def eyeBreakFormatted(self):
+        return self.health.eyeBreakFormatted
+
+    @pyqtSlot()
+    @pyqtSlot(int)
+    def drinkWater(self, amount=250):
+        self.health.drinkWater(amount)
+
+    @pyqtSlot()
+    def resetWater(self):
+        self.health.resetWater()
+
+    @pyqtSlot()
+    def resetEyeBreak(self):
+        self.health.resetEyeBreak()
+
+    # --- To-Do Task Properties ---
+    @pyqtProperty(list, notify=tasksChanged)
+    def tasks(self):
+        return self.todo.tasks
+
+    @pyqtProperty(int, notify=tasksChanged)
+    def tasksTotalCount(self):
+        return self.todo.totalCount
+
+    @pyqtProperty(int, notify=tasksChanged)
+    def tasksDoneCount(self):
+        return self.todo.doneCount
+
+    @pyqtProperty(str, notify=tasksChanged)
+    def tasksSummaryText(self):
+        return self.todo.summaryText
+
+    @pyqtSlot(str)
+    def addTask(self, text):
+        self.todo.addTask(text)
+
+    @pyqtSlot(int)
+    def toggleTask(self, index):
+        self.todo.toggleTask(index)
+
+    @pyqtSlot(int)
+    def removeTask(self, index):
+        self.todo.removeTask(index)
+
+    @pyqtSlot()
+    def clearCompletedTasks(self):
+        self.todo.clearCompleted()
+

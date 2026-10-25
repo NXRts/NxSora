@@ -81,7 +81,7 @@ Dynamic Island dirancang dengan prinsip **100% Click-Through**: Anda tetap bisa 
 ## 4. Fitur-Fitur Utama & Cara Pakai
 
 ### A. Dynamic Control Hub Berhalaman (Multi-Page Hub)
-Gunakan tombol navigasi **`<`** dan **`>`** (atau geser / klik titik indikator) untuk berpindah antara 4 halaman menu:
+Gunakan tombol navigasi **`<`** dan **`>`** (atau geser / klik titik indikator) untuk berpindah antara 6 halaman menu beragam:
 
 1. **Halaman 1: 📊 Sistem & Monitoring**:
    * **CPU Usage**: Persentase pemakaian prosesor dan grafik bar.
@@ -91,10 +91,10 @@ Gunakan tombol navigasi **`<`** dan **`>`** (atau geser / klik titik indikator) 
    * **Quick Mute**: Tombol satu klik untuk mematikan/menyalakan suara.
 
 2. **Halaman 2: 🎵 Pemutar Musik Lengkap**:
+   * **Adaptive Album Glow**: Pendaran pendar cahaya gradasi di sekeliling island yang otomatis mengekstrak warna dominan cover album aktif.
    * Menampilkan sampul lagu besar, judul lagu, dan nama artis.
    * Garis durasi interaktif (bisa diklik untuk melompat menit lagu).
    * Tombol kontrol Prev (⏮), Play/Pause (▶ / ⏸), Next (⏭), dan slider volume langsung.
-   * Tampilan estetis saat tidak ada musik aktif.
 
 3. **Halaman 3: ⚡ Pintasan Cepat (Quick Tools)**:
    * 📸 **Screenshot**: Satu klik untuk mengambil cuplikan area layar dengan Spectacle.
@@ -107,6 +107,17 @@ Gunakan tombol navigasi **`<`** dan **`>`** (atau geser / klik titik indikator) 
 4. **Halaman 4: 🌐 Jaringan & Informasi Sistem**:
    * **Speedometer Internet Live**: Kecepatan unduh (`↓`) dan unggah (`↑`) *real-time*.
    * **Info Sistem**: Versi distro CachyOS, Kernel Linux, dan status Wayland Layer-Shell.
+
+5. **Halaman 5: 💧 Kesehatan & Pelacak Air (Health Tracker)**:
+   * **Pelacak Minum Air**: Tampilan target harian (misal: `1.5 / 2.0 L · 75% Target`), tombol cepat **`+250 ml`** untuk mencatat 1 gelas minum, tombol reset, dan bar progres hidrasi.
+   * **Jeda Mata 20-20-20**: Timer istirahat mata setiap 20 menit untuk memandang kejauhan selama 20 detik demi kesehatan mata.
+   * **Mode Maskot Santai**: Sakelar satu klik untuk mengubah tampilan kapsul idle antara jam digital standar dan sepasang mata maskot berkedip (*Nusa-style*).
+
+6. **Halaman 6: ✓ Daftar Tugas (To-Do List Harian)**:
+   * **Rekap Tugas**: Indikator jumlah tugas yang telah selesai hari ini.
+   * **Checklist Interaktif**: Klik lingkaran centang untuk menandai tugas selesai (teks langsung dicoret).
+   * **Tambah Tugas Baru**: Ketik di kolom input lalu tekan tombol Enter / Tambah.
+   * **Hapus Tugas & Bersihkan**: Tombol ✕ untuk menghapus tugas tertentu dan tombol *Bersihkan Selesai*.
 
 ---
 

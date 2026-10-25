@@ -22,9 +22,21 @@ Item {
         }
     }
 
+    // 1. Mascot Eyes Mode (Nusa Style)
+    MascotEyes {
+        anchors.fill: parent
+        visible: opacity > 0
+        opacity: IslandController.mascotMode ? 1.0 : 0.0
+        Behavior on opacity { NumberAnimation { duration: 250 } }
+    }
+
+    // 2. Standard Digital Clock Mode
     RowLayout {
         anchors.centerIn: parent
         spacing: 8
+        visible: opacity > 0
+        opacity: IslandController.mascotMode ? 0.0 : 1.0
+        Behavior on opacity { NumberAnimation { duration: 250 } }
 
         // Small indicator dot
         Rectangle {
