@@ -49,8 +49,8 @@ class SystemService(QObject):
         batt = psutil.sensors_battery()
         if batt is not None:
             self.has_battery = True
-            self.battery_percent = batt.percent
-            self.power_plugged = batt.power_plugged
+            self.battery_percent = float(batt.percent)
+            self.power_plugged = bool(batt.power_plugged) if batt.power_plugged is not None else True
             self._last_plugged_state = self.power_plugged
 
         # Timer to poll stats every 1 second
@@ -80,19 +80,24 @@ class SystemService(QObject):
         self.statsUpdated.emit(self.cpu_percent, self.ram_percent, self.ram_text)
 
         # Battery
-        batt = psutil.sensors_battery()
-        if batt is not None:
-            self.has_battery = True
-            self.battery_percent = batt.percent
-            current_plugged = batt.power_plugged
-            
-            # Check for plug/unplug transition
-            if self._last_plugged_state is not None and self._last_plugged_state != current_plugged:
-                self.powerPluggedEvent.emit(current_plugged, self.battery_percent)
+        try:
+            batt = psutil.sensors_battery()
+            if batt is not None:
+                self.has_battery = True
+                self.battery_percent = float(batt.percent)
+                current_plugged = bool(batt.power_plugged) if batt.power_plugged is not None else False
+                
+                # Check for plug/unplug transition
+                if self._last_plugged_state is not None and self._last_plugged_state != current_plugged:
+                    self.powerPluggedEvent.emit(current_plugged, self.battery_percent)
 
-            self._last_plugged_state = current_plugged
-            self.power_plugged = current_plugged
-            self.batteryChanged.emit(self.battery_percent, self.power_plugged)
+                self._last_plugged_state = current_plugged
+                self.power_plugged = current_plugged
+                self.batteryChanged.emit(self.battery_percent, self.power_plugged)
+            else:
+                self.has_battery = False
+        except Exception as e:
+            print(f"[System] Warning in battery poll: {e}")
 
         # Network
         now = time.time()
