@@ -3,29 +3,32 @@ import QtQuick.Layouts
 
 Item {
     id: root
-    implicitWidth: 340
-    implicitHeight: 64
+    implicitWidth: 330
+    implicitHeight: 56
 
     RowLayout {
         anchors.fill: parent
-        anchors.margins: 10
+        anchors.leftMargin: 12
+        anchors.rightMargin: 12
+        anchors.topMargin: 6
+        anchors.bottomMargin: 6
         spacing: 10
 
         // Notification Icon circle
         Rectangle {
-            width: 36
-            height: 36
-            radius: 18
+            width: 32
+            height: 32
+            radius: 16
             color: "#1e1b4b"
             Layout.alignment: Qt.AlignVCenter
 
             Image {
                 anchors.centerIn: parent
-                width: 18
-                height: 18
+                width: 16
+                height: 16
                 source: "file://" + AppConfig.assetsDir + "/bell.svg"
-                sourceSize.width: 18
-                sourceSize.height: 18
+                sourceSize.width: 16
+                sourceSize.height: 16
             }
         }
 
@@ -33,7 +36,7 @@ Item {
         ColumnLayout {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
-            spacing: 2
+            spacing: 1
 
             RowLayout {
                 spacing: 6

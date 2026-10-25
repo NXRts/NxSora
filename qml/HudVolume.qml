@@ -3,8 +3,8 @@ import QtQuick.Layouts
 
 Item {
     id: root
-    implicitWidth: 240
-    implicitHeight: 38
+    implicitWidth: 230
+    implicitHeight: 32
 
     RowLayout {
         anchors.fill: parent

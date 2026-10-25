@@ -18,7 +18,7 @@ case "$1" in
             exit 0
         fi
         rm -f "$LOCK_FILE"
-        PYTHONUNBUFFERED=1 nohup python3 "$DIR/main.py" >> /tmp/dynamic_island_kde.log 2>&1 &
+        PYTHONUNBUFFERED=1 nohup setsid python3 "$DIR/main.py" >> /tmp/dynamic_island_kde.log 2>&1 &
         PID=$!
         echo $PID > "$PID_FILE"
         echo "Dynamic Island berjalan di background (PID: $PID)."
