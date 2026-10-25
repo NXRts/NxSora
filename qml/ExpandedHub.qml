@@ -18,14 +18,8 @@ Item {
     ]
 
     function jumpToPageInstant(idx) {
-        if (!swipeView) return;
-        if (swipeView.contentItem) {
-            swipeView.contentItem.highlightMoveDuration = 0;
-            swipeView.currentIndex = idx;
-            swipeView.contentItem.positionViewAtIndex(idx, ListView.Beginning);
-        } else {
-            swipeView.currentIndex = idx;
-        }
+        if (!pageContainer) return;
+        pageContainer.goTo(idx, 0);
     }
 
     Connections {
@@ -45,21 +39,15 @@ Item {
     }
 
     function goToPrevPage() {
-        if (!swipeView) return;
-        if (swipeView.contentItem) swipeView.contentItem.highlightMoveDuration = 240;
-        if (swipeView.currentIndex > 0)
-            swipeView.currentIndex--;
-        else
-            swipeView.currentIndex = swipeView.count - 1;
+        if (!pageContainer) return;
+        var nextIdx = (pageContainer.currentIndex > 0) ? pageContainer.currentIndex - 1 : pageContainer.count - 1;
+        pageContainer.goTo(nextIdx, -1);
     }
 
     function goToNextPage() {
-        if (!swipeView) return;
-        if (swipeView.contentItem) swipeView.contentItem.highlightMoveDuration = 240;
-        if (swipeView.currentIndex < swipeView.count - 1)
-            swipeView.currentIndex++;
-        else
-            swipeView.currentIndex = 0;
+        if (!pageContainer) return;
+        var nextIdx = (pageContainer.currentIndex < pageContainer.count - 1) ? pageContainer.currentIndex + 1 : 0;
+        pageContainer.goTo(nextIdx, 1);
     }
 
     ColumnLayout {
@@ -148,7 +136,7 @@ Item {
                 spacing: 3
 
                 Text {
-                    text: root.pageTitles[swipeView.currentIndex] || "Control Hub"
+                    text: root.pageTitles[pageContainer.currentIndex] || "Control Hub"
                     color: "#f8fafc"
                     font.pixelSize: 12
                     font.weight: Font.Bold
@@ -158,13 +146,13 @@ Item {
                 Row {
                     spacing: 4
                     Repeater {
-                        model: swipeView.count
+                        model: pageContainer.count
                         Rectangle {
                             required property int index
-                            width: swipeView.currentIndex === index ? 14 : 5
+                            width: pageContainer.currentIndex === index ? 14 : 5
                             height: 5
                             radius: 2.5
-                            color: swipeView.currentIndex === index ? "#38bdf8" : "#475569"
+                            color: pageContainer.currentIndex === index ? "#38bdf8" : "#475569"
 
                             Behavior on width {
                                 NumberAnimation { duration: 150; easing.type: Easing.OutQuad }
@@ -177,8 +165,10 @@ Item {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    if (swipeView.contentItem) swipeView.contentItem.highlightMoveDuration = 240;
-                                    swipeView.currentIndex = index;
+                                    if (index !== pageContainer.currentIndex) {
+                                        var dir = (index > pageContainer.currentIndex) ? 1 : -1;
+                                        pageContainer.goTo(index, dir);
+                                    }
                                 }
                             }
                         }
@@ -215,25 +205,110 @@ Item {
         }
 
         // =====================================================================
-        // BODY: SWIPEVIEW WITH 4 RICH PAGES
+        // BODY: DIRECTIONAL CAROUSEL CONTAINER (6 PAGES)
         // =====================================================================
-        SwipeView {
-            id: swipeView
+        Item {
+            id: pageContainer
             Layout.fillWidth: true
             Layout.fillHeight: true
-            currentIndex: IslandController.activeHubPage
             clip: true
+
+            property int currentIndex: IslandController.activeHubPage
+            readonly property int count: 6
+            readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageHealth, pageTodo]
 
             // Allow keyboard Left/Right arrow navigation
             focus: true
             Keys.onLeftPressed: root.goToPrevPage()
             Keys.onRightPressed: root.goToNextPage()
 
+            ParallelAnimation {
+                id: slideAnim
+                property Item oldPage: null
+                property Item newPage: null
+                property real oldTargetX: 0
+                property real newTargetX: 0
+
+                NumberAnimation {
+                    target: slideAnim.oldPage
+                    property: "x"
+                    to: slideAnim.oldTargetX
+                    duration: 220
+                    easing.type: Easing.OutCubic
+                }
+                NumberAnimation {
+                    target: slideAnim.newPage
+                    property: "x"
+                    to: slideAnim.newTargetX
+                    duration: 220
+                    easing.type: Easing.OutCubic
+                }
+                onFinished: {
+                    if (slideAnim.oldPage && slideAnim.oldPage !== slideAnim.newPage) {
+                        slideAnim.oldPage.visible = false;
+                    }
+                }
+            }
+
+            function goTo(newIdx, dir) {
+                if (newIdx < 0 || newIdx >= count) return;
+                var oldIdx = currentIndex;
+
+                slideAnim.stop();
+
+                var oldP = pages[oldIdx];
+                var newP = pages[newIdx];
+
+                if (dir === 0 || !oldP || !newP || oldIdx === newIdx) {
+                    for (var i = 0; i < count; i++) {
+                        if (pages[i]) {
+                            pages[i].visible = (i === newIdx);
+                            pages[i].x = 0;
+                        }
+                    }
+                    currentIndex = newIdx;
+                    return;
+                }
+
+                // Directional continuous slide
+                // dir > 0: going forward (Next), old slides left (-w), new enters from right (+w -> 0)
+                // dir < 0: going backward (Prev), old slides right (+w), new enters from left (-w -> 0)
+                var w = pageContainer.width > 0 ? pageContainer.width : 392;
+
+                for (var j = 0; j < count; j++) {
+                    if (pages[j] && j !== oldIdx && j !== newIdx) {
+                        pages[j].visible = false;
+                        pages[j].x = w;
+                    }
+                }
+
+                oldP.visible = true;
+                oldP.x = 0;
+
+                newP.visible = true;
+                newP.x = (dir > 0) ? w : -w;
+
+                slideAnim.oldPage = oldP;
+                slideAnim.newPage = newP;
+                slideAnim.oldTargetX = (dir > 0) ? -w : w;
+                slideAnim.newTargetX = 0;
+
+                currentIndex = newIdx;
+                slideAnim.restart();
+            }
+
+            Component.onCompleted: {
+                goTo(IslandController.activeHubPage, 0);
+            }
+
             // -----------------------------------------------------------------
             // PAGE 0: SISTEM & MONITORING
             // -----------------------------------------------------------------
             Item {
                 id: pageSystem
+                width: pageContainer.width
+                height: pageContainer.height
+                y: 0
                 ColumnLayout {
                     anchors.fill: parent
                     spacing: 8
@@ -562,6 +637,9 @@ Item {
             // -----------------------------------------------------------------
             Item {
                 id: pageMusic
+                width: pageContainer.width
+                height: pageContainer.height
+                y: 0
 
                 // When media exists
                 ColumnLayout {
@@ -826,6 +904,9 @@ Item {
             // -----------------------------------------------------------------
             Item {
                 id: pageTools
+                width: pageContainer.width
+                height: pageContainer.height
+                y: 0
 
                 GridLayout {
                     anchors.fill: parent
@@ -1054,6 +1135,9 @@ Item {
             // -----------------------------------------------------------------
             Item {
                 id: pageNet
+                width: pageContainer.width
+                height: pageContainer.height
+                y: 0
                 ColumnLayout {
                     anchors.fill: parent
                     spacing: 8
@@ -1209,6 +1293,9 @@ Item {
             // -----------------------------------------------------------------
             PageHealth {
                 id: pageHealth
+                width: pageContainer.width
+                height: pageContainer.height
+                y: 0
             }
 
             // -----------------------------------------------------------------
@@ -1216,6 +1303,9 @@ Item {
             // -----------------------------------------------------------------
             PageTodo {
                 id: pageTodo
+                width: pageContainer.width
+                height: pageContainer.height
+                y: 0
             }
         }
     }
