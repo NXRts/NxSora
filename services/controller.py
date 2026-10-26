@@ -50,6 +50,7 @@ class IslandController(QObject):
 
     # Mascot mode
     mascotModeChanged = pyqtSignal(bool)
+    isPinnedChanged = pyqtSignal(bool)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -65,6 +66,7 @@ class IslandController(QObject):
 
         # Mascot mode toggle (Resting Eyes vs Digital Clock)
         self._mascot_mode = False
+        self._is_pinned = False
 
         # Island UI State:
         # "idle", "music", "hud-volume", "hud-battery", "hud-notification", "expanded-hub"
@@ -340,6 +342,15 @@ class IslandController(QObject):
     @pyqtProperty(int, notify=activeHubPageChanged)
     def activeHubPage(self):
         return self._active_hub_page
+
+    @pyqtProperty(bool, notify=isPinnedChanged)
+    def isPinned(self):
+        return self._is_pinned
+
+    @pyqtSlot()
+    def togglePin(self):
+        self._is_pinned = not self._is_pinned
+        self.isPinnedChanged.emit(self._is_pinned)
 
     # --- Slots / Invocable Actions for QML ---
 

@@ -178,28 +178,59 @@ Item {
 
             Item { Layout.fillWidth: true }
 
-            // Close button (✕)
-            Rectangle {
-                width: 28
-                height: 28
-                radius: 14
-                color: closeMouse.containsMouse ? "#3b3b4a" : "#1e1e28"
-                border.color: "#2d2d3c"
-                border.width: 1
+            // Action Buttons: [Pin 📌] and [Close ✕]
+            RowLayout {
+                spacing: 6
 
-                Image {
-                    anchors.centerIn: parent
-                    width: 12
-                    height: 12
-                    source: "file://" + AppConfig.assetsDir + "/close.svg"
+                // Pin Button (📌 toggle auto-collapse)
+                Rectangle {
+                    width: 28
+                    height: 28
+                    radius: 14
+                    color: IslandController.isPinned ? "#1e293b" : (pinMouse.containsMouse ? "#2d2d3a" : "#181a24")
+                    border.color: IslandController.isPinned ? "#38bdf8" : (pinMouse.containsMouse ? "#3b3b4a" : "#282a36")
+                    border.width: IslandController.isPinned ? 1.5 : 1
+
+                    Image {
+                        anchors.centerIn: parent
+                        width: 12
+                        height: 12
+                        source: "file://" + AppConfig.assetsDir + "/pin.svg"
+                        opacity: IslandController.isPinned ? 1.0 : (pinMouse.containsMouse ? 0.9 : 0.6)
+                    }
+
+                    MouseArea {
+                        id: pinMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: IslandController.togglePin()
+                    }
                 }
 
-                MouseArea {
-                    id: closeMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: IslandController.collapse()
+                // Close button (✕)
+                Rectangle {
+                    width: 28
+                    height: 28
+                    radius: 14
+                    color: closeMouse.containsMouse ? "#3b3b4a" : "#1e1e28"
+                    border.color: "#2d2d3c"
+                    border.width: 1
+
+                    Image {
+                        anchors.centerIn: parent
+                        width: 12
+                        height: 12
+                        source: "file://" + AppConfig.assetsDir + "/close.svg"
+                    }
+
+                    MouseArea {
+                        id: closeMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: IslandController.collapse()
+                    }
                 }
             }
         }
@@ -217,10 +248,11 @@ Item {
             readonly property int count: 6
             readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageHealth, pageTodo]
 
-            // Allow keyboard Left/Right arrow navigation
+            // Allow keyboard Left/Right arrow navigation & Esc to close
             focus: true
             Keys.onLeftPressed: root.goToPrevPage()
             Keys.onRightPressed: root.goToNextPage()
+            Keys.onEscapePressed: IslandController.collapse()
 
             ParallelAnimation {
                 id: slideAnim

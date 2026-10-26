@@ -26,6 +26,58 @@ Item {
 
     readonly property real islandBorderWidth: IslandController.mediaIsPlaying && !IslandController.isExpanded ? 1.5 : 1.0
 
+    // Smart Hover Tracker & Auto-Collapse on Cursor Exit
+    HoverHandler {
+        id: islandHover
+        onHoveredChanged: {
+            if (!AppConfig.autoCollapseEnabled) return;
+            if (IslandController.isExpanded && !IslandController.isPinned) {
+                if (hovered) {
+                    autoCollapseTimer.stop();
+                } else {
+                    autoCollapseTimer.restart();
+                }
+            }
+        }
+    }
+
+    Timer {
+        id: autoCollapseTimer
+        interval: AppConfig.autoCollapseTimeout
+        repeat: false
+        onTriggered: {
+            if (IslandController.isExpanded && !islandHover.hovered && !IslandController.isPinned) {
+                // Do not collapse if the user is typing in a text field
+                if (typeof rootWindow !== "undefined" && rootWindow && rootWindow.activeFocusItem && rootWindow.activeFocusItem.hasOwnProperty("text")) {
+                    return;
+                }
+                IslandController.collapse();
+            }
+        }
+    }
+
+    Connections {
+        target: IslandController
+        function onIsExpandedChanged() {
+            if (IslandController.isExpanded) {
+                if (AppConfig.autoCollapseEnabled && !islandHover.hovered && !IslandController.isPinned) {
+                    autoCollapseTimer.restart();
+                } else {
+                    autoCollapseTimer.stop();
+                }
+            } else {
+                autoCollapseTimer.stop();
+            }
+        }
+        function onIsPinnedChanged() {
+            if (IslandController.isPinned) {
+                autoCollapseTimer.stop();
+            } else if (IslandController.isExpanded && !islandHover.hovered) {
+                autoCollapseTimer.restart();
+            }
+        }
+    }
+
     // Dimensions driven by IslandController.state
     readonly property real targetWidth: {
         switch (IslandController.state) {

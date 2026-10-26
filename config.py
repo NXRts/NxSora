@@ -37,6 +37,8 @@ CONFIG = {
     "hud_volume_timeout": 2200,
     "hud_battery_timeout": 3000,
     "hud_notification_timeout": 5000,
+    "auto_collapse_on_leave": True,          # Auto-close expanded hub when mouse leaves
+    "auto_collapse_leave_timeout": 3500,     # Delay (ms) before closing after mouse leaves
     
     # Theme colors
     "bg_color": "#07070a",
