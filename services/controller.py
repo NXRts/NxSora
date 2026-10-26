@@ -397,7 +397,10 @@ class IslandController(QObject):
 
     @pyqtSlot(float)
     def mediaSeek(self, ratio):
-        self.mpris.seek_ratio(ratio)
+        try:
+            self.mpris.seek_ratio(ratio)
+        except Exception as e:
+            print(f"[Controller] Warning in mediaSeek: {e}")
 
     # Volume controls
     @pyqtSlot(float)

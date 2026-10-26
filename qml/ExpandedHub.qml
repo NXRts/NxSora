@@ -706,23 +706,70 @@ Item {
                         Rectangle {
                             id: hubProgressBar
                             Layout.fillWidth: true
-                            height: 5
-                            radius: 2.5
+                            height: 6
+                            radius: 3
                             color: "#27272a"
 
+                            // Active progress fill
                             Rectangle {
-                                width: hubProgressBar.width * IslandController.mediaPositionRatio
+                                width: Math.max(0, Math.min(hubProgressBar.width, hubProgressBar.width * (seekMouseArea.isDragging ? seekMouseArea.dragRatio : IslandController.mediaPositionRatio)))
                                 height: parent.height
                                 radius: parent.radius
-                                color: "#38bdf8"
+                                color: IslandController.mediaAccentColor || "#38bdf8"
                             }
 
+                            // Glowing scrubber thumb indicator on hover / drag
+                            Rectangle {
+                                x: Math.max(0, Math.min(hubProgressBar.width - width, (hubProgressBar.width * (seekMouseArea.isDragging ? seekMouseArea.dragRatio : IslandController.mediaPositionRatio)) - width / 2))
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: (seekMouseArea.containsMouse || seekMouseArea.isDragging) ? 12 : 0
+                                height: width
+                                radius: width / 2
+                                color: "#ffffff"
+                                border.color: IslandController.mediaAccentColor || "#38bdf8"
+                                border.width: 2
+                                opacity: width > 0 ? 1.0 : 0.0
+
+                                Behavior on width { NumberAnimation { duration: 100 } }
+                                Behavior on opacity { NumberAnimation { duration: 100 } }
+                            }
+
+                            // Expanded hit-test area for effortless dragging and clicking
                             MouseArea {
+                                id: seekMouseArea
                                 anchors.fill: parent
+                                anchors.topMargin: -8
+                                anchors.bottomMargin: -8
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: (mouse) => {
-                                    var ratio = Math.max(0.0, Math.min(1.0, mouse.x / width))
-                                    IslandController.mediaSeek(ratio)
+                                hoverEnabled: true
+
+                                property bool isDragging: false
+                                property real dragRatio: 0.0
+
+                                function calcRatio(mouseX) {
+                                    return Math.max(0.0, Math.min(1.0, mouseX / width))
+                                }
+
+                                onPressed: (mouse) => {
+                                    isDragging = true
+                                    dragRatio = calcRatio(mouse.x)
+                                    IslandController.mediaSeek(dragRatio)
+                                }
+                                onPositionChanged: (mouse) => {
+                                    if (pressed && isDragging) {
+                                        dragRatio = calcRatio(mouse.x)
+                                        IslandController.mediaSeek(dragRatio)
+                                    }
+                                }
+                                onReleased: (mouse) => {
+                                    if (isDragging) {
+                                        dragRatio = calcRatio(mouse.x)
+                                        IslandController.mediaSeek(dragRatio)
+                                        isDragging = false
+                                    }
+                                }
+                                onCanceled: {
+                                    isDragging = false
                                 }
                             }
                         }
