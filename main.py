@@ -50,6 +50,18 @@ def main():
     app.setApplicationName("Dynamic Island")
     app.setOrganizationName("KDE Dynamic Island")
 
+    # Handle SIGTERM gracefully (e.g. systemctl stop / pkill)
+    def handle_sigterm(signum, frame):
+        QGuiApplication.quit()
+
+    signal.signal(signal.SIGTERM, handle_sigterm)
+
+    # Periodic timer to allow Python interpreter to process POSIX signals during app.exec()
+    sig_timer = QTimer()
+    sig_timer.timeout.connect(lambda: None)
+    sig_timer.start(500)
+    app._sig_timer = sig_timer
+
     # Single-instance lock with stale lock recovery
     lock_path = QDir.tempPath() + "/dynamic_island_kde.lock"
     lock_file = QLockFile(lock_path)
