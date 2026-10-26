@@ -6,6 +6,8 @@ Integrates with Spotify, Chrome, Firefox, VLC, and other MPRIS-compliant players
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot, QTimer
 from PyQt6.QtDBus import QDBusConnection, QDBusInterface, QDBusMessage
 import os
+import time
+import subprocess
 from services.color_extractor import ColorExtractor
 
 
@@ -218,17 +220,70 @@ class MprisService(QObject):
     def seek_ratio(self, ratio):
         if not self.active_player or self.duration <= 0:
             return
-        target_pos_us = int(ratio * self.duration * 1_000_000)
-        p_iface = QDBusInterface(self.active_player, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", self.bus)
-        
-        meta_reply = p_iface.call("Get", "org.mpris.MediaPlayer2.Player", "Metadata")
-        if meta_reply.arguments():
-            raw_meta = meta_reply.arguments()[0]
-            if isinstance(raw_meta, dict):
-                track_id = raw_meta.get("mpris:trackid", track_id)
-            elif hasattr(raw_meta, "value") and isinstance(raw_meta.value(), dict):
-                track_id = raw_meta.value().get("mpris:trackid", track_id)
-        
-        p_iface.call("SetPosition", track_id, target_pos_us)
-        self.position = ratio * self.duration
-        self.positionChanged.emit(self.position, self.duration)
+        try:
+            now = time.time()
+            # Update local position immediately for smooth responsive UI
+            self.position = max(0.0, min(self.duration, ratio * self.duration))
+            self.positionChanged.emit(self.position, self.duration)
+
+            # Throttle D-Bus subprocess calls while dragging to max ~16 calls/sec
+            if hasattr(self, "_last_seek_time") and (now - self._last_seek_time) < 0.06:
+                return
+            self._last_seek_time = now
+
+            target_pos_us = int(ratio * self.duration * 1_000_000)
+
+            # Safely fetch track_id from DBus Properties interface
+            prop_iface = QDBusInterface(
+                self.active_player,
+                "/org/mpris/MediaPlayer2",
+                "org.freedesktop.DBus.Properties",
+                self.bus
+            )
+            track_id_str = "/org/mpris/MediaPlayer2/TrackList/NoTrack"
+            meta_reply = prop_iface.call("Get", "org.mpris.MediaPlayer2.Player", "Metadata")
+            if meta_reply.arguments():
+                raw_meta = meta_reply.arguments()[0]
+                if hasattr(raw_meta, "value"):
+                    raw_meta = raw_meta.value()
+                if isinstance(raw_meta, dict):
+                    track_id_val = raw_meta.get("mpris:trackid")
+                    if track_id_val is not None:
+                        val_str = str(track_id_val)
+                        if val_str.startswith("/"):
+                            track_id_str = val_str
+
+            # Execute SetPosition via gdbus (handles (ox) int64 microsecond position accurately)
+            try:
+                subprocess.run(
+                    [
+                        "gdbus", "call", "--session",
+                        "--dest", self.active_player,
+                        "--object-path", "/org/mpris/MediaPlayer2",
+                        "--method", "org.mpris.MediaPlayer2.Player.SetPosition",
+                        track_id_str, str(target_pos_us)
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    timeout=0.6
+                )
+            except Exception:
+                try:
+                    subprocess.run(
+                        [
+                            "dbus-send", "--session",
+                            f"--dest={self.active_player}",
+                            "--type=method_call",
+                            "/org/mpris/MediaPlayer2",
+                            "org.mpris.MediaPlayer2.Player.SetPosition",
+                            f"objpath:{track_id_str}",
+                            f"int64:{target_pos_us}"
+                        ],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        timeout=0.6
+                    )
+                except Exception:
+                    pass
+        except Exception as e:
+            print(f"[MPRIS] Warning in seek_ratio: {e}")

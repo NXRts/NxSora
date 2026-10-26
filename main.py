@@ -20,9 +20,11 @@ from services.controller import IslandController
 class AppConfig(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._top_margin = config.CONFIG.get("top_margin", 10)
+        self._top_margin = config.CONFIG.get("top_margin", 0)
         self._assets_dir = str(config.ASSETS_DIR)
         self._qml_dir = str(config.QML_DIR)
+        self._auto_collapse_enabled = bool(config.CONFIG.get("auto_collapse_on_leave", True))
+        self._auto_collapse_timeout = int(config.CONFIG.get("auto_collapse_leave_timeout", 3500))
 
     @pyqtProperty(int, constant=True)
     def topMargin(self):
@@ -35,6 +37,14 @@ class AppConfig(QObject):
     @pyqtProperty(str, constant=True)
     def qmlDir(self):
         return self._qml_dir
+
+    @pyqtProperty(bool, constant=True)
+    def autoCollapseEnabled(self):
+        return self._auto_collapse_enabled
+
+    @pyqtProperty(int, constant=True)
+    def autoCollapseTimeout(self):
+        return self._auto_collapse_timeout
 
 
 def main():

@@ -49,7 +49,7 @@ case "$1" in
 
         # Prioritaskan systemd-run --user agar proses terisolasi di luar cgroup terminal.
         # Hal ini mencegah aplikasi tertutup otomatis saat terminal/Konsole ditutup.
-        if command -v systemd-run >/dev/null 2>&1 && systemctl --user is-system-running >/dev/null 2>&1; then
+        if command -v systemd-run >/dev/null 2>&1 && systemctl --user status basic.target >/dev/null 2>&1; then
             systemctl --user reset-failed "$UNIT_NAME" 2>/dev/null || true
             systemd-run --user \
                 --unit="$UNIT_NAME" \
