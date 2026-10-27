@@ -141,7 +141,7 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 
 Berikut adalah urutan pengerjaan yang paling terstruktur agar setiap fase memberikan peningkatan visual dan fungsional yang langsung terasa tanpa merusak kestabilan sistem yang sudah ada:
 
-### ✅ Fase 1: Paritas Penuh Fitur Utama Nusa (Lyrics, File Shelf, & Pomodoro Ring) — [SELESAI]
+<!-- ### ✅ Fase 1: Paritas Penuh Fitur Utama Nusa (Lyrics, File Shelf, & Pomodoro Ring) — [SELESAI]
 1. **Synced Lyrics Mode (`520x140px` Split Karaoke View)**
    - **Backend (`services/lyrics.py`)**: Buat layanan pencari lirik asinkron ke API `https://lrclib.net/api/get` menggunakan `title`, `artist`, dan `duration` dari `MprisService`, lengkap dengan cache lokal (`~/.cache/dynamic_island/lyrics/`) dan parser format `.lrc` (`[mm:ss.xx]`).
    - **UI (`qml/ExpandedHub.qml` & `qml/Island.qml`)**: Tambahkan tombol balon lirik di halaman Musik. Saat aktif, lebarkan `Island` menjadi `520px`, bagi tampilan menjadi dua (info musik di kiri, daftar lirik auto-scroll dengan *fade mask* di kanan), dan dukung klik baris lirik untuk *seek* posisi lagu.
@@ -150,7 +150,7 @@ Berikut adalah urutan pengerjaan yang paling terstruktur agar setiap fase member
    - **UI (`qml/PageShelf.qml`)**: Buat halaman **Shelf** dengan `DropArea` bergaris putus-putus, efek pendaran cahaya **"Island Gulp"** saat file melayang di atas island, serta kartu thumbnail file yang bisa di-drag keluar kapan saja.
 3. **Nusa-Style Pomodoro Focus Timer & Hourly Water Histogram**
    - Percantik timer dengan **Circular Conic Progress Ring** bercahaya, mode *Focus (25m)* / *Short Break (5m)* / *Long Break (15m)*, serta efek suara notifikasi lembut (`canberra-gtk-play` / `paplay`).
-   - Visualisasikan data `_hourly_history` di `PageHealth.qml` menjadi **Grafik Batang Per Jam (09..18)** persis seperti di Nusa, lengkap dengan tombol pengatur ukuran gelas (`150ml / 250ml / 500ml`) dan target harian.
+   - Visualisasikan data `_hourly_history` di `PageHealth.qml` menjadi **Grafik Batang Per Jam (09..18)** persis seperti di Nusa, lengkap dengan tombol pengatur ukuran gelas (`150ml / 250ml / 500ml`) dan target harian. -->
 
 ### ⚡ Fase 2: Smart Peek Overlays (`310x60px`) & Indikator Hardware KDE
 1. **Headphones / Bluetooth Auto-Peek (`qml/HudBluetooth.qml` + `services/bluetooth.py`)**
