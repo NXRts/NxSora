@@ -6,8 +6,14 @@ Item {
     id: island
 
     readonly property color islandColor: "#07070a"
+    property bool isShelfDragNear: false
+    property real gulpGlowOpacity: 0.0
+    property real gulpScale: 1.0
 
     readonly property color currentAccentColor: {
+        if (island.isShelfDragNear || island.gulpGlowOpacity > 0.05) {
+            return "#2d5bff"
+        }
         if (IslandController.state === "music" || IslandController.isExpanded) {
             return IslandController.mediaAccentColor || "#38bdf8"
         }
@@ -15,6 +21,9 @@ Item {
     }
 
     readonly property color islandBorderColor: {
+        if (island.isShelfDragNear || island.gulpGlowOpacity > 0.05) {
+            return "#38bdf8"
+        }
         if (islandMouse.containsMouse && !IslandController.isExpanded) {
             return currentAccentColor
         }
@@ -24,7 +33,27 @@ Item {
         return "#23232c"
     }
 
-    readonly property real islandBorderWidth: IslandController.mediaIsPlaying && !IslandController.isExpanded ? 1.5 : 1.0
+    readonly property real islandBorderWidth: (IslandController.mediaIsPlaying && !IslandController.isExpanded) || island.isShelfDragNear ? 1.5 : 1.0
+
+    // "Island Gulp" animation when files are dropped onto the Shelf
+    SequentialAnimation {
+        id: gulpAnimation
+        ParallelAnimation {
+            NumberAnimation { target: island; property: "gulpGlowOpacity"; to: 0.78; duration: 180; easing.type: Easing.OutQuad }
+            NumberAnimation { target: island; property: "gulpScale"; to: 1.03; duration: 160; easing.type: Easing.OutBack }
+        }
+        ParallelAnimation {
+            NumberAnimation { target: island; property: "gulpGlowOpacity"; to: 0.0; duration: 520; easing.type: Easing.InOutQuad }
+            NumberAnimation { target: island; property: "gulpScale"; to: 1.0; duration: 380; easing.type: Easing.OutElastic }
+        }
+    }
+
+    transform: Scale {
+        origin.x: island.width / 2
+        origin.y: 0
+        xScale: island.gulpScale
+        yScale: island.gulpScale
+    }
 
     // Smart Hover Tracker & Auto-Collapse on Cursor Exit
     HoverHandler {
@@ -76,9 +105,12 @@ Item {
                 autoCollapseTimer.restart();
             }
         }
+        function onShelfGulpTriggered() {
+            gulpAnimation.restart();
+        }
     }
 
-    // Dimensions driven by IslandController.state
+    // Dimensions driven by IslandController.state (+ 520px wide split view in Synced Lyrics mode)
     readonly property real targetWidth: {
         switch (IslandController.state) {
             case "idle": return 140;
@@ -86,8 +118,13 @@ Item {
             case "hud-volume": return 230;
             case "hud-battery": return 230;
             case "hud-notification": return 330;
-            case "expanded-music": return 420;
-            case "expanded-hub": return 420;
+            case "expanded-music":
+                return IslandController.lyricsModeActive ? 520 : 420;
+            case "expanded-hub":
+                if (IslandController.activeHubPage === 1 && IslandController.lyricsModeActive && IslandController.mediaHasTrack) {
+                    return 520;
+                }
+                return 420;
             default: return 140;
         }
     }
@@ -161,62 +198,47 @@ Item {
 
             startX: 0; startY: 0
 
-            // Left ear concave curve into notch left edge
             PathArc {
                 x: island.earRadius; y: island.earRadius
                 radiusX: island.earRadius; radiusY: island.earRadius
                 direction: PathArc.Clockwise
             }
-
-            // Down the left edge
             PathLine {
                 x: island.earRadius
                 y: island.height - island.cornerRadius
             }
-
-            // Bottom-left rounded corner
             PathArc {
                 x: island.earRadius + island.cornerRadius
                 y: island.height
                 radiusX: island.cornerRadius; radiusY: island.cornerRadius
                 direction: PathArc.Counterclockwise
             }
-
-            // Across the bottom edge
             PathLine {
                 x: island.earRadius + island.width - island.cornerRadius
                 y: island.height
             }
-
-            // Bottom-right rounded corner
             PathArc {
                 x: island.earRadius + island.width
                 y: island.height - island.cornerRadius
                 radiusX: island.cornerRadius; radiusY: island.cornerRadius
                 direction: PathArc.Counterclockwise
             }
-
-            // Up the right edge
             PathLine {
                 x: island.earRadius + island.width
                 y: island.earRadius
             }
-
-            // Right ear concave curve into top panel
             PathArc {
                 x: island.earRadius * 2 + island.width
                 y: 0
                 radiusX: island.earRadius; radiusY: island.earRadius
                 direction: PathArc.Clockwise
             }
-
-            // Top edge closing the fill polygon
             PathLine {
                 x: 0; y: 0
             }
         }
 
-        // Stroke Outline along ears, sides, and bottom (top edge remains open for flush attachment!)
+        // Stroke Outline along ears, sides, and bottom
         ShapePath {
             strokeColor: island.islandBorderColor
             strokeWidth: island.islandBorderWidth
@@ -273,7 +295,7 @@ Item {
         bottomRightRadius: island.cornerRadius
         color: "transparent"
         z: 1
-        opacity: IslandController.mediaIsPlaying ? (IslandController.isExpanded ? 0.20 : 0.35) : 0.0
+        opacity: IslandController.mediaIsPlaying ? (IslandController.isExpanded ? 0.22 : 0.35) : 0.0
         gradient: Gradient {
             orientation: Gradient.Vertical
             GradientStop { position: 0.0; color: "transparent" }
@@ -281,6 +303,53 @@ Item {
             GradientStop { position: 1.0; color: Qt.rgba(island.currentAccentColor.r, island.currentAccentColor.g, island.currentAccentColor.b, 0.42) }
         }
         Behavior on opacity { NumberAnimation { duration: 400 } }
+    }
+
+    // 2B. Nusa "Island Gulp" Shelf Drop Glow Layer (#19b8ff -> #2d5bff -> #7b4bff)
+    Rectangle {
+        id: shelfGulpGlow
+        anchors.fill: parent
+        topLeftRadius: 0
+        topRightRadius: 0
+        bottomLeftRadius: island.cornerRadius
+        bottomRightRadius: island.cornerRadius
+        z: 1
+        opacity: Math.max(island.gulpGlowOpacity, island.isShelfDragNear ? 0.45 : 0.0)
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0.0; color: Qt.rgba(0.10, 0.72, 1.0, 0.55) }
+            GradientStop { position: 0.5; color: Qt.rgba(0.18, 0.36, 1.0, 0.65) }
+            GradientStop { position: 1.0; color: Qt.rgba(0.48, 0.29, 1.0, 0.55) }
+        }
+        Behavior on opacity { NumberAnimation { duration: 220 } }
+    }
+
+    // 2C. Global Drag-Enter Detector on Compact Pill (auto-expands to Shelf when dragging files to top notch!)
+    DropArea {
+        anchors.fill: parent
+        z: 15
+        enabled: !IslandController.isExpanded || IslandController.activeHubPage !== 6
+
+        onEntered: (drag) => {
+            if (drag.hasUrls || drag.hasText) {
+                drag.acceptProposedAction()
+                island.isShelfDragNear = true
+                IslandController.expandToShelf()
+            }
+        }
+        onExited: {
+            island.isShelfDragNear = false
+        }
+        onDropped: (drop) => {
+            island.isShelfDragNear = false
+            if (drop.hasUrls) {
+                IslandController.addShelfFiles(drop.urls)
+                drop.acceptProposedAction()
+            } else if (drop.hasText) {
+                IslandController.addShelfFiles(drop.text)
+                drop.acceptProposedAction()
+            }
+        }
     }
 
     // 3. Click handler on island background for expanding / wheel for volume
@@ -291,7 +360,7 @@ Item {
         hoverEnabled: true
         cursorShape: !IslandController.isExpanded ? Qt.PointingHandCursor : Qt.ArrowCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        
+
         onClicked: (mouse) => {
             if (mouse.button === Qt.RightButton) {
                 IslandController.toggleExpand()
