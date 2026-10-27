@@ -370,6 +370,10 @@ Item {
         }
 
         onWheel: (wheel) => {
+            if (IslandController.isExpanded) {
+                wheel.accepted = true
+                return
+            }
             if (wheel.angleDelta.y > 0) {
                 IslandController.changeVolume(0.03)
             } else if (wheel.angleDelta.y < 0) {
