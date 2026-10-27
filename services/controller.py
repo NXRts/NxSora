@@ -34,6 +34,7 @@ class IslandController(QObject):
     # System signals
     statsChanged = pyqtSignal()
     batteryChanged = pyqtSignal()
+    powerProfileChanged = pyqtSignal()
 
     # Notification signal
     notificationChanged = pyqtSignal()
@@ -115,6 +116,8 @@ class IslandController(QObject):
 
         self.system.networkUpdated.connect(lambda d, u: self.networkChanged.emit())
         self.system.nightLightChanged.connect(lambda a: self.nightLightChanged.emit())
+        self.system.powerProfileChanged.connect(lambda _: self.powerProfileChanged.emit())
+        self.system.overheatAlert.connect(self._on_overheat_alert)
         self.health.waterChanged.connect(lambda: self.waterChanged.emit())
         self.health.eyeBreakChanged.connect(lambda: self.eyeBreakChanged.emit())
         self.health.eyeBreakAlert.connect(self._on_eye_break_alert)
@@ -359,10 +362,79 @@ class IslandController(QObject):
             return f"Mengisi Daya {self.batteryPercent}%"
         return f"Baterai {self.batteryPercent}%"
 
-    # System Stats
+    # System, Thermal & TDP Stats
     @pyqtProperty(int, notify=statsChanged)
     def cpuPercent(self):
         return int(round(self.system.cpu_percent))
+
+    @pyqtProperty(int, notify=statsChanged)
+    def cpuTemp(self):
+        return int(round(self.system.cpu_temp))
+
+    @pyqtProperty(str, notify=statsChanged)
+    def cpuFreqText(self):
+        return self.system.cpu_freq_text
+
+    @pyqtProperty(str, constant=True)
+    def cpuModel(self):
+        return self.system.cpu_model
+
+    @pyqtProperty(float, notify=statsChanged)
+    def cpuTdpWatts(self):
+        return float(self.system.cpu_tdp_watts)
+
+    @pyqtProperty(float, notify=statsChanged)
+    def cpuTdpMaxWatts(self):
+        return float(self.system.cpu_tdp_max_watts)
+
+    @pyqtProperty(float, notify=statsChanged)
+    def cpuTdpRatio(self):
+        mx = max(1.0, float(self.system.cpu_tdp_max_watts))
+        return max(0.0, min(1.0, float(self.system.cpu_tdp_watts) / mx))
+
+    @pyqtProperty(str, notify=statsChanged)
+    def cpuTdpText(self):
+        return f"{self.system.cpu_tdp_watts:.1f} W"
+
+    @pyqtProperty(int, notify=statsChanged)
+    def gpuPercent(self):
+        return int(self.system.gpu_percent)
+
+    @pyqtProperty(int, notify=statsChanged)
+    def gpuTemp(self):
+        return int(round(self.system.gpu_temp))
+
+    @pyqtProperty(int, notify=statsChanged)
+    def gpuFreqMhz(self):
+        return int(self.system.gpu_freq_mhz)
+
+    @pyqtProperty(int, notify=statsChanged)
+    def vramPercent(self):
+        return int(self.system.vram_percent)
+
+    @pyqtProperty(str, notify=statsChanged)
+    def vramText(self):
+        return self.system.vram_text
+
+    @pyqtProperty(int, notify=statsChanged)
+    def nvmeTemp(self):
+        return int(round(self.system.nvme_temp))
+
+    @pyqtProperty(int, notify=statsChanged)
+    def diskPercent(self):
+        return int(self.system.disk_percent)
+
+    @pyqtProperty(str, notify=statsChanged)
+    def diskText(self):
+        return self.system.disk_text
+
+    @pyqtProperty(str, notify=statsChanged)
+    def topProcess(self):
+        return self.system.top_process
+
+    @pyqtProperty(str, notify=powerProfileChanged)
+    def powerProfile(self):
+        return self.system.power_profile
 
     @pyqtProperty(int, notify=statsChanged)
     def ramPercent(self):
@@ -583,6 +655,20 @@ class IslandController(QObject):
     @pyqtSlot()
     def toggleNightLight(self):
         self.system.toggle_night_light()
+
+    @pyqtSlot(str)
+    def setPowerProfile(self, profile):
+        self.system.set_power_profile(profile)
+
+    @pyqtSlot()
+    def cyclePowerProfile(self):
+        self.system.cycle_power_profile()
+
+    def _on_overheat_alert(self, temp_c, top_proc):
+        self.notifications.trigger_test(
+            f"⚠️ Suhu Tinggi ({temp_c}°C)!",
+            f"Proses terberat: {top_proc} · TDP: {self.cpuTdpText}. Pertimbangkan mode Balanced/Power Saver."
+        )
 
     def _on_eye_break_alert(self):
         self.notifications.trigger_test(

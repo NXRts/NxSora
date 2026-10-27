@@ -38,15 +38,17 @@ Item {
         opacity: IslandController.mascotMode ? 0.0 : 1.0
         Behavior on opacity { NumberAnimation { duration: 250 } }
 
-        // Small indicator dot
+        // Small status / thermal indicator dot
         Rectangle {
             width: 7
             height: 7
             radius: 3.5
-            color: IslandController.timerRunning ? "#f59e0b" : "#22c55e"
+            color: IslandController.cpuTemp >= 80
+                   ? "#ef4444"
+                   : (IslandController.timerRunning ? "#f59e0b" : "#22c55e")
 
             SequentialAnimation on opacity {
-                running: IslandController.timerRunning
+                running: IslandController.timerRunning || IslandController.cpuTemp >= 80
                 loops: Animation.Infinite
                 NumberAnimation { from: 1.0; to: 0.3; duration: 800 }
                 NumberAnimation { from: 0.3; to: 1.0; duration: 800 }
@@ -62,13 +64,19 @@ Item {
             font.family: "Inter, Noto Sans, sans-serif"
         }
 
-        // Tiny battery or dot
+        // Battery % (or high CPU Temp badge when CPU >= 78°C)
         Text {
-            text: IslandController.batteryPercent + "%"
-            color: IslandController.isCharging ? "#22c55e" : "#94a3b8"
+            text: IslandController.cpuTemp >= 78
+                  ? (IslandController.cpuTemp + "°C")
+                  : (IslandController.batteryPercent + "%")
+            color: IslandController.cpuTemp >= 80
+                   ? "#ef4444"
+                   : (IslandController.cpuTemp >= 78
+                      ? "#f59e0b"
+                      : (IslandController.isCharging ? "#22c55e" : "#94a3b8"))
             font.pixelSize: 10
             font.weight: Font.Medium
-            visible: IslandController.hasBattery
+            visible: IslandController.hasBattery || IslandController.cpuTemp >= 78
         }
     }
 

@@ -12,7 +12,7 @@ Item {
         "Sistem & Pomodoro Fokus",
         IslandController.lyricsModeActive ? "Musik & Lirik Karaoke" : "Pemutar Musik",
         "Pintasan Cepat",
-        "Jaringan & Info",
+        "Hardware, Suhu & TDP",
         "Kesehatan & Air",
         "Daftar Tugas (To-Do)",
         "Rak File (Shelf)"
@@ -501,13 +501,13 @@ Item {
                         Layout.fillWidth: true
                         spacing: 8
 
-                        // CPU Box
+                        // CPU + Temp + TDP Box (Click to jump to Page 3 Hardware & TDP)
                         Rectangle {
                             Layout.fillWidth: true
                             height: 48
                             radius: 10
-                            color: "#121217"
-                            border.color: "#22222a"
+                            color: cpuBoxMouse.containsMouse ? "#181924" : "#121217"
+                            border.color: IslandController.cpuTemp >= 80 ? "#ef4444" : (cpuBoxMouse.containsMouse ? "#38bdf8" : "#22222a")
                             border.width: 1
 
                             ColumnLayout {
@@ -517,22 +517,29 @@ Item {
 
                                 RowLayout {
                                     Layout.fillWidth: true
+                                    spacing: 4
                                     Image {
-                                        width: 13
-                                        height: 13
+                                        width: 12
+                                        height: 12
                                         source: "file://" + AppConfig.assetsDir + "/cpu.svg"
                                     }
                                     Text {
-                                        text: "CPU"
-                                        color: "#94a3b8"
+                                        text: IslandController.cpuTemp + "°C"
+                                        color: IslandController.cpuTemp >= 80 ? "#ef4444" : (IslandController.cpuTemp >= 62 ? "#f59e0b" : "#22c55e")
                                         font.pixelSize: 10
+                                        font.weight: Font.Bold
+                                    }
+                                    Text {
+                                        text: "· " + IslandController.cpuTdpText
+                                        color: "#38bdf8"
+                                        font.pixelSize: 9
                                         font.weight: Font.DemiBold
                                     }
                                     Item { Layout.fillWidth: true }
                                     Text {
                                         text: IslandController.cpuPercent + "%"
                                         color: "#f8fafc"
-                                        font.pixelSize: 11
+                                        font.pixelSize: 10
                                         font.weight: Font.Bold
                                     }
                                 }
@@ -549,6 +556,14 @@ Item {
                                         color: IslandController.cpuPercent > 80 ? "#ef4444" : "#38bdf8"
                                     }
                                 }
+                            }
+
+                            MouseArea {
+                                id: cpuBoxMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: pageContainer.goTo(3, 1)
                             }
                         }
 
@@ -1776,161 +1791,13 @@ Item {
             }
 
             // -----------------------------------------------------------------
-            // PAGE 3: JARINGAN & INFORMASI SISTEM
+            // PAGE 3: HARDWARE, SUHU, TDP & JARINGAN
             // -----------------------------------------------------------------
-            Item {
+            PageHardware {
                 id: pageNet
                 width: pageContainer.width
                 height: pageContainer.height
                 y: 0
-                ColumnLayout {
-                    anchors.fill: parent
-                    spacing: 8
-
-                    // Network Speed Monitor Cards
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 8
-
-                        // Download Speed
-                        Rectangle {
-                            Layout.fillWidth: true
-                            height: 56
-                            radius: 10
-                            color: "#121217"
-                            border.color: "#22222a"
-                            border.width: 1
-
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: 10
-                                spacing: 8
-
-                                Image {
-                                    width: 18
-                                    height: 18
-                                    source: "file://" + AppConfig.assetsDir + "/network.svg"
-                                }
-
-                                ColumnLayout {
-                                    spacing: 0
-                                    Text {
-                                        text: "Unduh (Down)"
-                                        color: "#94a3b8"
-                                        font.pixelSize: 9
-                                    }
-                                    Text {
-                                        text: IslandController.netDownSpeed
-                                        color: "#38bdf8"
-                                        font.pixelSize: 13
-                                        font.weight: Font.Bold
-                                    }
-                                }
-                            }
-                        }
-
-                        // Upload Speed
-                        Rectangle {
-                            Layout.fillWidth: true
-                            height: 56
-                            radius: 10
-                            color: "#121217"
-                            border.color: "#22222a"
-                            border.width: 1
-
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: 10
-                                spacing: 8
-
-                                Image {
-                                    width: 18
-                                    height: 18
-                                    source: "file://" + AppConfig.assetsDir + "/network.svg"
-                                }
-
-                                ColumnLayout {
-                                    spacing: 0
-                                    Text {
-                                        text: "Unggah (Up)"
-                                        color: "#94a3b8"
-                                        font.pixelSize: 9
-                                    }
-                                    Text {
-                                        text: IslandController.netUpSpeed
-                                        color: "#22c55e"
-                                        font.pixelSize: 13
-                                        font.weight: Font.Bold
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // System Info Box
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        radius: 10
-                        color: "#121217"
-                        border.color: "#22222a"
-                        border.width: 1
-
-                        ColumnLayout {
-                            anchors.fill: parent
-                            anchors.margins: 10
-                            spacing: 4
-
-                            RowLayout {
-                                Layout.fillWidth: true
-                                Text {
-                                    text: "Distro & Desktop:"
-                                    color: "#94a3b8"
-                                    font.pixelSize: 10
-                                }
-                                Item { Layout.fillWidth: true }
-                                Text {
-                                    text: IslandController.osInfo
-                                    color: "#f8fafc"
-                                    font.pixelSize: 10
-                                    font.weight: Font.DemiBold
-                                }
-                            }
-
-                            RowLayout {
-                                Layout.fillWidth: true
-                                Text {
-                                    text: "Kernel Linux:"
-                                    color: "#94a3b8"
-                                    font.pixelSize: 10
-                                }
-                                Item { Layout.fillWidth: true }
-                                Text {
-                                    text: IslandController.kernelInfo
-                                    color: "#38bdf8"
-                                    font.pixelSize: 10
-                                    font.weight: Font.DemiBold
-                                }
-                            }
-
-                            RowLayout {
-                                Layout.fillWidth: true
-                                Text {
-                                    text: "Sesi Wayland:"
-                                    color: "#94a3b8"
-                                    font.pixelSize: 10
-                                }
-                                Item { Layout.fillWidth: true }
-                                Text {
-                                    text: "Layer-Shell Active (60/144 FPS)"
-                                    color: "#22c55e"
-                                    font.pixelSize: 10
-                                    font.weight: Font.DemiBold
-                                }
-                            }
-                        }
-                    }
-                }
             }
 
             // -----------------------------------------------------------------
