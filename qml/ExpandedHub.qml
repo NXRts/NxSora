@@ -281,22 +281,34 @@ Item {
                 repeat: false
             }
 
-            // Touchpad 2-finger horizontal swipe anywhere on the Hub
-            WheelHandler {
-                id: horizontalWheelSwipe
-                orientation: Qt.Horizontal
-                acceptedDevices: PointerDevice.TouchPad | PointerDevice.Mouse
-                onWheel: (event) => {
-                    if (wheelSwipeCooldown.running || slideAnim.running) return;
-                    var dx = event.angleDelta.x !== 0 ? event.angleDelta.x : event.pixelDelta.x;
-                    if (Math.abs(dx) >= 15) {
-                        wheelSwipeCooldown.restart();
-                        if (dx < 0) {
-                            root.goToNextPage();
-                        } else {
-                            root.goToPrevPage();
+            // Top-level Wheel Overlay (z: 50) so child ListViews (To-Do, Shelf, Lyrics)
+            // never trap or block mouse wheel page scrolling across pages 0..6
+            Item {
+                anchors.fill: parent
+                z: 50
+
+                WheelHandler {
+                    id: horizontalWheelSwipe
+                    orientation: Qt.Horizontal | Qt.Vertical
+                    acceptedDevices: PointerDevice.TouchPad | PointerDevice.Mouse
+                    onWheel: (event) => {
+                        if (wheelSwipeCooldown.running || slideAnim.running) {
+                            event.accepted = true;
+                            return;
                         }
-                        event.accepted = true;
+                        var delta = event.angleDelta.x !== 0 ? event.angleDelta.x : event.angleDelta.y;
+                        if (delta === 0) {
+                            delta = event.pixelDelta.x !== 0 ? event.pixelDelta.x : event.pixelDelta.y;
+                        }
+                        if (Math.abs(delta) >= 15) {
+                            wheelSwipeCooldown.restart();
+                            if (delta < 0) {
+                                root.goToNextPage();
+                            } else {
+                                root.goToPrevPage();
+                            }
+                            event.accepted = true;
+                        }
                     }
                 }
             }
@@ -1292,10 +1304,6 @@ Item {
                                                 IslandController.setVolume(r)
                                             }
                                         }
-                                        onWheel: (wheel) => {
-                                            var delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05
-                                            IslandController.setVolume(Math.max(0.0, Math.min(1.0, IslandController.volume + delta)))
-                                        }
                                     }
                                 }
                             }
@@ -1376,10 +1384,6 @@ Item {
                                                 IslandController.setVolume(r)
                                             }
                                         }
-                                        onWheel: (wheel) => {
-                                            var delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05
-                                            IslandController.setVolume(Math.max(0.0, Math.min(1.0, IslandController.volume + delta)))
-                                        }
                                     }
                                 }
 
@@ -1411,6 +1415,10 @@ Item {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         clip: true
+
+                        HoverHandler {
+                            id: lyricsPanelHover
+                        }
 
                         ListView {
                             id: lyricsList
