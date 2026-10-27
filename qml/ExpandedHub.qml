@@ -65,6 +65,23 @@ Item {
             Layout.fillWidth: true
             spacing: 10
 
+            // Mouse wheel scroll on the header bar switches pages smoothly
+            WheelHandler {
+                onWheel: (event) => {
+                    if (wheelSwipeCooldown.running || slideAnim.running) return;
+                    var delta = event.angleDelta.y !== 0 ? event.angleDelta.y : event.angleDelta.x;
+                    if (Math.abs(delta) >= 15) {
+                        wheelSwipeCooldown.restart();
+                        if (delta < 0) {
+                            root.goToNextPage();
+                        } else {
+                            root.goToPrevPage();
+                        }
+                        event.accepted = true;
+                    }
+                }
+            }
+
             // Navigation Arrows Capsule (< >)
             Rectangle {
                 id: navCapsule
@@ -238,7 +255,7 @@ Item {
         }
 
         // =====================================================================
-        // BODY: DIRECTIONAL CAROUSEL CONTAINER (7 PAGES)
+        // BODY: DIRECTIONAL CAROUSEL CONTAINER (7 PAGES) + SWIPE GESTURE
         // =====================================================================
         Item {
             id: pageContainer
@@ -249,12 +266,66 @@ Item {
             property int currentIndex: IslandController.activeHubPage
             readonly property int count: 7
             readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageHealth, pageTodo, pageShelf]
+            readonly property bool isChildSliderActive: seekMouseArea.pressed || seekMouseArea.isDragging || hubVolBarMouse.pressed || lyricsVolMouse.pressed || pageShelf.isCardPressed
 
             // Allow keyboard Left/Right arrow navigation & Esc to close
             focus: true
             Keys.onLeftPressed: root.goToPrevPage()
             Keys.onRightPressed: root.goToNextPage()
             Keys.onEscapePressed: IslandController.collapse()
+
+            // Cooldown timer for touchpad / mouse wheel horizontal page swiping
+            Timer {
+                id: wheelSwipeCooldown
+                interval: 230
+                repeat: false
+            }
+
+            // Touchpad 2-finger horizontal swipe anywhere on the Hub
+            WheelHandler {
+                id: horizontalWheelSwipe
+                orientation: Qt.Horizontal
+                acceptedDevices: PointerDevice.TouchPad | PointerDevice.Mouse
+                onWheel: (event) => {
+                    if (wheelSwipeCooldown.running || slideAnim.running) return;
+                    var dx = event.angleDelta.x !== 0 ? event.angleDelta.x : event.pixelDelta.x;
+                    if (Math.abs(dx) >= 15) {
+                        wheelSwipeCooldown.restart();
+                        if (dx < 0) {
+                            root.goToNextPage();
+                        } else {
+                            root.goToPrevPage();
+                        }
+                        event.accepted = true;
+                    }
+                }
+            }
+
+            // Interactive Mouse / Touchpad Drag-to-Swipe Handler (like SwipeView + continuous wrap)
+            DragHandler {
+                id: swipeDragHandler
+                target: null
+                enabled: !pageContainer.isChildSliderActive
+                xAxis.enabled: true
+                yAxis.enabled: false
+                dragThreshold: 12
+
+                property real lastDx: 0
+
+                onActiveTranslationChanged: {
+                    if (active) {
+                        lastDx = activeTranslation.x;
+                        pageContainer.updateInteractiveSwipe(lastDx);
+                    }
+                }
+
+                onActiveChanged: {
+                    if (!active) {
+                        pageContainer.finishInteractiveSwipe(lastDx);
+                        lastDx = 0;
+                    }
+                }
+            }
 
             ParallelAnimation {
                 id: slideAnim
@@ -267,20 +338,87 @@ Item {
                     target: slideAnim.oldPage
                     property: "x"
                     to: slideAnim.oldTargetX
-                    duration: 220
+                    duration: 210
                     easing.type: Easing.OutCubic
                 }
                 NumberAnimation {
                     target: slideAnim.newPage
                     property: "x"
                     to: slideAnim.newTargetX
-                    duration: 220
+                    duration: 210
                     easing.type: Easing.OutCubic
                 }
                 onFinished: {
-                    if (slideAnim.oldPage && slideAnim.oldPage !== slideAnim.newPage) {
-                        slideAnim.oldPage.visible = false;
+                    for (var i = 0; i < pageContainer.count; i++) {
+                        if (pageContainer.pages[i]) {
+                            pageContainer.pages[i].visible = (i === pageContainer.currentIndex);
+                            if (i === pageContainer.currentIndex) {
+                                pageContainer.pages[i].x = 0;
+                            }
+                        }
                     }
+                }
+            }
+
+            function updateInteractiveSwipe(dx) {
+                slideAnim.stop();
+                var w = pageContainer.width > 0 ? pageContainer.width : 392;
+                var curIdx = currentIndex;
+                var nextIdx = (curIdx + 1) % count;
+                var prevIdx = (curIdx - 1 + count) % count;
+                var neighborIdx = (dx < 0) ? nextIdx : prevIdx;
+
+                for (var i = 0; i < count; i++) {
+                    if (!pages[i]) continue;
+                    if (i === curIdx) {
+                        pages[i].visible = true;
+                        pages[i].x = dx;
+                    } else if (i === neighborIdx && Math.abs(dx) > 1) {
+                        pages[i].visible = true;
+                        pages[i].x = (dx < 0) ? (w + dx) : (-w + dx);
+                    } else {
+                        pages[i].visible = false;
+                        pages[i].x = w;
+                    }
+                }
+            }
+
+            function finishInteractiveSwipe(dx) {
+                var w = pageContainer.width > 0 ? pageContainer.width : 392;
+                var curIdx = currentIndex;
+                var curP = pages[curIdx];
+                if (!curP) return;
+
+                if (Math.abs(dx) < 2) {
+                    goTo(curIdx, 0);
+                    return;
+                }
+
+                var dir = (dx < 0) ? 1 : -1;
+                var neighborIdx = (dir > 0) ? ((curIdx + 1) % count) : ((curIdx - 1 + count) % count);
+                var neighborP = pages[neighborIdx];
+
+                if (Math.abs(dx) >= 48 && neighborP) {
+                    // Commit swipe to neighbor page from current dragged position
+                    slideAnim.stop();
+                    slideAnim.oldPage = curP;
+                    slideAnim.newPage = neighborP;
+                    slideAnim.oldTargetX = (dir > 0) ? -w : w;
+                    slideAnim.newTargetX = 0;
+
+                    currentIndex = neighborIdx;
+                    IslandController.setActiveHubPage(neighborIdx);
+                    slideAnim.restart();
+                } else if (neighborP) {
+                    // Snap back to current page
+                    slideAnim.stop();
+                    slideAnim.oldPage = neighborP;
+                    slideAnim.newPage = curP;
+                    slideAnim.oldTargetX = (dir > 0) ? w : -w;
+                    slideAnim.newTargetX = 0;
+                    slideAnim.restart();
+                } else {
+                    goTo(curIdx, 0);
                 }
             }
 
@@ -1139,6 +1277,7 @@ Item {
                                         color: IslandController.isMuted ? "#ef4444" : (IslandController.mediaAccentColor || "#38bdf8")
                                     }
                                     MouseArea {
+                                        id: hubVolBarMouse
                                         anchors.fill: parent
                                         anchors.topMargin: -6
                                         anchors.bottomMargin: -6

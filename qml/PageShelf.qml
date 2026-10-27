@@ -7,6 +7,7 @@ Item {
     id: root
 
     property bool isDragHovering: false
+    property bool isCardPressed: false
 
     ColumnLayout {
         anchors.fill: parent
@@ -321,9 +322,18 @@ Item {
                         property bool dragStarted: false
 
                         onPressed: (mouse) => {
+                            root.isCardPressed = true
                             pressX = mouse.x
                             pressY = mouse.y
                             dragStarted = false
+                        }
+
+                        onReleased: {
+                            root.isCardPressed = false
+                        }
+
+                        onCanceled: {
+                            root.isCardPressed = false
                         }
 
                         onPositionChanged: (mouse) => {
