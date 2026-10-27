@@ -103,14 +103,12 @@ class LyricsService(QObject):
         time_tag_re = re.compile(r"\[(\d{1,3}):(\d{2})(?:[.:](\d{1,3}))?\]")
         parsed = []
 
+        raw_entries = []
         for raw_line in lrc_text.splitlines():
             matches = list(time_tag_re.finditer(raw_line))
             if not matches:
                 continue
             lyric_text = time_tag_re.sub("", raw_line).strip()
-            if not lyric_text:
-                # Instrumental break indicator
-                lyric_text = "♪ • • •"
 
             for m in matches:
                 mins = int(m.group(1))
@@ -118,9 +116,21 @@ class LyricsService(QObject):
                 frac_str = m.group(3) or "0"
                 frac = float("0." + frac_str)
                 total_sec = mins * 60.0 + secs + frac
-                parsed.append({"time": round(total_sec, 2), "text": lyric_text})
+                raw_entries.append({"time": round(total_sec, 2), "text": lyric_text})
 
-        parsed.sort(key=lambda item: item["time"])
+        raw_entries.sort(key=lambda item: item["time"])
+
+        # Filter out short empty end-of-line markers so the sung lyric stays lit;
+        # only keep an instrumental marker if the gap to the next vocal line is >= 12s.
+        parsed = []
+        for i, entry in enumerate(raw_entries):
+            if entry["text"]:
+                parsed.append(entry)
+            else:
+                next_time = raw_entries[i + 1]["time"] if (i + 1) < len(raw_entries) else (entry["time"] + 15.0)
+                if (next_time - entry["time"]) >= 12.0 and (not parsed or parsed[-1]["text"] != "♪ Instrumental ♪"):
+                    parsed.append({"time": entry["time"], "text": "♪ Instrumental ♪"})
+
         return parsed
 
     @staticmethod

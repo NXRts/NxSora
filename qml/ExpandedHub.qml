@@ -962,31 +962,38 @@ Item {
                             }
                         }
 
-                        // Media playback buttons + Nusa Lyrics Bubble Toggle
+                        // Media playback buttons (Symmetrical Left-Center-Right layout)
                         RowLayout {
                             Layout.fillWidth: true
-                            spacing: 8
+                            spacing: 6
 
-                            // Nusa Lyrics Bubble Button (💬 Lirik)
+                            // 1. LEFT: Nusa Lyrics Button (Vector SVG icon, Pill when off, Active Circle when on)
                             Rectangle {
                                 height: 30
                                 radius: 15
-                                implicitWidth: IslandController.lyricsModeActive ? 34 : 58
+                                implicitWidth: IslandController.lyricsModeActive ? 30 : 62
                                 color: IslandController.lyricsModeActive
-                                       ? "#ffffff"
-                                       : (lyricsBtnMouse.containsMouse ? "#282c40" : "#1a1b26")
-                                border.color: IslandController.lyricsModeActive ? "#ffffff" : "#33384e"
-                                border.width: 1
+                                       ? "#162436"
+                                       : (lyricsBtnMouse.containsMouse ? "#2f313f" : "#1a1b24")
+                                border.color: IslandController.lyricsModeActive
+                                              ? (IslandController.mediaAccentColor || "#38bdf8")
+                                              : (lyricsBtnMouse.containsMouse ? "#475569" : "#282937")
+                                border.width: IslandController.lyricsModeActive ? 1.5 : 1
 
                                 Behavior on implicitWidth { NumberAnimation { duration: 180; easing.type: Easing.OutQuad } }
+                                Behavior on color { ColorAnimation { duration: 150 } }
 
                                 RowLayout {
                                     anchors.centerIn: parent
-                                    spacing: 4
+                                    spacing: 5
 
-                                    Text {
-                                        text: "💬"
-                                        font.pixelSize: 11
+                                    Image {
+                                        width: 14
+                                        height: 14
+                                        source: "file://" + AppConfig.assetsDir + "/lyrics.svg"
+                                        sourceSize.width: 14
+                                        sourceSize.height: 14
+                                        opacity: IslandController.lyricsModeActive ? 1.0 : 0.85
                                     }
 
                                     Text {
@@ -994,7 +1001,7 @@ Item {
                                         text: "Lirik"
                                         color: "#f8fafc"
                                         font.pixelSize: 10
-                                        font.weight: Font.Bold
+                                        font.weight: Font.DemiBold
                                     }
                                 }
 
@@ -1007,99 +1014,120 @@ Item {
                                 }
                             }
 
-                            // Previous
-                            Rectangle {
-                                width: 30
-                                height: 30
-                                radius: 15
-                                color: mPrevMouse.containsMouse ? "#2f313f" : "#1a1b24"
-                                border.color: "#282937"
-                                border.width: 1
+                            Item { Layout.fillWidth: true }
 
-                                Image {
-                                    anchors.centerIn: parent
-                                    width: 13
-                                    height: 13
-                                    source: "file://" + AppConfig.assetsDir + "/prev.svg"
-                                }
-                                MouseArea {
-                                    id: mPrevMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: IslandController.mediaPrevious()
-                                }
-                            }
+                            // 2. CENTER: Transport Controls [Prev] [Play/Pause] [Next]
+                            RowLayout {
+                                spacing: 8
 
-                            // Play / Pause
-                            Rectangle {
-                                width: 36
-                                height: 36
-                                radius: 18
-                                color: mPlayMouse.containsMouse ? "#0284c7" : "#0ea5e9"
+                                // Previous
+                                Rectangle {
+                                    width: 30
+                                    height: 30
+                                    radius: 15
+                                    color: mPrevMouse.containsMouse ? "#2f313f" : "#1a1b24"
+                                    border.color: mPrevMouse.containsMouse ? "#475569" : "#282937"
+                                    border.width: 1
 
-                                Image {
-                                    anchors.centerIn: parent
-                                    width: 15
-                                    height: 15
-                                    source: IslandController.mediaIsPlaying
-                                            ? "file://" + AppConfig.assetsDir + "/pause.svg"
-                                            : "file://" + AppConfig.assetsDir + "/play.svg"
+                                    Image {
+                                        anchors.centerIn: parent
+                                        width: 13
+                                        height: 13
+                                        source: "file://" + AppConfig.assetsDir + "/prev.svg"
+                                    }
+                                    MouseArea {
+                                        id: mPrevMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: IslandController.mediaPrevious()
+                                    }
                                 }
-                                MouseArea {
-                                    id: mPlayMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: IslandController.mediaPlayPause()
-                                }
-                            }
 
-                            // Next
-                            Rectangle {
-                                width: 30
-                                height: 30
-                                radius: 15
-                                color: mNextMouse.containsMouse ? "#2f313f" : "#1a1b24"
-                                border.color: "#282937"
-                                border.width: 1
+                                // Play / Pause
+                                Rectangle {
+                                    width: 38
+                                    height: 38
+                                    radius: 19
+                                    color: mPlayMouse.containsMouse ? "#0284c7" : "#0ea5e9"
 
-                                Image {
-                                    anchors.centerIn: parent
-                                    width: 13
-                                    height: 13
-                                    source: "file://" + AppConfig.assetsDir + "/next.svg"
+                                    Image {
+                                        anchors.centerIn: parent
+                                        width: 15
+                                        height: 15
+                                        source: IslandController.mediaIsPlaying
+                                                ? "file://" + AppConfig.assetsDir + "/pause.svg"
+                                                : "file://" + AppConfig.assetsDir + "/play.svg"
+                                    }
+                                    MouseArea {
+                                        id: mPlayMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: IslandController.mediaPlayPause()
+                                    }
                                 }
-                                MouseArea {
-                                    id: mNextMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: IslandController.mediaNext()
+
+                                // Next
+                                Rectangle {
+                                    width: 30
+                                    height: 30
+                                    radius: 15
+                                    color: mNextMouse.containsMouse ? "#2f313f" : "#1a1b24"
+                                    border.color: mNextMouse.containsMouse ? "#475569" : "#282937"
+                                    border.width: 1
+
+                                    Image {
+                                        anchors.centerIn: parent
+                                        width: 13
+                                        height: 13
+                                        source: "file://" + AppConfig.assetsDir + "/next.svg"
+                                    }
+                                    MouseArea {
+                                        id: mNextMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: IslandController.mediaNext()
+                                    }
                                 }
                             }
 
                             Item { Layout.fillWidth: true }
 
-                            // Volume mini slider (shown when not in compact split lyrics view)
+                            // 3. RIGHT: Volume Button (+ Slider when in full 420px view, Circle Mute toggle when in 520px Split Lyrics view)
                             RowLayout {
                                 spacing: 6
-                                visible: !IslandController.lyricsModeActive
 
-                                Image {
-                                    width: 14
-                                    height: 14
-                                    source: IslandController.isMuted
-                                            ? "file://" + AppConfig.assetsDir + "/volume-mute.svg"
-                                            : "file://" + AppConfig.assetsDir + "/volume-high.svg"
+                                Rectangle {
+                                    width: 30
+                                    height: 30
+                                    radius: 15
+                                    color: volBtnMouse.containsMouse ? "#2f313f" : "#1a1b24"
+                                    border.color: IslandController.isMuted ? "#ef4444" : (volBtnMouse.containsMouse ? "#475569" : "#282937")
+                                    border.width: 1
+
+                                    Image {
+                                        anchors.centerIn: parent
+                                        width: 14
+                                        height: 14
+                                        source: IslandController.isMuted
+                                                ? "file://" + AppConfig.assetsDir + "/volume-mute.svg"
+                                                : "file://" + AppConfig.assetsDir + "/volume-high.svg"
+                                    }
+
                                     MouseArea {
+                                        id: volBtnMouse
                                         anchors.fill: parent
+                                        hoverEnabled: true
                                         cursorShape: Qt.PointingHandCursor
                                         onClicked: IslandController.toggleMute()
                                     }
                                 }
+
                                 Rectangle {
                                     id: hubVolBar
+                                    visible: !IslandController.lyricsModeActive
                                     width: 58
                                     height: 5
                                     radius: 2.5
@@ -1108,16 +1136,121 @@ Item {
                                         width: hubVolBar.width * IslandController.volume
                                         height: parent.height
                                         radius: parent.radius
-                                        color: IslandController.isMuted ? "#ef4444" : "#38bdf8"
+                                        color: IslandController.isMuted ? "#ef4444" : (IslandController.mediaAccentColor || "#38bdf8")
                                     }
                                     MouseArea {
                                         anchors.fill: parent
+                                        anchors.topMargin: -6
+                                        anchors.bottomMargin: -6
                                         cursorShape: Qt.PointingHandCursor
-                                        onClicked: (mouse) => {
+                                        onPressed: (mouse) => {
                                             var r = Math.max(0.0, Math.min(1.0, mouse.x / width))
                                             IslandController.setVolume(r)
                                         }
+                                        onPositionChanged: (mouse) => {
+                                            if (pressed) {
+                                                var r = Math.max(0.0, Math.min(1.0, mouse.x / width))
+                                                IslandController.setVolume(r)
+                                            }
+                                        }
+                                        onWheel: (wheel) => {
+                                            var delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05
+                                            IslandController.setVolume(Math.max(0.0, Math.min(1.0, IslandController.volume + delta)))
+                                        }
                                     }
+                                }
+                            }
+                        }
+
+                        // Dedicated full-width Volume Bar when Lyrics Mode is open
+                        Rectangle {
+                            visible: IslandController.lyricsModeActive
+                            Layout.fillWidth: true
+                            height: 24
+                            radius: 12
+                            color: "#13151f"
+                            border.color: "#232636"
+                            border.width: 1
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 9
+                                anchors.rightMargin: 9
+                                spacing: 7
+
+                                Image {
+                                    width: 12
+                                    height: 12
+                                    source: IslandController.isMuted
+                                            ? "file://" + AppConfig.assetsDir + "/volume-mute.svg"
+                                            : "file://" + AppConfig.assetsDir + "/volume-high.svg"
+                                    opacity: 0.85
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: IslandController.toggleMute()
+                                    }
+                                }
+
+                                Rectangle {
+                                    id: lyricsVolSlider
+                                    Layout.fillWidth: true
+                                    height: 5
+                                    radius: 2.5
+                                    color: "#27272a"
+
+                                    Rectangle {
+                                        width: Math.max(0, Math.min(lyricsVolSlider.width, lyricsVolSlider.width * IslandController.volume))
+                                        height: parent.height
+                                        radius: parent.radius
+                                        color: IslandController.isMuted ? "#ef4444" : (IslandController.mediaAccentColor || "#38bdf8")
+                                    }
+
+                                    Rectangle {
+                                        x: Math.max(0, Math.min(lyricsVolSlider.width - width, (lyricsVolSlider.width * IslandController.volume) - width / 2))
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: (lyricsVolMouse.containsMouse || lyricsVolMouse.pressed) ? 11 : 7
+                                        height: width
+                                        radius: width / 2
+                                        color: "#ffffff"
+                                        border.color: IslandController.isMuted ? "#ef4444" : (IslandController.mediaAccentColor || "#38bdf8")
+                                        border.width: 2
+
+                                        Behavior on width { NumberAnimation { duration: 100 } }
+                                    }
+
+                                    MouseArea {
+                                        id: lyricsVolMouse
+                                        anchors.fill: parent
+                                        anchors.topMargin: -8
+                                        anchors.bottomMargin: -8
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onPressed: (mouse) => {
+                                            var r = Math.max(0.0, Math.min(1.0, mouse.x / width))
+                                            IslandController.setVolume(r)
+                                        }
+                                        onPositionChanged: (mouse) => {
+                                            if (pressed) {
+                                                var r = Math.max(0.0, Math.min(1.0, mouse.x / width))
+                                                IslandController.setVolume(r)
+                                            }
+                                        }
+                                        onWheel: (wheel) => {
+                                            var delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05
+                                            IslandController.setVolume(Math.max(0.0, Math.min(1.0, IslandController.volume + delta)))
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    text: IslandController.isMuted ? "Mute" : (IslandController.volumePercent + "%")
+                                    color: IslandController.isMuted ? "#ef4444" : "#94a3b8"
+                                    font.pixelSize: 9
+                                    font.weight: Font.Bold
+                                    Layout.preferredWidth: 26
+                                    horizontalAlignment: Text.AlignRight
                                 }
                             }
                         }
@@ -1155,32 +1288,56 @@ Item {
                             highlightRangeMode: ListView.ApplyRange
                             highlightMoveDuration: 380
 
-                            delegate: Item {
+                            delegate: Rectangle {
                                 id: lyricDelegate
                                 required property var modelData
                                 required property int index
 
                                 width: lyricsList.width
-                                height: lyricTxt.implicitHeight + 6
+                                height: lyricTxt.implicitHeight + 8
+                                radius: 6
+                                color: lyricDelegate.isActive
+                                       ? Qt.rgba(1, 1, 1, 0.09)
+                                       : (lyricMouse.containsMouse ? Qt.rgba(1, 1, 1, 0.04) : "transparent")
 
                                 readonly property bool isActive: index === IslandController.currentLyricIndex
+                                readonly property bool isNear: Math.abs(index - IslandController.currentLyricIndex) === 1
+
+                                // Active left accent indicator bar
+                                Rectangle {
+                                    visible: lyricDelegate.isActive
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 2
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: 3
+                                    height: Math.max(12, parent.height - 8)
+                                    radius: 1.5
+                                    color: IslandController.mediaAccentColor || "#38bdf8"
+                                }
 
                                 Text {
                                     id: lyricTxt
-                                    width: parent.width - 8
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: lyricDelegate.isActive ? 10 : 6
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: 4
                                     anchors.verticalCenter: parent.verticalCenter
                                     text: lyricDelegate.modelData.text || ""
                                     wrapMode: Text.WordWrap
-                                    color: lyricDelegate.isActive
-                                           ? "#ffffff"
-                                           : (lyricMouse.containsMouse ? "#94a3b8" : "rgba(255, 255, 255, 0.30)")
+                                    color: {
+                                        if (lyricDelegate.isActive) return "#ffffff";
+                                        if (lyricMouse.containsMouse) return "#38bdf8";
+                                        if (lyricDelegate.isNear) return "#cbd5e1";
+                                        return "#8b9bb4";
+                                    }
                                     font.pixelSize: lyricDelegate.isActive ? 13 : 11
-                                    font.weight: Font.Bold
+                                    font.weight: lyricDelegate.isActive ? Font.ExtraBold : Font.DemiBold
                                     transformOrigin: Item.Left
-                                    scale: lyricDelegate.isActive ? 1.0 : 0.93
+                                    scale: lyricDelegate.isActive ? 1.0 : 0.96
 
-                                    Behavior on color { ColorAnimation { duration: 240 } }
-                                    Behavior on scale { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
+                                    Behavior on color { ColorAnimation { duration: 200 } }
+                                    Behavior on scale { NumberAnimation { duration: 220; easing.type: Easing.OutBack } }
+                                    Behavior on anchors.leftMargin { NumberAnimation { duration: 180; easing.type: Easing.OutQuad } }
                                 }
 
                                 // Click any lyric line to jump/seek to that timestamp!
@@ -1195,30 +1352,6 @@ Item {
                                         }
                                     }
                                 }
-                            }
-                        }
-
-                        // Top & Bottom Soft Fade Masks (Nusa .lyr mask effect)
-                        Rectangle {
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            height: 18
-                            gradient: Gradient {
-                                orientation: Gradient.Vertical
-                                GradientStop { position: 0.0; color: "#07070a" }
-                                GradientStop { position: 1.0; color: "transparent" }
-                            }
-                        }
-                        Rectangle {
-                            anchors.bottom: parent.bottom
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            height: 18
-                            gradient: Gradient {
-                                orientation: Gradient.Vertical
-                                GradientStop { position: 0.0; color: "transparent" }
-                                GradientStop { position: 1.0; color: "#07070a" }
                             }
                         }
                     }
