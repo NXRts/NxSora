@@ -46,9 +46,9 @@ class MprisService(QObject):
             self._on_name_owner_changed
         )
 
-        # Poll timer for smooth playback progress
+        # Poll timer for smooth playback progress & synced lyrics
         self.poll_timer = QTimer(self)
-        self.poll_timer.setInterval(1000)
+        self.poll_timer.setInterval(350)
         self.poll_timer.timeout.connect(self._poll_position)
 
         # Initial detection

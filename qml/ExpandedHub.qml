@@ -7,14 +7,15 @@ Item {
     implicitWidth: 420
     implicitHeight: 245
 
-    // Current page titles
+    // Current page titles (7 pages)
     readonly property var pageTitles: [
-        "Sistem & Monitoring",
-        "Pemutar Musik",
+        "Sistem & Pomodoro Fokus",
+        IslandController.lyricsModeActive ? "Musik & Lirik Karaoke" : "Pemutar Musik",
         "Pintasan Cepat",
         "Jaringan & Info",
         "Kesehatan & Air",
-        "Daftar Tugas (To-Do)"
+        "Daftar Tugas (To-Do)",
+        "Rak File (Shelf)"
     ]
 
     function jumpToPageInstant(idx) {
@@ -25,7 +26,9 @@ Item {
     Connections {
         target: IslandController
         function onActiveHubPageChanged() {
-            root.jumpToPageInstant(IslandController.activeHubPage);
+            if (pageContainer.currentIndex !== IslandController.activeHubPage) {
+                root.jumpToPageInstant(IslandController.activeHubPage);
+            }
         }
         function onIsExpandedChanged() {
             if (IslandController.isExpanded) {
@@ -56,8 +59,7 @@ Item {
         spacing: 10
 
         // =====================================================================
-        // =====================================================================
-        // HEADER: [ < | > ] [Title + Page Indicator Dots] [Close Button]
+        // HEADER: [ < | > ] [Title + Page Indicator Dots] [Pin + Close Button]
         // =====================================================================
         RowLayout {
             Layout.fillWidth: true
@@ -142,7 +144,7 @@ Item {
                     font.weight: Font.Bold
                 }
 
-                // Interactive Page Dots
+                // Interactive Page Dots (7 pages)
                 Row {
                     spacing: 4
                     Repeater {
@@ -236,7 +238,7 @@ Item {
         }
 
         // =====================================================================
-        // BODY: DIRECTIONAL CAROUSEL CONTAINER (6 PAGES)
+        // BODY: DIRECTIONAL CAROUSEL CONTAINER (7 PAGES)
         // =====================================================================
         Item {
             id: pageContainer
@@ -245,8 +247,8 @@ Item {
             clip: true
 
             property int currentIndex: IslandController.activeHubPage
-            readonly property int count: 6
-            readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageHealth, pageTodo]
+            readonly property int count: 7
+            readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageHealth, pageTodo, pageShelf]
 
             // Allow keyboard Left/Right arrow navigation & Esc to close
             focus: true
@@ -299,12 +301,10 @@ Item {
                         }
                     }
                     currentIndex = newIdx;
+                    IslandController.setActiveHubPage(newIdx);
                     return;
                 }
 
-                // Directional continuous slide
-                // dir > 0: going forward (Next), old slides left (-w), new enters from right (+w -> 0)
-                // dir < 0: going backward (Prev), old slides right (+w), new enters from left (-w -> 0)
                 var w = pageContainer.width > 0 ? pageContainer.width : 392;
 
                 for (var j = 0; j < count; j++) {
@@ -326,6 +326,7 @@ Item {
                 slideAnim.newTargetX = 0;
 
                 currentIndex = newIdx;
+                IslandController.setActiveHubPage(newIdx);
                 slideAnim.restart();
             }
 
@@ -334,7 +335,7 @@ Item {
             }
 
             // -----------------------------------------------------------------
-            // PAGE 0: SISTEM & MONITORING
+            // PAGE 0: SISTEM & NUSA POMODORO FOCUS TIMER
             // -----------------------------------------------------------------
             Item {
                 id: pageSystem
@@ -345,7 +346,7 @@ Item {
                     anchors.fill: parent
                     spacing: 8
 
-                    // Resource Meters (CPU, RAM, Battery)
+                    // 1. Compact Resource Meters (CPU, RAM, Battery)
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
@@ -353,7 +354,7 @@ Item {
                         // CPU Box
                         Rectangle {
                             Layout.fillWidth: true
-                            height: 60
+                            height: 48
                             radius: 10
                             color: "#121217"
                             border.color: "#22222a"
@@ -361,14 +362,14 @@ Item {
 
                             ColumnLayout {
                                 anchors.fill: parent
-                                anchors.margins: 8
-                                spacing: 4
+                                anchors.margins: 7
+                                spacing: 3
 
                                 RowLayout {
                                     Layout.fillWidth: true
                                     Image {
-                                        width: 14
-                                        height: 14
+                                        width: 13
+                                        height: 13
                                         source: "file://" + AppConfig.assetsDir + "/cpu.svg"
                                     }
                                     Text {
@@ -404,7 +405,7 @@ Item {
                         // RAM Box
                         Rectangle {
                             Layout.fillWidth: true
-                            height: 60
+                            height: 48
                             radius: 10
                             color: "#121217"
                             border.color: "#22222a"
@@ -412,14 +413,14 @@ Item {
 
                             ColumnLayout {
                                 anchors.fill: parent
-                                anchors.margins: 8
-                                spacing: 4
+                                anchors.margins: 7
+                                spacing: 3
 
                                 RowLayout {
                                     Layout.fillWidth: true
                                     Image {
-                                        width: 14
-                                        height: 14
+                                        width: 13
+                                        height: 13
                                         source: "file://" + AppConfig.assetsDir + "/memory.svg"
                                     }
                                     Text {
@@ -455,7 +456,7 @@ Item {
                         // Battery Box
                         Rectangle {
                             Layout.fillWidth: true
-                            height: 60
+                            height: 48
                             radius: 10
                             color: "#121217"
                             border.color: "#22222a"
@@ -463,15 +464,15 @@ Item {
 
                             ColumnLayout {
                                 anchors.fill: parent
-                                anchors.margins: 8
-                                spacing: 4
+                                anchors.margins: 7
+                                spacing: 3
 
                                 RowLayout {
                                     Layout.fillWidth: true
                                     Image {
-                                        width: 14
-                                        height: 14
-                                        source: IslandController.isCharging 
+                                        width: 13
+                                        height: 13
+                                        source: IslandController.isCharging
                                                 ? "file://" + AppConfig.assetsDir + "/bolt.svg"
                                                 : "file://" + AppConfig.assetsDir + "/battery.svg"
                                     }
@@ -506,149 +507,282 @@ Item {
                         }
                     }
 
-                    // Bottom: Timer & Quick Mute & Test
+                    // 2. Bottom Row: NUSA POMODORO FOCUS TIMER RING + QUICK MUTE
                     RowLayout {
                         Layout.fillWidth: true
+                        Layout.fillHeight: true
                         spacing: 8
 
-                        // Timer Card
+                        // NUSA POMODORO FOCUS TIMER CARD
                         Rectangle {
                             Layout.fillWidth: true
-                            height: 52
-                            radius: 10
-                            color: "#121217"
-                            border.color: "#22222a"
+                            Layout.fillHeight: true
+                            radius: 12
+                            color: "#11131d"
+                            border.color: IslandController.timerRunning
+                                          ? (IslandController.timerMode === "focus" ? "#f43f5e" : "#38bdf8")
+                                          : "#222436"
                             border.width: 1
 
                             RowLayout {
                                 anchors.fill: parent
-                                anchors.margins: 8
-                                spacing: 8
+                                anchors.leftMargin: 14
+                                anchors.rightMargin: 12
+                                spacing: 14
 
-                                Image {
-                                    width: 14
-                                    height: 14
-                                    source: "file://" + AppConfig.assetsDir + "/timer.svg"
+                                // --- LEFT: GLOWING CONIC RING (Nusa .pring & .pglow) ---
+                                Item {
+                                    width: 68
+                                    height: 68
+                                    Layout.alignment: Qt.AlignVCenter
+
+                                    // Soft radial glow behind the ring
+                                    Rectangle {
+                                        anchors.centerIn: parent
+                                        width: 66
+                                        height: 66
+                                        radius: 33
+                                        color: IslandController.timerMode === "focus" ? "#ff4b55" : "#38bdf8"
+                                        opacity: IslandController.timerRunning ? 0.24 : 0.12
+                                        Behavior on opacity { NumberAnimation { duration: 300 } }
+                                    }
+
+                                    // Circular Progress Ring Canvas
+                                    Canvas {
+                                        id: pomoRingCanvas
+                                        anchors.fill: parent
+                                        property real progress: IslandController.timerProgressRatio
+                                        property string mode: IslandController.timerMode
+
+                                        onProgressChanged: requestPaint()
+                                        onModeChanged: requestPaint()
+                                        Component.onCompleted: requestPaint()
+
+                                        onPaint: {
+                                            var ctx = getContext("2d");
+                                            ctx.reset();
+                                            var cx = width / 2;
+                                            var cy = height / 2;
+                                            var r = 27;
+                                            var startAngle = -Math.PI / 2;
+                                            var endAngle = startAngle + (Math.PI * 2 * Math.max(0.02, progress));
+
+                                            // Track circle
+                                            ctx.beginPath();
+                                            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                                            ctx.lineWidth = 6.5;
+                                            ctx.strokeStyle = mode === "focus" ? "rgba(255, 90, 110, 0.20)" : "rgba(56, 189, 248, 0.20)";
+                                            ctx.stroke();
+
+                                            // Active arc
+                                            ctx.beginPath();
+                                            ctx.arc(cx, cy, r, startAngle, endAngle);
+                                            ctx.lineWidth = 6.5;
+                                            ctx.lineCap = "round";
+                                            var grad = ctx.createLinearGradient(0, 0, width, height);
+                                            if (mode === "focus") {
+                                                grad.addColorStop(0.0, "#ff6b5f");
+                                                grad.addColorStop(0.5, "#ff3a3a");
+                                                grad.addColorStop(1.0, "#ff5a6e");
+                                            } else {
+                                                grad.addColorStop(0.0, "#66dbff");
+                                                grad.addColorStop(1.0, "#2563eb");
+                                            }
+                                            ctx.strokeStyle = grad;
+                                            ctx.stroke();
+                                        }
+                                    }
+
+                                    // Center Stopwatch Icon
+                                    Image {
+                                        anchors.centerIn: parent
+                                        width: 20
+                                        height: 20
+                                        source: "file://" + AppConfig.assetsDir + "/timer.svg"
+                                    }
                                 }
 
-                                Text {
-                                    text: IslandController.timerRemaining > 0 ? IslandController.timerFormatted : "Timer"
-                                    color: IslandController.timerRunning ? "#f59e0b" : "#f8fafc"
-                                    font.pixelSize: 11
-                                    font.weight: Font.DemiBold
-                                }
+                                // --- RIGHT: TIME READOUT, RESET & 3 NUSA PILL BUTTONS ---
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    spacing: 6
 
-                                Item { Layout.fillWidth: true }
+                                    // Top Row: Big Time + Mode Label + Reset Circle
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 8
 
-                                // Preset buttons
-                                Row {
-                                    spacing: 4
-                                    visible: IslandController.timerRemaining === 0
+                                        Text {
+                                            text: IslandController.timerFormatted
+                                            color: "#ffffff"
+                                            font.pixelSize: 24
+                                            font.weight: Font.ExtraBold
+                                            font.letterSpacing: -0.5
+                                        }
 
-                                    Repeater {
-                                        model: [
-                                            { label: "1m", sec: 60 },
-                                            { label: "5m", sec: 300 },
-                                            { label: "25m", sec: 1500 }
-                                        ]
+                                        ColumnLayout {
+                                            spacing: 0
+                                            Text {
+                                                text: "Pomodoro"
+                                                color: "#f8fafc"
+                                                font.pixelSize: 10
+                                                font.weight: Font.Bold
+                                            }
+                                            Text {
+                                                text: IslandController.timerModeLabel
+                                                color: IslandController.timerMode === "focus" ? "#fda4af" : "#7dd3fc"
+                                                font.pixelSize: 10
+                                                font.weight: Font.DemiBold
+                                            }
+                                        }
+
+                                        Item { Layout.fillWidth: true }
+
+                                        // Circular Reset Button (Nusa style)
                                         Rectangle {
-                                            required property var modelData
-                                            width: 28
-                                            height: 22
-                                            radius: 4
-                                            color: tBtnMouse.containsMouse ? "#27272a" : "#1a1a22"
+                                            width: 24
+                                            height: 24
+                                            radius: 12
+                                            color: pomoResetMouse.containsMouse ? "#2d324a" : "#1e2235"
+                                            border.color: "#333954"
+                                            border.width: 1
 
                                             Text {
                                                 anchors.centerIn: parent
-                                                text: modelData.label
-                                                color: "#cbd5e1"
-                                                font.pixelSize: 9
+                                                text: "↺"
+                                                color: "#f8fafc"
+                                                font.pixelSize: 12
+                                                font.weight: Font.Bold
                                             }
 
                                             MouseArea {
-                                                id: tBtnMouse
+                                                id: pomoResetMouse
                                                 anchors.fill: parent
                                                 hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
-                                                onClicked: IslandController.startTimer(modelData.sec)
+                                                onClicked: IslandController.resetTimer()
                                             }
                                         }
                                     }
-                                }
 
-                                // Running Controls
-                                Row {
-                                    spacing: 4
-                                    visible: IslandController.timerRemaining > 0
+                                    // Bottom Row: [☕ Short Break] [▶/⏸ Play] [🎯 Focus Time]
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 6
 
-                                    Rectangle {
-                                        width: 44
-                                        height: 22
-                                        radius: 4
-                                        color: pMouse.containsMouse ? "#27272a" : "#1a1a22"
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: IslandController.timerRunning ? "Pause" : "Start"
-                                            color: "#38bdf8"
-                                            font.pixelSize: 9
-                                        }
-                                        MouseArea {
-                                            id: pMouse
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: IslandController.toggleTimer()
-                                        }
-                                    }
+                                        // 1. Short Break Pill (5m)
+                                        Rectangle {
+                                            Layout.fillWidth: true
+                                            height: 26
+                                            radius: 13
+                                            color: IslandController.timerMode === "short_break"
+                                                   ? "#0c4a6e"
+                                                   : (sbMouse.containsMouse ? "#25293d" : "#1a1d2d")
+                                            border.color: IslandController.timerMode === "short_break" ? "#38bdf8" : "#2b3048"
+                                            border.width: 1
 
-                                    Rectangle {
-                                        width: 36
-                                        height: 22
-                                        radius: 4
-                                        color: rMouse.containsMouse ? "#27272a" : "#1a1a22"
-                                        Text {
-                                            anchors.centerIn: parent
-                                            text: "Reset"
-                                            color: "#ef4444"
-                                            font.pixelSize: 9
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: "☕ Short Break"
+                                                color: "#f8fafc"
+                                                font.pixelSize: 10
+                                                font.weight: Font.DemiBold
+                                            }
+
+                                            MouseArea {
+                                                id: sbMouse
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: IslandController.setTimerMode("short_break")
+                                            }
                                         }
-                                        MouseArea {
-                                            id: rMouse
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: IslandController.resetTimer()
+
+                                        // 2. Center Play / Pause Pill (#ff4b55 in Nusa)
+                                        Rectangle {
+                                            width: 48
+                                            height: 26
+                                            radius: 13
+                                            color: playPomoMouse.containsMouse
+                                                   ? (IslandController.timerMode === "focus" ? "#e11d48" : "#0284c7")
+                                                   : (IslandController.timerMode === "focus" ? "#ff4b55" : "#0ea5e9")
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: IslandController.timerRunning ? "⏸" : "▶"
+                                                color: "#ffffff"
+                                                font.pixelSize: 11
+                                                font.weight: Font.Bold
+                                            }
+
+                                            MouseArea {
+                                                id: playPomoMouse
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: IslandController.toggleTimer()
+                                            }
+                                        }
+
+                                        // 3. Focus Time Pill (25m)
+                                        Rectangle {
+                                            Layout.fillWidth: true
+                                            height: 26
+                                            radius: 13
+                                            color: IslandController.timerMode === "focus"
+                                                   ? "#3f1d2b"
+                                                   : (ftMouse.containsMouse ? "#25293d" : "#1a1d2d")
+                                            border.color: IslandController.timerMode === "focus" ? "#ff5a6e" : "#2b3048"
+                                            border.width: 1
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                text: "🎯 Focus Time"
+                                                color: "#f8fafc"
+                                                font.pixelSize: 10
+                                                font.weight: Font.DemiBold
+                                            }
+
+                                            MouseArea {
+                                                id: ftMouse
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: IslandController.setTimerMode("focus")
+                                            }
                                         }
                                     }
                                 }
                             }
                         }
 
-                        // Mute button
+                        // Mute button card
                         Rectangle {
-                            width: 52
-                            height: 52
-                            radius: 10
+                            width: 50
+                            Layout.fillHeight: true
+                            radius: 12
                             color: muteMouse.containsMouse ? "#27272a" : "#121217"
                             border.color: IslandController.isMuted ? "#ef4444" : "#22222a"
                             border.width: 1
 
                             ColumnLayout {
                                 anchors.centerIn: parent
-                                spacing: 2
+                                spacing: 4
                                 Image {
                                     Layout.alignment: Qt.AlignHCenter
-                                    width: 14
-                                    height: 14
+                                    width: 15
+                                    height: 15
                                     source: IslandController.isMuted
                                             ? "file://" + AppConfig.assetsDir + "/volume-mute.svg"
                                             : "file://" + AppConfig.assetsDir + "/volume-high.svg"
                                 }
                                 Text {
                                     Layout.alignment: Qt.AlignHCenter
-                                    text: IslandController.isMuted ? "Unmute" : "Mute"
+                                    text: IslandController.isMuted ? "Muted" : (IslandController.volumePercent + "%")
                                     color: IslandController.isMuted ? "#ef4444" : "#94a3b8"
-                                    font.pixelSize: 8
+                                    font.pixelSize: 9
+                                    font.weight: Font.Bold
                                 }
                             }
 
@@ -665,7 +799,7 @@ Item {
             }
 
             // -----------------------------------------------------------------
-            // PAGE 1: PEMUTAR MUSIK
+            // PAGE 1: PEMUTAR MUSIK + NUSA 520px SPLIT SYNCED LYRICS KARAOKE
             // -----------------------------------------------------------------
             Item {
                 id: pageMusic
@@ -673,266 +807,418 @@ Item {
                 height: pageContainer.height
                 y: 0
 
-                // When media exists
-                ColumnLayout {
+                // When media exists: Split-capable RowLayout
+                RowLayout {
                     anchors.fill: parent
-                    spacing: 8
+                    spacing: 12
                     visible: IslandController.mediaHasTrack
 
-                    // Track info row
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 10
+                    // --- LEFT COLUMN: MUSIC PLAYER CONTROLS ---
+                    ColumnLayout {
+                        Layout.fillWidth: !IslandController.lyricsModeActive
+                        Layout.preferredWidth: IslandController.lyricsModeActive ? 215 : -1
+                        Layout.fillHeight: true
+                        spacing: 8
 
-                        Rectangle {
-                            width: 44
-                            height: 44
-                            radius: 10
-                            color: "#18181f"
-                            clip: true
+                        // Track info row
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 10
 
-                            Image {
-                                anchors.fill: parent
-                                source: IslandController.mediaArtUrl
-                                fillMode: Image.PreserveAspectCrop
-                                visible: IslandController.mediaArtUrl !== ""
+                            Rectangle {
+                                width: 44
+                                height: 44
+                                radius: 10
+                                color: "#18181f"
+                                clip: true
+
+                                Image {
+                                    anchors.fill: parent
+                                    source: IslandController.mediaArtUrl
+                                    fillMode: Image.PreserveAspectCrop
+                                    visible: IslandController.mediaArtUrl !== ""
+                                }
+                                Image {
+                                    anchors.centerIn: parent
+                                    width: 20
+                                    height: 20
+                                    source: "file://" + AppConfig.assetsDir + "/music.svg"
+                                    visible: IslandController.mediaArtUrl === ""
+                                }
                             }
-                            Image {
-                                anchors.centerIn: parent
-                                width: 20
-                                height: 20
-                                source: "file://" + AppConfig.assetsDir + "/music.svg"
-                                visible: IslandController.mediaArtUrl === ""
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 1
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: IslandController.mediaTitle
+                                    color: "#ffffff"
+                                    font.pixelSize: 12
+                                    font.weight: Font.Bold
+                                    elide: Text.ElideRight
+                                    maximumLineCount: 1
+                                }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: IslandController.mediaArtist
+                                    color: "#94a3b8"
+                                    font.pixelSize: 10
+                                    elide: Text.ElideRight
+                                    maximumLineCount: 1
+                                }
                             }
                         }
 
+                        // Seek timeline (Elapsed on left, -Remaining on right like Nusa!)
                         ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: 1
+                            spacing: 2
 
-                            Text {
-                                Layout.fillWidth: true
-                                text: IslandController.mediaTitle
-                                color: "#ffffff"
-                                font.pixelSize: 12
-                                font.weight: Font.Bold
-                                elide: Text.ElideRight
-                                maximumLineCount: 1
-                            }
-                            Text {
-                                Layout.fillWidth: true
-                                text: IslandController.mediaArtist
-                                color: "#94a3b8"
-                                font.pixelSize: 10
-                                elide: Text.ElideRight
-                                maximumLineCount: 1
-                            }
-                        }
-                    }
-
-                    // Seek timeline
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 2
-
-                        Rectangle {
-                            id: hubProgressBar
-                            Layout.fillWidth: true
-                            height: 6
-                            radius: 3
-                            color: "#27272a"
-
-                            // Active progress fill
                             Rectangle {
-                                width: Math.max(0, Math.min(hubProgressBar.width, hubProgressBar.width * (seekMouseArea.isDragging ? seekMouseArea.dragRatio : IslandController.mediaPositionRatio)))
-                                height: parent.height
-                                radius: parent.radius
-                                color: IslandController.mediaAccentColor || "#38bdf8"
-                            }
+                                id: hubProgressBar
+                                Layout.fillWidth: true
+                                height: 6
+                                radius: 3
+                                color: "#27272a"
 
-                            // Glowing scrubber thumb indicator on hover / drag
-                            Rectangle {
-                                x: Math.max(0, Math.min(hubProgressBar.width - width, (hubProgressBar.width * (seekMouseArea.isDragging ? seekMouseArea.dragRatio : IslandController.mediaPositionRatio)) - width / 2))
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: (seekMouseArea.containsMouse || seekMouseArea.isDragging) ? 12 : 0
-                                height: width
-                                radius: width / 2
-                                color: "#ffffff"
-                                border.color: IslandController.mediaAccentColor || "#38bdf8"
-                                border.width: 2
-                                opacity: width > 0 ? 1.0 : 0.0
-
-                                Behavior on width { NumberAnimation { duration: 100 } }
-                                Behavior on opacity { NumberAnimation { duration: 100 } }
-                            }
-
-                            // Expanded hit-test area for effortless dragging and clicking
-                            MouseArea {
-                                id: seekMouseArea
-                                anchors.fill: parent
-                                anchors.topMargin: -8
-                                anchors.bottomMargin: -8
-                                cursorShape: Qt.PointingHandCursor
-                                hoverEnabled: true
-
-                                property bool isDragging: false
-                                property real dragRatio: 0.0
-
-                                function calcRatio(mouseX) {
-                                    return Math.max(0.0, Math.min(1.0, mouseX / width))
+                                // Active progress fill
+                                Rectangle {
+                                    width: Math.max(0, Math.min(hubProgressBar.width, hubProgressBar.width * (seekMouseArea.isDragging ? seekMouseArea.dragRatio : IslandController.mediaPositionRatio)))
+                                    height: parent.height
+                                    radius: parent.radius
+                                    color: IslandController.mediaAccentColor || "#38bdf8"
                                 }
 
-                                onPressed: (mouse) => {
-                                    isDragging = true
-                                    dragRatio = calcRatio(mouse.x)
-                                    IslandController.mediaSeek(dragRatio)
+                                // Glowing scrubber thumb indicator on hover / drag
+                                Rectangle {
+                                    x: Math.max(0, Math.min(hubProgressBar.width - width, (hubProgressBar.width * (seekMouseArea.isDragging ? seekMouseArea.dragRatio : IslandController.mediaPositionRatio)) - width / 2))
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: (seekMouseArea.containsMouse || seekMouseArea.isDragging) ? 12 : 0
+                                    height: width
+                                    radius: width / 2
+                                    color: "#ffffff"
+                                    border.color: IslandController.mediaAccentColor || "#38bdf8"
+                                    border.width: 2
+                                    opacity: width > 0 ? 1.0 : 0.0
+
+                                    Behavior on width { NumberAnimation { duration: 100 } }
+                                    Behavior on opacity { NumberAnimation { duration: 100 } }
                                 }
-                                onPositionChanged: (mouse) => {
-                                    if (pressed && isDragging) {
+
+                                MouseArea {
+                                    id: seekMouseArea
+                                    anchors.fill: parent
+                                    anchors.topMargin: -8
+                                    anchors.bottomMargin: -8
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
+
+                                    property bool isDragging: false
+                                    property real dragRatio: 0.0
+
+                                    function calcRatio(mouseX) {
+                                        return Math.max(0.0, Math.min(1.0, mouseX / width))
+                                    }
+
+                                    onPressed: (mouse) => {
+                                        isDragging = true
                                         dragRatio = calcRatio(mouse.x)
                                         IslandController.mediaSeek(dragRatio)
                                     }
-                                }
-                                onReleased: (mouse) => {
-                                    if (isDragging) {
-                                        dragRatio = calcRatio(mouse.x)
-                                        IslandController.mediaSeek(dragRatio)
+                                    onPositionChanged: (mouse) => {
+                                        if (pressed && isDragging) {
+                                            dragRatio = calcRatio(mouse.x)
+                                            IslandController.mediaSeek(dragRatio)
+                                        }
+                                    }
+                                    onReleased: (mouse) => {
+                                        if (isDragging) {
+                                            dragRatio = calcRatio(mouse.x)
+                                            IslandController.mediaSeek(dragRatio)
+                                            isDragging = false
+                                        }
+                                    }
+                                    onCanceled: {
                                         isDragging = false
                                     }
                                 }
-                                onCanceled: {
-                                    isDragging = false
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Text {
+                                    text: IslandController.mediaPositionFormatted
+                                    color: "#94a3b8"
+                                    font.pixelSize: 9
+                                }
+                                Item { Layout.fillWidth: true }
+                                Text {
+                                    text: IslandController.mediaRemainingFormatted
+                                    color: "#94a3b8"
+                                    font.pixelSize: 9
                                 }
                             }
                         }
 
+                        // Media playback buttons + Nusa Lyrics Bubble Toggle
                         RowLayout {
                             Layout.fillWidth: true
-                            Text {
-                                text: IslandController.mediaPositionFormatted
-                                color: "#64748b"
-                                font.pixelSize: 9
+                            spacing: 8
+
+                            // Nusa Lyrics Bubble Button (💬 Lirik)
+                            Rectangle {
+                                height: 30
+                                radius: 15
+                                implicitWidth: IslandController.lyricsModeActive ? 34 : 58
+                                color: IslandController.lyricsModeActive
+                                       ? "#ffffff"
+                                       : (lyricsBtnMouse.containsMouse ? "#282c40" : "#1a1b26")
+                                border.color: IslandController.lyricsModeActive ? "#ffffff" : "#33384e"
+                                border.width: 1
+
+                                Behavior on implicitWidth { NumberAnimation { duration: 180; easing.type: Easing.OutQuad } }
+
+                                RowLayout {
+                                    anchors.centerIn: parent
+                                    spacing: 4
+
+                                    Text {
+                                        text: "💬"
+                                        font.pixelSize: 11
+                                    }
+
+                                    Text {
+                                        visible: !IslandController.lyricsModeActive
+                                        text: "Lirik"
+                                        color: "#f8fafc"
+                                        font.pixelSize: 10
+                                        font.weight: Font.Bold
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: lyricsBtnMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: IslandController.toggleLyricsMode()
+                                }
                             }
+
+                            // Previous
+                            Rectangle {
+                                width: 30
+                                height: 30
+                                radius: 15
+                                color: mPrevMouse.containsMouse ? "#2f313f" : "#1a1b24"
+                                border.color: "#282937"
+                                border.width: 1
+
+                                Image {
+                                    anchors.centerIn: parent
+                                    width: 13
+                                    height: 13
+                                    source: "file://" + AppConfig.assetsDir + "/prev.svg"
+                                }
+                                MouseArea {
+                                    id: mPrevMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: IslandController.mediaPrevious()
+                                }
+                            }
+
+                            // Play / Pause
+                            Rectangle {
+                                width: 36
+                                height: 36
+                                radius: 18
+                                color: mPlayMouse.containsMouse ? "#0284c7" : "#0ea5e9"
+
+                                Image {
+                                    anchors.centerIn: parent
+                                    width: 15
+                                    height: 15
+                                    source: IslandController.mediaIsPlaying
+                                            ? "file://" + AppConfig.assetsDir + "/pause.svg"
+                                            : "file://" + AppConfig.assetsDir + "/play.svg"
+                                }
+                                MouseArea {
+                                    id: mPlayMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: IslandController.mediaPlayPause()
+                                }
+                            }
+
+                            // Next
+                            Rectangle {
+                                width: 30
+                                height: 30
+                                radius: 15
+                                color: mNextMouse.containsMouse ? "#2f313f" : "#1a1b24"
+                                border.color: "#282937"
+                                border.width: 1
+
+                                Image {
+                                    anchors.centerIn: parent
+                                    width: 13
+                                    height: 13
+                                    source: "file://" + AppConfig.assetsDir + "/next.svg"
+                                }
+                                MouseArea {
+                                    id: mNextMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: IslandController.mediaNext()
+                                }
+                            }
+
                             Item { Layout.fillWidth: true }
-                            Text {
-                                text: IslandController.mediaDurationFormatted
-                                color: "#64748b"
-                                font.pixelSize: 9
+
+                            // Volume mini slider (shown when not in compact split lyrics view)
+                            RowLayout {
+                                spacing: 6
+                                visible: !IslandController.lyricsModeActive
+
+                                Image {
+                                    width: 14
+                                    height: 14
+                                    source: IslandController.isMuted
+                                            ? "file://" + AppConfig.assetsDir + "/volume-mute.svg"
+                                            : "file://" + AppConfig.assetsDir + "/volume-high.svg"
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: IslandController.toggleMute()
+                                    }
+                                }
+                                Rectangle {
+                                    id: hubVolBar
+                                    width: 58
+                                    height: 5
+                                    radius: 2.5
+                                    color: "#27272a"
+                                    Rectangle {
+                                        width: hubVolBar.width * IslandController.volume
+                                        height: parent.height
+                                        radius: parent.radius
+                                        color: IslandController.isMuted ? "#ef4444" : "#38bdf8"
+                                    }
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: (mouse) => {
+                                            var r = Math.max(0.0, Math.min(1.0, mouse.x / width))
+                                            IslandController.setVolume(r)
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
 
-                    // Media playback buttons
-                    RowLayout {
+                    // --- VERTICAL DIVIDER (Nusa x=252px split line) ---
+                    Rectangle {
+                        visible: IslandController.lyricsModeActive
+                        width: 1
+                        Layout.fillHeight: true
+                        Layout.topMargin: 4
+                        Layout.bottomMargin: 4
+                        color: "#262b40"
+                    }
+
+                    // --- RIGHT COLUMN: NUSA SYNCED LYRICS KARAOKE VIEW ---
+                    Item {
+                        visible: IslandController.lyricsModeActive
                         Layout.fillWidth: true
-                        spacing: 10
+                        Layout.fillHeight: true
+                        clip: true
 
-                        Rectangle {
-                            width: 32
-                            height: 32
-                            radius: 16
-                            color: mPrevMouse.containsMouse ? "#2f313f" : "#1a1b24"
-                            border.color: "#282937"
-                            border.width: 1
-
-                            Image {
-                                anchors.centerIn: parent
-                                width: 14
-                                height: 14
-                                source: "file://" + AppConfig.assetsDir + "/prev.svg"
-                            }
-                            MouseArea {
-                                id: mPrevMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: IslandController.mediaPrevious()
-                            }
-                        }
-
-                        Rectangle {
-                            width: 38
-                            height: 38
-                            radius: 19
-                            color: mPlayMouse.containsMouse ? "#0284c7" : "#0ea5e9"
-
-                            Image {
-                                anchors.centerIn: parent
-                                width: 16
-                                height: 16
-                                source: IslandController.mediaIsPlaying
-                                        ? "file://" + AppConfig.assetsDir + "/pause.svg"
-                                        : "file://" + AppConfig.assetsDir + "/play.svg"
-                            }
-                            MouseArea {
-                                id: mPlayMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: IslandController.mediaPlayPause()
-                            }
-                        }
-
-                        Rectangle {
-                            width: 32
-                            height: 32
-                            radius: 16
-                            color: mNextMouse.containsMouse ? "#2f313f" : "#1a1b24"
-                            border.color: "#282937"
-                            border.width: 1
-
-                            Image {
-                                anchors.centerIn: parent
-                                width: 14
-                                height: 14
-                                source: "file://" + AppConfig.assetsDir + "/next.svg"
-                            }
-                            MouseArea {
-                                id: mNextMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: IslandController.mediaNext()
-                            }
-                        }
-
-                        Item { Layout.fillWidth: true }
-
-                        // Volume mini slider
-                        RowLayout {
+                        ListView {
+                            id: lyricsList
+                            anchors.fill: parent
+                            anchors.leftMargin: 4
+                            anchors.rightMargin: 4
                             spacing: 6
-                            Image {
-                                width: 14
-                                height: 14
-                                source: IslandController.isMuted
-                                        ? "file://" + AppConfig.assetsDir + "/volume-mute.svg"
-                                        : "file://" + AppConfig.assetsDir + "/volume-high.svg"
-                                MouseArea {
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: IslandController.toggleMute()
+                            clip: true
+                            model: IslandController.lyricsLines
+                            currentIndex: Math.max(0, IslandController.currentLyricIndex)
+
+                            preferredHighlightBegin: height * 0.34
+                            preferredHighlightEnd: height * 0.56
+                            highlightRangeMode: ListView.ApplyRange
+                            highlightMoveDuration: 380
+
+                            delegate: Item {
+                                id: lyricDelegate
+                                required property var modelData
+                                required property int index
+
+                                width: lyricsList.width
+                                height: lyricTxt.implicitHeight + 6
+
+                                readonly property bool isActive: index === IslandController.currentLyricIndex
+
+                                Text {
+                                    id: lyricTxt
+                                    width: parent.width - 8
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: lyricDelegate.modelData.text || ""
+                                    wrapMode: Text.WordWrap
+                                    color: lyricDelegate.isActive
+                                           ? "#ffffff"
+                                           : (lyricMouse.containsMouse ? "#94a3b8" : "rgba(255, 255, 255, 0.30)")
+                                    font.pixelSize: lyricDelegate.isActive ? 13 : 11
+                                    font.weight: Font.Bold
+                                    transformOrigin: Item.Left
+                                    scale: lyricDelegate.isActive ? 1.0 : 0.93
+
+                                    Behavior on color { ColorAnimation { duration: 240 } }
+                                    Behavior on scale { NumberAnimation { duration: 260; easing.type: Easing.OutBack } }
                                 }
-                            }
-                            Rectangle {
-                                id: hubVolBar
-                                width: 65
-                                height: 5
-                                radius: 2.5
-                                color: "#27272a"
-                                Rectangle {
-                                    width: hubVolBar.width * IslandController.volume
-                                    height: parent.height
-                                    radius: parent.radius
-                                    color: IslandController.isMuted ? "#ef4444" : "#38bdf8"
-                                }
+
+                                // Click any lyric line to jump/seek to that timestamp!
                                 MouseArea {
+                                    id: lyricMouse
                                     anchors.fill: parent
+                                    hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: (mouse) => {
-                                        var r = Math.max(0.0, Math.min(1.0, mouse.x / width))
-                                        IslandController.setVolume(r)
+                                    onClicked: {
+                                        if (lyricDelegate.modelData.time !== undefined) {
+                                            IslandController.seekToLyricTime(lyricDelegate.modelData.time)
+                                        }
                                     }
                                 }
+                            }
+                        }
+
+                        // Top & Bottom Soft Fade Masks (Nusa .lyr mask effect)
+                        Rectangle {
+                            anchors.top: parent.top
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            height: 18
+                            gradient: Gradient {
+                                orientation: Gradient.Vertical
+                                GradientStop { position: 0.0; color: "#07070a" }
+                                GradientStop { position: 1.0; color: "transparent" }
+                            }
+                        }
+                        Rectangle {
+                            anchors.bottom: parent.bottom
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            height: 18
+                            gradient: Gradient {
+                                orientation: Gradient.Vertical
+                                GradientStop { position: 0.0; color: "transparent" }
+                                GradientStop { position: 1.0; color: "#07070a" }
                             }
                         }
                     }
@@ -971,7 +1257,7 @@ Item {
 
                     Text {
                         Layout.alignment: Qt.AlignHCenter
-                        text: "Putar lagu di Spotify atau video di browser untuk kendali cepat"
+                        text: "Putar lagu di Spotify atau video di browser untuk kendali & lirik karaoke"
                         color: "#64748b"
                         font.pixelSize: 10
                     }
@@ -1049,10 +1335,10 @@ Item {
                             ColumnLayout {
                                 spacing: 0
                                 Text { text: "Night Light"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
-                                Text { 
+                                Text {
                                     text: IslandController.nightLightActive ? "Aktif" : "Mati"
                                     color: IslandController.nightLightActive ? "#818cf8" : "#64748b"
-                                    font.pixelSize: 9 
+                                    font.pixelSize: 9
                                 }
                             }
                         }
@@ -1368,7 +1654,7 @@ Item {
             }
 
             // -----------------------------------------------------------------
-            // PAGE 4: KESEHATAN & PELACAK AIR
+            // PAGE 4: KESEHATAN & PELACAK AIR (WITH HOURLY HISTOGRAM CHART)
             // -----------------------------------------------------------------
             PageHealth {
                 id: pageHealth
@@ -1382,6 +1668,16 @@ Item {
             // -----------------------------------------------------------------
             PageTodo {
                 id: pageTodo
+                width: pageContainer.width
+                height: pageContainer.height
+                y: 0
+            }
+
+            // -----------------------------------------------------------------
+            // PAGE 6: RAK FILE SEMENTARA (WAYLAND FILE SHELF)
+            // -----------------------------------------------------------------
+            PageShelf {
+                id: pageShelf
                 width: pageContainer.width
                 height: pageContainer.height
                 y: 0

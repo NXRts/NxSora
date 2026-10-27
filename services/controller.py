@@ -11,6 +11,8 @@ from services.notifications import NotificationService
 from services.timer import TimerService
 from services.health import HealthService
 from services.todo import TodoService
+from services.lyrics import LyricsService
+from services.shelf import ShelfService
 import config
 
 
@@ -18,21 +20,24 @@ class IslandController(QObject):
     # Core state change signal
     stateChanged = pyqtSignal(str)
     isExpandedChanged = pyqtSignal(bool)
-    
-    # Media signals
+
+    # Media & Lyrics signals
     mediaChanged = pyqtSignal()
     mediaProgressChanged = pyqtSignal()
-    
+    lyricsChanged = pyqtSignal()
+    currentLyricIndexChanged = pyqtSignal(int)
+    lyricsModeChanged = pyqtSignal(bool)
+
     # Volume signals
     volumeChanged = pyqtSignal()
-    
+
     # System signals
     statsChanged = pyqtSignal()
     batteryChanged = pyqtSignal()
-    
+
     # Notification signal
     notificationChanged = pyqtSignal()
-    
+
     # Timer signal
     timerChanged = pyqtSignal()
 
@@ -48,21 +53,27 @@ class IslandController(QObject):
     # To-Do Task signals
     tasksChanged = pyqtSignal()
 
-    # Mascot mode
+    # Shelf (File Stash) signals
+    shelfChanged = pyqtSignal()
+    shelfGulpTriggered = pyqtSignal()
+
+    # Mascot & Pin mode
     mascotModeChanged = pyqtSignal(bool)
     isPinnedChanged = pyqtSignal(bool)
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        
+
         # Sub-services
         self.mpris = MprisService(self)
+        self.lyrics = LyricsService(self)
         self.volume_service = VolumeService(self)
         self.system = SystemService(self)
         self.notifications = NotificationService(self)
         self.timer_service = TimerService(self)
         self.health = HealthService(self)
         self.todo = TodoService(self)
+        self.shelf = ShelfService(self)
 
         # Mascot mode toggle (Resting Eyes vs Digital Clock)
         self._mascot_mode = False
@@ -88,13 +99,20 @@ class IslandController(QObject):
         # Wire up sub-services
         self.mpris.mediaChanged.connect(self._on_media_changed)
         self.mpris.positionChanged.connect(self._on_media_progress)
+        self.lyrics.lyricsUpdated.connect(lambda: self.lyricsChanged.emit())
+        self.lyrics.currentIndexChanged.connect(self._on_lyric_index_changed)
+        self.lyrics.lyricsModeChanged.connect(lambda m: self.lyricsModeChanged.emit(m))
+
         self.volume_service.volumeChanged.connect(self._on_volume_changed)
         self.system.statsUpdated.connect(self._on_stats_updated)
         self.system.batteryChanged.connect(self._on_battery_updated)
         self.system.powerPluggedEvent.connect(self._on_power_plugged_event)
         self.notifications.notificationReceived.connect(self._on_notification_received)
+
         self.timer_service.timerTick.connect(self._on_timer_tick)
         self.timer_service.timerFinished.connect(self._on_timer_finished)
+        self.timer_service.timerStateChanged.connect(lambda _: self.timerChanged.emit())
+
         self.system.networkUpdated.connect(lambda d, u: self.networkChanged.emit())
         self.system.nightLightChanged.connect(lambda a: self.nightLightChanged.emit())
         self.health.waterChanged.connect(lambda: self.waterChanged.emit())
@@ -102,9 +120,15 @@ class IslandController(QObject):
         self.health.eyeBreakAlert.connect(self._on_eye_break_alert)
         self.todo.tasksChanged.connect(lambda: self.tasksChanged.emit())
 
+        self.shelf.shelfChanged.connect(lambda: self.shelfChanged.emit())
+        self.shelf.shelfGulpTriggered.connect(lambda: self.shelfGulpTriggered.emit())
+
         # Initial state setup
         if self.mpris.status in ("Playing", "Paused") and self.mpris.title:
             self._state = "music"
+            self.lyrics.update_track(
+                self.mpris.title, self.mpris.artist, self.mpris.album, self.mpris.duration
+            )
         else:
             self._state = "idle"
 
@@ -114,7 +138,7 @@ class IslandController(QObject):
         if self._state != new_state:
             self._state = new_state
             self.stateChanged.emit(self._state)
-            
+
             expanded = new_state.startswith("expanded-")
             if self._is_expanded != expanded:
                 self._is_expanded = expanded
@@ -132,6 +156,9 @@ class IslandController(QObject):
 
     def _on_media_changed(self):
         self.mediaChanged.emit()
+        self.lyrics.update_track(
+            self.mpris.title, self.mpris.artist, self.mpris.album, self.mpris.duration
+        )
         if not self._is_expanded and not self._state.startswith("hud-"):
             if self.mpris.status == "Playing" or (self.mpris.title and self.mpris.status == "Paused"):
                 self._set_state("music")
@@ -140,10 +167,13 @@ class IslandController(QObject):
 
     def _on_media_progress(self, pos, dur):
         self.mediaProgressChanged.emit()
+        self.lyrics.update_position(pos)
+
+    def _on_lyric_index_changed(self, idx):
+        self.currentLyricIndexChanged.emit(idx)
 
     def _on_volume_changed(self, vol, is_muted):
         self.volumeChanged.emit()
-        # Trigger HUD popup if not already in expanded card
         if not self._is_expanded:
             self._set_state("hud-volume")
             self._hud_timer.start(config.CONFIG.get("hud_volume_timeout", 2200))
@@ -172,9 +202,18 @@ class IslandController(QObject):
     def _on_timer_tick(self, rem, text):
         self.timerChanged.emit()
 
-    def _on_timer_finished(self):
+    def _on_timer_finished(self, completed_mode="focus"):
         self.timerChanged.emit()
-        self.notifications.trigger_test("Timer Selesai!", "Waktu countdown telah berakhir.")
+        if completed_mode == "focus":
+            self.notifications.trigger_test(
+                "Sesi Fokus 25m Selesai! 🎯",
+                "Kerja bagus! Saatnya mengambil Short Break (5 menit)."
+            )
+        else:
+            self.notifications.trigger_test(
+                "Waktu Istirahat Selesai! ☕",
+                "Siap kembali memulai sesi Focus Time berikutnya."
+            )
 
     # --- PyQT Properties for QML ---
 
@@ -245,6 +284,49 @@ class IslandController(QObject):
         secs = int(self.mpris.duration) % 60
         return f"{mins:02d}:{secs:02d}"
 
+    @pyqtProperty(str, notify=mediaProgressChanged)
+    def mediaRemainingFormatted(self):
+        rem = max(0, int(self.mpris.duration - self.mpris.position))
+        mins = rem // 60
+        secs = rem % 60
+        return f"-{mins:02d}:{secs:02d}"
+
+    # --- Synced Lyrics Properties ---
+    @pyqtProperty(bool, notify=lyricsModeChanged)
+    def lyricsModeActive(self):
+        return self.lyrics.lyricsMode
+
+    @pyqtProperty(str, notify=lyricsChanged)
+    def lyricsStatus(self):
+        return self.lyrics.status
+
+    @pyqtProperty(list, notify=lyricsChanged)
+    def lyricsLines(self):
+        return self.lyrics.lines
+
+    @pyqtProperty(int, notify=currentLyricIndexChanged)
+    def currentLyricIndex(self):
+        return self.lyrics.currentIndex
+
+    @pyqtProperty(str, notify=currentLyricIndexChanged)
+    def currentLyricText(self):
+        return self.lyrics.currentLineText
+
+    @pyqtSlot()
+    def toggleLyricsMode(self):
+        self.lyrics.toggleLyricsMode()
+
+    @pyqtSlot(bool)
+    def setLyricsMode(self, active):
+        self.lyrics.setLyricsMode(active)
+
+    @pyqtSlot(float)
+    def seekToLyricTime(self, seconds):
+        if self.mpris.duration > 0:
+            ratio = max(0.0, min(1.0, float(seconds) / self.mpris.duration))
+            self.mediaSeek(ratio)
+            self.lyrics.update_position(float(seconds))
+
     # Volume Properties
     @pyqtProperty(float, notify=volumeChanged)
     def volume(self):
@@ -303,7 +385,7 @@ class IslandController(QObject):
     def notifBody(self):
         return self._notif_body
 
-    # Timer Properties
+    # Timer / Pomodoro Properties
     @pyqtProperty(int, notify=timerChanged)
     def timerRemaining(self):
         return self.timer_service.remaining_seconds
@@ -317,6 +399,18 @@ class IslandController(QObject):
     @pyqtProperty(bool, notify=timerChanged)
     def timerRunning(self):
         return self.timer_service.is_running
+
+    @pyqtProperty(str, notify=timerChanged)
+    def timerMode(self):
+        return self.timer_service.mode
+
+    @pyqtProperty(str, notify=timerChanged)
+    def timerModeLabel(self):
+        return self.timer_service.mode_label
+
+    @pyqtProperty(float, notify=timerChanged)
+    def timerProgressRatio(self):
+        return self.timer_service.progress_ratio
 
     # Network & System Info Properties
     @pyqtProperty(str, notify=networkChanged)
@@ -354,6 +448,13 @@ class IslandController(QObject):
 
     # --- Slots / Invocable Actions for QML ---
 
+    @pyqtSlot(int)
+    def setActiveHubPage(self, page_index):
+        clamped = max(0, min(int(page_index), 6))
+        if self._active_hub_page != clamped:
+            self._active_hub_page = clamped
+            self.activeHubPageChanged.emit(self._active_hub_page)
+
     @pyqtSlot()
     def toggleExpand(self):
         """Toggle between compact pill and expanded view"""
@@ -387,9 +488,16 @@ class IslandController(QObject):
         self.activeHubPageChanged.emit(0)
         self._set_state("expanded-hub")
 
+    @pyqtSlot()
+    def expandToShelf(self):
+        """Automatically expand to Page 6 (File Shelf) when a file is dragged over the notch."""
+        self._active_hub_page = 6
+        self.activeHubPageChanged.emit(6)
+        self._set_state("expanded-hub")
+
     @pyqtSlot(int)
     def openHubPage(self, page_index):
-        self._active_hub_page = max(0, min(page_index, 5))
+        self._active_hub_page = max(0, min(page_index, 6))
         self.activeHubPageChanged.emit(self._active_hub_page)
         self._set_state("expanded-hub")
 
@@ -426,10 +534,18 @@ class IslandController(QObject):
     def toggleMute(self):
         self.volume_service.toggle_mute()
 
-    # Timer controls
+    # Timer / Pomodoro controls
     @pyqtSlot(int)
     def startTimer(self, seconds):
         self.timer_service.start_timer(seconds)
+
+    @pyqtSlot(str)
+    def setTimerMode(self, mode):
+        self.timer_service.set_mode(mode, auto_start=False)
+
+    @pyqtSlot(str, bool)
+    def setTimerModeAndStart(self, mode, auto_start):
+        self.timer_service.set_mode(mode, auto_start=bool(auto_start))
 
     @pyqtSlot()
     def toggleTimer(self):
@@ -493,6 +609,10 @@ class IslandController(QObject):
     def waterGoal(self):
         return self.health.waterGoal
 
+    @pyqtProperty(int, notify=waterChanged)
+    def waterCupSize(self):
+        return self.health.waterCupSize
+
     @pyqtProperty(float, notify=waterChanged)
     def waterProgressRatio(self):
         return self.health.waterProgressRatio
@@ -505,6 +625,10 @@ class IslandController(QObject):
     def waterFormatted(self):
         return self.health.waterFormatted
 
+    @pyqtProperty(list, notify=waterChanged)
+    def waterHourlyBars(self):
+        return self.health.waterHourlyBars
+
     @pyqtProperty(int, notify=eyeBreakChanged)
     def eyeBreakRemaining(self):
         return self.health.eyeBreakRemaining
@@ -515,8 +639,16 @@ class IslandController(QObject):
 
     @pyqtSlot()
     @pyqtSlot(int)
-    def drinkWater(self, amount=250):
+    def drinkWater(self, amount=0):
         self.health.drinkWater(amount)
+
+    @pyqtSlot()
+    def cycleWaterCupSize(self):
+        self.health.cycleWaterCupSize()
+
+    @pyqtSlot()
+    def cycleWaterGoal(self):
+        self.health.cycleWaterGoal()
 
     @pyqtSlot()
     def resetWater(self):
@@ -559,3 +691,35 @@ class IslandController(QObject):
     def clearCompletedTasks(self):
         self.todo.clearCompleted()
 
+    # --- Wayland File Shelf Properties & Slots ---
+    @pyqtProperty(list, notify=shelfChanged)
+    def shelfItems(self):
+        return self.shelf.items
+
+    @pyqtProperty(int, notify=shelfChanged)
+    def shelfCount(self):
+        return self.shelf.count
+
+    @pyqtSlot("QVariant")
+    def addShelfFiles(self, urls):
+        self.shelf.addDroppedUrls(urls)
+
+    @pyqtSlot(int)
+    def removeShelfFile(self, index):
+        self.shelf.removeItem(index)
+
+    @pyqtSlot()
+    def clearShelf(self):
+        self.shelf.clearShelf()
+
+    @pyqtSlot(int)
+    def openShelfFile(self, index):
+        self.shelf.openItem(index)
+
+    @pyqtSlot(int)
+    def startShelfDrag(self, index):
+        self.shelf.startDragOut(index)
+
+    @pyqtSlot()
+    def startShelfDragAll(self):
+        self.shelf.startDragAll()
