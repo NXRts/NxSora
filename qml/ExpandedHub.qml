@@ -504,6 +504,7 @@ Item {
                         // CPU + Temp + TDP Box (Click to jump to Page 3 Hardware & TDP)
                         Rectangle {
                             Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             height: 48
                             radius: 10
                             color: cpuBoxMouse.containsMouse ? "#181924" : "#121217"
@@ -519,8 +520,10 @@ Item {
                                     Layout.fillWidth: true
                                     spacing: 4
                                     Image {
-                                        width: 12
-                                        height: 12
+                                        Layout.preferredWidth: 12
+                                        Layout.preferredHeight: 12
+                                        sourceSize.width: 12
+                                        sourceSize.height: 12
                                         source: "file://" + AppConfig.assetsDir + "/cpu.svg"
                                     }
                                     Text {
@@ -570,6 +573,7 @@ Item {
                         // RAM Box
                         Rectangle {
                             Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             height: 48
                             radius: 10
                             color: "#121217"
@@ -584,8 +588,10 @@ Item {
                                 RowLayout {
                                     Layout.fillWidth: true
                                     Image {
-                                        width: 13
-                                        height: 13
+                                        Layout.preferredWidth: 12
+                                        Layout.preferredHeight: 12
+                                        sourceSize.width: 12
+                                        sourceSize.height: 12
                                         source: "file://" + AppConfig.assetsDir + "/memory.svg"
                                     }
                                     Text {
@@ -621,6 +627,7 @@ Item {
                         // Battery Box
                         Rectangle {
                             Layout.fillWidth: true
+                            Layout.preferredWidth: 1
                             height: 48
                             radius: 10
                             color: "#121217"
@@ -635,8 +642,10 @@ Item {
                                 RowLayout {
                                     Layout.fillWidth: true
                                     Image {
-                                        width: 13
-                                        height: 13
+                                        Layout.preferredWidth: 12
+                                        Layout.preferredHeight: 12
+                                        sourceSize.width: 12
+                                        sourceSize.height: 12
                                         source: IslandController.isCharging
                                                 ? "file://" + AppConfig.assetsDir + "/bolt.svg"
                                                 : "file://" + AppConfig.assetsDir + "/battery.svg"

@@ -266,7 +266,7 @@ class SystemService(QObject):
         if raw_uw is not None and raw_uw > 0:
             self.cpu_tdp_watts = round(raw_uw / 1_000_000.0, 1)
             if self.cpu_tdp_watts > self.cpu_tdp_max_watts:
-                self.cpu_tdp_max_watts = float(int(self.cpu_tdp_watts + 5))
+                self.cpu_tdp_max_watts = float(int(round(self.cpu_tdp_watts)))
         else:
             # Fallback estimation based on CPU load if sensor unavailable
             self.cpu_tdp_watts = round(4.0 + (self.cpu_percent / 100.0) * 21.0, 1)

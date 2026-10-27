@@ -18,51 +18,47 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: 7
+        spacing: 6
 
         // =====================================================================
-        // ROW 1: 3 HARDWARE TELEMETRY CARDS (CPU+TDP | GPU+VRAM | NVMe+DISK)
+        // ROW 1: 3 PROPORTIONAL HARDWARE CARDS (1:1:1 EQUAL WIDTH, 86px HEIGHT)
         // =====================================================================
         RowLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: 78
-            spacing: 7
+            Layout.preferredHeight: 86
+            Layout.maximumHeight: 86
+            spacing: 6
 
             // 1. CPU, SUHU & PROCESSOR TDP CARD
             Rectangle {
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
                 Layout.fillHeight: true
-                radius: 11
+                radius: 10
                 color: "#12131c"
                 border.color: IslandController.cpuTemp >= 80 ? "#ef4444" : "#24273a"
                 border.width: 1
+                clip: true
 
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: 8
                     spacing: 4
 
-                    // Header: CPU + Temp Badge
+                    // Header: Title + Thermal Pill
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 4
 
-                        Image {
-                            width: 12
-                            height: 12
-                            source: "file://" + AppConfig.assetsDir + "/cpu.svg"
-                        }
-
                         Text {
+                            Layout.fillWidth: true
                             text: "CPU & TDP"
-                            color: "#cbd5e1"
+                            color: "#e2e8f0"
                             font.pixelSize: 10
                             font.weight: Font.Bold
+                            elide: Text.ElideRight
                         }
 
-                        Item { Layout.fillWidth: true }
-
-                        // Thermal Pill
                         Rectangle {
                             height: 16
                             radius: 8
@@ -90,7 +86,7 @@ Item {
                         Text {
                             text: IslandController.cpuTdpText
                             color: "#38bdf8"
-                            font.pixelSize: 14
+                            font.pixelSize: 13
                             font.weight: Font.ExtraBold
                         }
 
@@ -104,40 +100,40 @@ Item {
                         }
                     }
 
-                    // Bottom: TDP Progress Bar + CPU Load %
-                    ColumnLayout {
+                    Item { Layout.fillHeight: true }
+
+                    // Progress Bar
+                    Rectangle {
+                        id: tdpBarBg
                         Layout.fillWidth: true
-                        spacing: 3
+                        height: 4
+                        radius: 2
+                        color: "#232638"
 
                         Rectangle {
-                            id: tdpBarBg
-                            Layout.fillWidth: true
-                            height: 5
-                            radius: 2.5
-                            color: "#232638"
-
-                            Rectangle {
-                                width: Math.max(4, Math.min(tdpBarBg.width, tdpBarBg.width * IslandController.cpuTdpRatio))
-                                height: parent.height
-                                radius: parent.radius
-                                color: IslandController.cpuTdpWatts >= 24 ? "#f59e0b" : "#38bdf8"
-                                Behavior on width { NumberAnimation { duration: 250; easing.type: Easing.OutQuad } }
-                            }
+                            width: Math.max(4, Math.min(tdpBarBg.width, tdpBarBg.width * IslandController.cpuTdpRatio))
+                            height: parent.height
+                            radius: parent.radius
+                            color: IslandController.cpuTdpWatts >= 24 ? "#f59e0b" : "#38bdf8"
+                            Behavior on width { NumberAnimation { duration: 250; easing.type: Easing.OutQuad } }
                         }
+                    }
 
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Text {
-                                text: "Beban: " + IslandController.cpuPercent + "%"
-                                color: "#94a3b8"
-                                font.pixelSize: 8
-                            }
-                            Item { Layout.fillWidth: true }
-                            Text {
-                                text: "Max ~" + Math.round(IslandController.cpuTdpMaxWatts) + "W"
-                                color: "#64748b"
-                                font.pixelSize: 8
-                            }
+                    // Footer: CPU Load % + Max TDP
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        Text {
+                            text: "CPU " + IslandController.cpuPercent + "%"
+                            color: "#94a3b8"
+                            font.pixelSize: 8
+                            font.weight: Font.Medium
+                        }
+                        Item { Layout.fillWidth: true }
+                        Text {
+                            text: "Maks " + Math.round(IslandController.cpuTdpMaxWatts) + "W"
+                            color: "#64748b"
+                            font.pixelSize: 8
                         }
                     }
                 }
@@ -146,30 +142,32 @@ Item {
             // 2. GPU, SUHU & VRAM CARD
             Rectangle {
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
                 Layout.fillHeight: true
-                radius: 11
+                radius: 10
                 color: "#12131c"
                 border.color: IslandController.gpuTemp >= 80 ? "#ef4444" : "#24273a"
                 border.width: 1
+                clip: true
 
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: 8
                     spacing: 4
 
-                    // Header: GPU + Temp Badge
+                    // Header: Title + Thermal Pill
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 4
 
                         Text {
+                            Layout.fillWidth: true
                             text: "GPU & VRAM"
-                            color: "#cbd5e1"
+                            color: "#e2e8f0"
                             font.pixelSize: 10
                             font.weight: Font.Bold
+                            elide: Text.ElideRight
                         }
-
-                        Item { Layout.fillWidth: true }
 
                         Rectangle {
                             height: 16
@@ -198,7 +196,7 @@ Item {
                         Text {
                             text: IslandController.gpuPercent + "%"
                             color: "#a855f7"
-                            font.pixelSize: 14
+                            font.pixelSize: 13
                             font.weight: Font.ExtraBold
                         }
 
@@ -212,40 +210,40 @@ Item {
                         }
                     }
 
-                    // Bottom: VRAM Bar + Readout
-                    ColumnLayout {
+                    Item { Layout.fillHeight: true }
+
+                    // Progress Bar
+                    Rectangle {
+                        id: vramBarBg
                         Layout.fillWidth: true
-                        spacing: 3
+                        height: 4
+                        radius: 2
+                        color: "#232638"
 
                         Rectangle {
-                            id: vramBarBg
-                            Layout.fillWidth: true
-                            height: 5
-                            radius: 2.5
-                            color: "#232638"
-
-                            Rectangle {
-                                width: Math.max(4, Math.min(vramBarBg.width, vramBarBg.width * (IslandController.vramPercent / 100.0)))
-                                height: parent.height
-                                radius: parent.radius
-                                color: "#a855f7"
-                                Behavior on width { NumberAnimation { duration: 250; easing.type: Easing.OutQuad } }
-                            }
+                            width: Math.max(4, Math.min(vramBarBg.width, vramBarBg.width * (IslandController.vramPercent / 100.0)))
+                            height: parent.height
+                            radius: parent.radius
+                            color: "#a855f7"
+                            Behavior on width { NumberAnimation { duration: 250; easing.type: Easing.OutQuad } }
                         }
+                    }
 
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Text {
-                                text: "VRAM"
-                                color: "#94a3b8"
-                                font.pixelSize: 8
-                            }
-                            Item { Layout.fillWidth: true }
-                            Text {
-                                text: IslandController.vramText
-                                color: "#64748b"
-                                font.pixelSize: 8
-                            }
+                    // Footer: VRAM Readout
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        Text {
+                            text: "VRAM"
+                            color: "#94a3b8"
+                            font.pixelSize: 8
+                            font.weight: Font.Medium
+                        }
+                        Item { Layout.fillWidth: true }
+                        Text {
+                            text: IslandController.vramText
+                            color: "#64748b"
+                            font.pixelSize: 8
                         }
                     }
                 }
@@ -254,30 +252,32 @@ Item {
             // 3. NVMe SSD, SUHU & DISK CARD
             Rectangle {
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
                 Layout.fillHeight: true
-                radius: 11
+                radius: 10
                 color: "#12131c"
                 border.color: "#24273a"
                 border.width: 1
+                clip: true
 
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: 8
                     spacing: 4
 
-                    // Header: NVMe + Temp Badge
+                    // Header: Title + Thermal Pill
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 4
 
                         Text {
+                            Layout.fillWidth: true
                             text: "NVMe SSD"
-                            color: "#cbd5e1"
+                            color: "#e2e8f0"
                             font.pixelSize: 10
                             font.weight: Font.Bold
+                            elide: Text.ElideRight
                         }
-
-                        Item { Layout.fillWidth: true }
 
                         Rectangle {
                             height: 16
@@ -306,7 +306,7 @@ Item {
                         Text {
                             text: IslandController.diskPercent + "%"
                             color: "#22c55e"
-                            font.pixelSize: 14
+                            font.pixelSize: 13
                             font.weight: Font.ExtraBold
                         }
 
@@ -320,40 +320,40 @@ Item {
                         }
                     }
 
-                    // Bottom: Disk Bar + RAM Info
-                    ColumnLayout {
+                    Item { Layout.fillHeight: true }
+
+                    // Progress Bar
+                    Rectangle {
+                        id: diskBarBg
                         Layout.fillWidth: true
-                        spacing: 3
+                        height: 4
+                        radius: 2
+                        color: "#232638"
 
                         Rectangle {
-                            id: diskBarBg
-                            Layout.fillWidth: true
-                            height: 5
-                            radius: 2.5
-                            color: "#232638"
-
-                            Rectangle {
-                                width: Math.max(4, Math.min(diskBarBg.width, diskBarBg.width * (IslandController.diskPercent / 100.0)))
-                                height: parent.height
-                                radius: parent.radius
-                                color: IslandController.diskPercent > 88 ? "#ef4444" : "#22c55e"
-                                Behavior on width { NumberAnimation { duration: 250; easing.type: Easing.OutQuad } }
-                            }
+                            width: Math.max(4, Math.min(diskBarBg.width, diskBarBg.width * (IslandController.diskPercent / 100.0)))
+                            height: parent.height
+                            radius: parent.radius
+                            color: IslandController.diskPercent > 88 ? "#ef4444" : "#22c55e"
+                            Behavior on width { NumberAnimation { duration: 250; easing.type: Easing.OutQuad } }
                         }
+                    }
 
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Text {
-                                text: "RAM"
-                                color: "#94a3b8"
-                                font.pixelSize: 8
-                            }
-                            Item { Layout.fillWidth: true }
-                            Text {
-                                text: IslandController.ramText
-                                color: "#64748b"
-                                font.pixelSize: 8
-                            }
+                    // Footer: RAM Usage
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        Text {
+                            text: "RAM"
+                            color: "#94a3b8"
+                            font.pixelSize: 8
+                            font.weight: Font.Medium
+                        }
+                        Item { Layout.fillWidth: true }
+                        Text {
+                            text: IslandController.ramText
+                            color: "#64748b"
+                            font.pixelSize: 8
                         }
                     }
                 }
@@ -361,43 +361,77 @@ Item {
         }
 
         // =====================================================================
-        // ROW 2: NETWORK TRAFFIC (DOWN/UP) + TOP CPU PROCESS & CPU MODEL
+        // ROW 2: NETWORK TRAFFIC (1:1 LEFT) + PROCESSOR & TOP APP (1:1 RIGHT)
         // =====================================================================
         RowLayout {
             Layout.fillWidth: true
             Layout.preferredHeight: 42
-            spacing: 7
+            Layout.maximumHeight: 42
+            spacing: 6
 
-            // Network Live Speed Pill Card
+            // Left Card: Network Traffic (Balanced Left Icon + Label, Right Speeds)
             Rectangle {
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
                 Layout.fillHeight: true
                 radius: 10
                 color: "#12131c"
                 border.color: "#24273a"
                 border.width: 1
+                clip: true
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                    spacing: 8
+                    anchors.leftMargin: 8
+                    anchors.rightMargin: 8
+                    spacing: 7
 
-                    Image {
-                        width: 14
-                        height: 14
-                        source: "file://" + AppConfig.assetsDir + "/network.svg"
+                    Rectangle {
+                        width: 26
+                        height: 26
+                        radius: 7
+                        color: "#162032"
+                        border.color: "#233554"
+                        border.width: 1
+
+                        Image {
+                            anchors.centerIn: parent
+                            width: 14
+                            height: 14
+                            sourceSize.width: 14
+                            sourceSize.height: 14
+                            source: "file://" + AppConfig.assetsDir + "/network.svg"
+                        }
                     }
 
                     ColumnLayout {
                         spacing: 1
                         Text {
+                            text: "Jaringan"
+                            color: "#e2e8f0"
+                            font.pixelSize: 10
+                            font.weight: Font.Bold
+                        }
+                        Text {
+                            text: "Live Trafik"
+                            color: "#64748b"
+                            font.pixelSize: 8
+                        }
+                    }
+
+                    Item { Layout.fillWidth: true }
+
+                    ColumnLayout {
+                        spacing: 1
+                        Text {
+                            Layout.alignment: Qt.AlignRight
                             text: "↓ " + IslandController.netDownSpeed
                             color: "#38bdf8"
                             font.pixelSize: 10
                             font.weight: Font.Bold
                         }
                         Text {
+                            Layout.alignment: Qt.AlignRight
                             text: "↑ " + IslandController.netUpSpeed
                             color: "#22c55e"
                             font.pixelSize: 9
@@ -407,49 +441,73 @@ Item {
                 }
             }
 
-            // CPU Model & Top Resource Culprit Card
+            // Right Card: CPU Model & Top Resource Culprit
             Rectangle {
                 Layout.fillWidth: true
+                Layout.preferredWidth: 1
                 Layout.fillHeight: true
                 radius: 10
                 color: "#12131c"
                 border.color: "#24273a"
                 border.width: 1
+                clip: true
 
-                ColumnLayout {
+                RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                    anchors.topMargin: 5
-                    anchors.bottomMargin: 5
-                    spacing: 1
+                    anchors.leftMargin: 8
+                    anchors.rightMargin: 8
+                    spacing: 7
 
-                    Text {
-                        Layout.fillWidth: true
-                        text: IslandController.cpuModel
-                        color: "#f8fafc"
-                        font.pixelSize: 10
-                        font.weight: Font.Bold
-                        elide: Text.ElideRight
+                    Rectangle {
+                        width: 26
+                        height: 26
+                        radius: 7
+                        color: "#1b1d2e"
+                        border.color: "#2b2f4a"
+                        border.width: 1
+
+                        Image {
+                            anchors.centerIn: parent
+                            width: 14
+                            height: 14
+                            sourceSize.width: 14
+                            sourceSize.height: 14
+                            source: "file://" + AppConfig.assetsDir + "/cpu.svg"
+                        }
                     }
 
-                    Text {
+                    ColumnLayout {
                         Layout.fillWidth: true
-                        text: "🔥 Top: " + IslandController.topProcess
-                        color: "#94a3b8"
-                        font.pixelSize: 9
-                        elide: Text.ElideRight
+                        spacing: 1
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: IslandController.cpuModel
+                            color: "#f8fafc"
+                            font.pixelSize: 10
+                            font.weight: Font.Bold
+                            elide: Text.ElideRight
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: "🔥 Top: " + IslandController.topProcess
+                            color: "#94a3b8"
+                            font.pixelSize: 9
+                            elide: Text.ElideRight
+                        }
                     }
                 }
             }
         }
 
         // =====================================================================
-        // ROW 3: INTERACTIVE POWER PROFILE & TDP MODE SWITCHER
+        // ROW 3: INTERACTIVE POWER PROFILE & TDP MODE SWITCHER (36px HEIGHT)
         // =====================================================================
         Rectangle {
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            Layout.preferredHeight: 36
+            Layout.maximumHeight: 36
             radius: 10
             color: "#12131c"
             border.color: "#24273a"
@@ -472,9 +530,9 @@ Item {
 
                 // 1. Power Saver Pill
                 Rectangle {
-                    height: 26
-                    radius: 13
-                    implicitWidth: 78
+                    height: 24
+                    radius: 12
+                    implicitWidth: 80
                     color: IslandController.powerProfile === "power-saver"
                            ? "#123524"
                            : (psMouse.containsMouse ? "#1e2233" : "#181a28")
@@ -485,7 +543,7 @@ Item {
                         anchors.centerIn: parent
                         text: "🍃 Hemat"
                         color: IslandController.powerProfile === "power-saver" ? "#4ade80" : "#94a3b8"
-                        font.pixelSize: 10
+                        font.pixelSize: 9
                         font.weight: Font.Bold
                     }
 
@@ -500,8 +558,8 @@ Item {
 
                 // 2. Balanced Pill
                 Rectangle {
-                    height: 26
-                    radius: 13
+                    height: 24
+                    radius: 12
                     implicitWidth: 88
                     color: IslandController.powerProfile === "balanced"
                            ? "#102a42"
@@ -513,7 +571,7 @@ Item {
                         anchors.centerIn: parent
                         text: "⚖️ Seimbang"
                         color: IslandController.powerProfile === "balanced" ? "#38bdf8" : "#94a3b8"
-                        font.pixelSize: 10
+                        font.pixelSize: 9
                         font.weight: Font.Bold
                     }
 
@@ -528,9 +586,9 @@ Item {
 
                 // 3. Performance Pill
                 Rectangle {
-                    height: 26
-                    radius: 13
-                    implicitWidth: 92
+                    height: 24
+                    radius: 12
+                    implicitWidth: 88
                     color: IslandController.powerProfile === "performance"
                            ? "#3b1722"
                            : (perfMouse.containsMouse ? "#1e2233" : "#181a28")
@@ -541,7 +599,7 @@ Item {
                         anchors.centerIn: parent
                         text: "🚀 Performa"
                         color: IslandController.powerProfile === "performance" ? "#fb7185" : "#94a3b8"
-                        font.pixelSize: 10
+                        font.pixelSize: 9
                         font.weight: Font.Bold
                     }
 
@@ -557,4 +615,3 @@ Item {
         }
     }
 }
-
