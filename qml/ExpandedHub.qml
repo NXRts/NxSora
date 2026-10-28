@@ -67,23 +67,6 @@ Item {
             Layout.fillWidth: true
             spacing: 10
 
-            // Mouse wheel scroll on the header bar switches pages smoothly
-            WheelHandler {
-                onWheel: (event) => {
-                    if (wheelSwipeCooldown.running || slideAnim.running) return;
-                    var delta = event.angleDelta.y !== 0 ? event.angleDelta.y : event.angleDelta.x;
-                    if (Math.abs(delta) >= 15) {
-                        wheelSwipeCooldown.restart();
-                        if (delta < 0) {
-                            root.goToNextPage();
-                        } else {
-                            root.goToPrevPage();
-                        }
-                        event.accepted = true;
-                    }
-                }
-            }
-
             // Navigation Arrows Capsule (< >)
             Rectangle {
                 id: navCapsule
@@ -342,34 +325,25 @@ Item {
                 repeat: false
             }
 
-            // Top-level Wheel Overlay (z: 50) so child ListViews (To-Do, Shelf, Lyrics)
-            // never trap or block mouse wheel page scrolling across pages 0..6
-            Item {
-                anchors.fill: parent
-                z: 50
-
-                WheelHandler {
-                    id: horizontalWheelSwipe
-                    orientation: Qt.Horizontal | Qt.Vertical
-                    acceptedDevices: PointerDevice.TouchPad | PointerDevice.Mouse
-                    onWheel: (event) => {
-                        if (wheelSwipeCooldown.running || slideAnim.running) {
-                            event.accepted = true;
-                            return;
+            // Touchpad Horizontal 2-Finger Swipe ONLY (Mouse vertical scroll wheel disabled for page switching)
+            WheelHandler {
+                id: horizontalWheelSwipe
+                orientation: Qt.Horizontal
+                acceptedDevices: PointerDevice.TouchPad
+                onWheel: (event) => {
+                    if (wheelSwipeCooldown.running || slideAnim.running) {
+                        event.accepted = true;
+                        return;
+                    }
+                    var delta = event.angleDelta.x !== 0 ? event.angleDelta.x : event.pixelDelta.x;
+                    if (Math.abs(delta) >= 18) {
+                        wheelSwipeCooldown.restart();
+                        if (delta < 0) {
+                            root.goToNextPage();
+                        } else {
+                            root.goToPrevPage();
                         }
-                        var delta = event.angleDelta.x !== 0 ? event.angleDelta.x : event.angleDelta.y;
-                        if (delta === 0) {
-                            delta = event.pixelDelta.x !== 0 ? event.pixelDelta.x : event.pixelDelta.y;
-                        }
-                        if (Math.abs(delta) >= 15) {
-                            wheelSwipeCooldown.restart();
-                            if (delta < 0) {
-                                root.goToNextPage();
-                            } else {
-                                root.goToPrevPage();
-                            }
-                            event.accepted = true;
-                        }
+                        event.accepted = true;
                     }
                 }
             }

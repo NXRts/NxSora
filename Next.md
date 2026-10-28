@@ -175,7 +175,7 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
   - [x] Tombol pengaturan ukuran gelas (`150ml / 200ml / 250ml / 300ml / 500ml`) dan target harian (`1500ml – 3000ml`) langsung dari UI.
 - [x] **5. Navigasi Swipe / Swap Interaktif & Perbaikan Input (`qml/ExpandedHub.qml` + `qml/Island.qml`)**
   - [x] *Interactive Mouse/Touchpad Drag-to-Swipe* (`DragHandler`) dengan *live preview* halaman tetangga & *continuous wrap-around*.
-  - [x] Perpindahan halaman dengan *Mouse Scroll Wheel* & *Touchpad 2-Finger Swipe* (`WheelHandler` di layer `z: 50`) yang bebas macet di seluruh 7 halaman (termasuk melewati *To-Do List* dan *Shelf*).
+  - [x] Perpindahan halaman menggunakan **Swap / Drag Mouse** & **Touchpad 2-Finger Horizontal Swipe** (sementara *vertical mouse scroll wheel* dikhususkan untuk menggulir daftar internal seperti *Notifikasi*, *Bluetooth*, *Lirik*, dan *To-Do* agar tidak mengganggu).
   - [x] Perbaikan bug perubahan volume tidak sengaja saat memutar *scroll wheel* ketika Dynamic Island sedang terbuka.
 - [x] **6. Hardware, Suhu & Processor TDP Telemetry Suite (`services/system.py` + `qml/PageHardware.qml` + `qml/ExpandedHub.qml`)**
   - [x] **Processor TDP / Package Power (`PPT` dalam Watt)**: Pembacaan daya prosesor *real-time* dari sensor kernel `/sys/class/hwmon/hwmon*/power1_input` (`15.0–30.0 W`) lengkap dengan bar progres TDP.
@@ -207,27 +207,54 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 ### ⏳ Fase 3: Interaktivitas Maskot Pintar, Privasi & Integrasi Desktop KDE (BELUM DIIMPLEMENTASIKAN)
 
 - [ ] **1. Smart Mascot 2.0 (`qml/MascotEyes.qml`)**
-  - Tambahkan pelacakan kursor halus (*eye gaze* mengikuti posisi mouse), mode mengantuk (*sleeping eyes* saat idle > 5 menit), dan animasi menyapa (*happy blink / wave*) saat pengguna kembali aktif.
-- [ ] **2. Privacy Indicator Dots (Kamera & Mikrofon Aktif)**
-  - Deteksi penggunaan kamera (`/dev/video*` / PipeWire) dan mikrofon aktif via `pw-dump` / `pactl`, lalu tampilkan titik indikator hijau (kamera) dan oranye (mikrofon) di sudut Dynamic Island seperti di iOS/macOS.
+  - Tambahkan pelacakan kursor halus (*eye gaze* mengikuti posisi mouse), mode mengantuk (*sleeping eyes* saat idle > 5 menit), animasi menyapa (*happy blink / wave*) saat pengguna kembali aktif, dan reaksi ekspresi mata saat musik berdentum atau suhu CPU tinggi.
+- [ ] **2. Privacy Indicator Dots (Kamera, Mikrofon & Screen Share Aktif)**
+  - Deteksi penggunaan kamera (`/dev/video*` / PipeWire), mikrofon aktif, dan *Screen Sharing / Recording* via `pw-dump` / `pactl`, lalu tampilkan titik indikator hijau (kamera), oranye (mikrofon), dan ungu (rekam layar) di sudut Dynamic Island seperti di iOS/macOS.
 - [ ] **3. System Tray Menu & Fullscreen Auto-Hide**
   - Tambahkan ikon System Tray (`QSystemTrayIcon`) dengan menu cepat: *Pin/Unpin Hub*, *Mode Maskot*, *Minimal Line Mode*, *Sembunyikan Saat Fullscreen*, dan *Keluar*.
   - Deteksi saat jendela aktif di KDE Wayland berada dalam mode *Fullscreen* agar Dynamic Island otomatis menyembunyikan diri dan tidak menghalangi game/video.
+- [ ] **4. Wi-Fi Connect / Disconnect Auto-Peek & Smart Low-Battery Nudge (`≤20%`)**
+  - Pantau `org.freedesktop.NetworkManager` via D-Bus untuk menampilkan kapsul *Peek* `310x60px` saat Wi-Fi tersambung ke SSID baru atau terputus dari internet.
+  - Saat baterai turun ke `20%` atau `10%` tanpa *charger*, tampilkan pop-up peringatan baterai lemah dengan tombol aksi cepat **"Aktifkan Mode Hemat Daya (`power-saver`)"**.
+- [ ] **5. KDE Virtual Desktop / Workspace Switcher Indicator**
+  - Tampilkan nomor/nama *Virtual Desktop* KDE Plasma yang sedang aktif dan dukung perpindahan *workspace* dengan 1 klik.
 
 ---
 
-### ⏳ Fase 4: Fitur Produktivitas Ekstra — Boring.Notch, NotchNook & Poni (BELUM DIIMPLEMENTASIKAN)
+### ⏳ Fase 4: Fitur Produktivitas Ekstra & Smart Utilities (BELUM DIIMPLEMENTASIKAN)
 
-- [ ] **1. Clipboard History & Quick Paste**: Halaman/tab cepat untuk melihat 10 teks terakhir yang disalin (`Ctrl+C`) dan menempelkannya kembali dengan sekali klik.
-- [ ] **2. Audio Output Device Switcher**: Pilih perangkat output audio aktif (Speaker Laptop ↔ Headphone Bluetooth ↔ HDMI) langsung dari halaman Musik/Sistem.
-- [ ] **3. Live Weather & Day Progress Bar**: Widget cuaca lokal ringan (`Open-Meteo` tanpa API key) dan bar progres waktu hari di halaman Jaringan/Info.
-- [ ] **4. Camera Mirror & KDE Connect Quick Share**: Pratinjau cermin webcam cepat sebelum rapat online dan tombol kirim file dari *Shelf* langsung ke smartphone via KDE Connect.
-- [ ] **5. To-Do Edit & Due Time Reminder**: Tambahkan fitur edit teks tugas dan opsi jam pengingat (`HH:MM`) pada setiap tugas di halaman To-Do yang otomatis memicu HUD Notifikasi saat jatuh tempo.
-- [ ] **6. Guided Breathing (Relaksasi Pernapasan)**: Animasi lingkaran pernapasan *Inhale (4s) — Hold (4s) — Exhale (4s)* di halaman Kesehatan.
+- [ ] **1. Clipboard History & Quick Paste (`services/clipboard.py` + `qml/PageClipboard.qml`)**: Menyimpan 15 teks/kode/gambar terakhir yang disalin (`Ctrl+C`), mendukung *Pin* item penting, dan menempelkannya kembali dengan sekali klik.
+- [ ] **2. Audio Output & Input Device Switcher**: Pilih perangkat output/input audio aktif (Speaker Laptop ↔ TWS Bluetooth ↔ Monitor HDMI) dan lihat *Real-Time Audio Spectrum Visualizer* (`PipeWire` / `cava`) langsung dari halaman Musik.
+- [ ] **3. Live Weather & Day Progress Bar**: Widget cuaca lokal *real-time* (`Open-Meteo` tanpa API key) lengkap dengan prakiraan suhu per jam dan bar persentase waktu hari yang telah berlalu (`Day Progress`).
+- [ ] **4. Camera Mirror & KDE Connect Quick Share**: Pratinjau cermin webcam cepat (*Live Camera Mirror*) untuk mengecek penampilan sebelum rapat online, serta integrasi **KDE Connect** di halaman *Shelf* untuk mengirim file yang di-*drop* langsung ke HP Android/iPhone dengan 1 klik (dan melihat baterai HP).
+- [ ] **5. Quick Voice Note Recorder & Screen Color Picker (Eyedropper)**:
+  - **Voice Memo ke Shelf**: Rekam catatan suara singkat dengan visualisasi gelombang suara yang otomatis masuk ke **Rak File (`Shelf`)** agar siap di-*drag* ke WhatsApp/Telegram/Discord.
+  - **Eyedropper Color Picker**: Ambil sampel warna piksel mana pun di layar dan otomatis salin kode `#HEX` / `RGB` ke *Clipboard* beserta pratinjau warnanya di HUD.
+- [ ] **6. To-Do Edit & Due Time Reminder**: Tambahkan fitur edit teks tugas dan opsi jam pengingat (`HH:MM`) pada setiap tugas di halaman To-Do yang otomatis memicu HUD Notifikasi saat jatuh tempo.
+- [ ] **7. Guided Breathing (Relaksasi Pernapasan)**: Animasi lingkaran pernapasan *Inhale (4s) — Hold (4s) — Exhale (4s)* di halaman Kesehatan untuk meredakan kelelahan saat bekerja.
 
 ---
 
-### ⏳ Fase 5 (Fase Terakhir): Dukungan Cross-Platform Windows (`win32`) & Packaging Installer `.exe` untuk Publik (BELUM DIIMPLEMENTASIKAN)
+### ⏳ Fase 5: Halaman Pengaturan Terpadu & Kustomisasi Dynamic Island (`qml/PageSettings.qml` + `config.py`) (BELUM DIIMPLEMENTASIKAN)
+
+- [ ] **1. Pengaturan Navigasi, Gestur & Perilaku Interaksi**
+  - **Mode Geser Halaman**: Opsi mengaktifkan/mematikan *Mouse Scroll Wheel untuk Pindah Halaman* (default: **Mati**, hanya menggunakan **Swap/Drag** & *Touchpad 2-Finger Swipe* agar tidak mengganggu scroll daftar), serta toggle *Scroll di Kapsul Tertutup untuk Volume*.
+  - **Auto-Collapse & Hover-to-Expand**: Sakelar *Auto-Collapse saat kursor keluar*, pilihan durasi jeda tutup otomatis (`1.0s` / `1.8s` / `3.0s` / `5.0s`), serta opsi **Hover-to-Expand** (otomatis membuka Dynamic Island saat kursor ditahan di atas kapsul tanpa perlu klik).
+- [ ] **2. Kustomisasi Tampilan, Ukuran, Posisi & Tema Warna**
+  - **Gaya Kapsul Tertutup (*Idle Mode*)**: Pilihan antara *Standard Pill (`Jam + Cincin Baterai`)*, *Mascot Eyes (`Resting`)*, atau *Minimal Thin Line Mode* (garis hitam tipis di tepi atas layar).
+  - **Ukuran, Posisi Notch & Multi-Monitor**: Pengaturan skala ukuran (`90% Compact` / `100% Normal` / `115% Large`), gaya tempel (*Flush Top Notch `0px`* vs *Floating Pill `6px`*), dan pilihan **Layar/Monitor Aktif** untuk pengguna multi-monitor.
+  - **Tema Warna Aksen & Efek Cahaya (*Ambient Glow*)**: Pilihan warna aksen (*Adaptive Album Art*, *Cyber Blue `#38bdf8`*, *Neon Green `#33e07a`*, *Indigo `#818cf8`*, *Coral `#ff5a6e`*) serta toggle *Concave Ears*.
+- [ ] **3. Kontrol Pop-Up HUD, Batas Suhu & Efek Suara**
+  - **Sakelar Per-HUD**: Toggle individual untuk mengaktifkan/mematikan pop-up *Notifikasi*, *Bluetooth/TWS Peek*, *Charging Peek*, *Brightness/CapsLock/Mic HUD*, *Wi-Fi Peek*, dan *Peringatan Suhu Overheat*.
+  - **Ambang Peringatan Suhu & Durasi HUD**: Pengaturan batas suhu peringatan CPU/GPU (`80°C` / `85°C` / `90°C`), durasi tampil pop-up HUD (`2s` / `3.5s` / `5s`), serta toggle **Efek Suara (*Chime SFX*)** saat TWS tersambung atau Pomodoro selesai.
+- [ ] **4. Manajemen Halaman Hub, Global Hotkeys, Backup JSON & Autostart**
+  - **Page Visibility & Order Manager**: Centang halaman mana saja yang ingin ditampilkan/disembunyikan serta atur halaman default saat Dynamic Island dibuka.
+  - **Global Keyboard Shortcuts**: Dukungan *shortcut* keyboard cepat (misal `Meta + I` untuk *Buka/Tutup Dynamic Island*, `Meta + Shift + N` untuk *Pusat Notifikasi*).
+  - **Start on Login & Export/Import Preset**: Sakelar 1-klik **Jalankan Otomatis Saat Login KDE**, tombol **Export / Import Konfigurasi (`.json`)**, **Restart Dynamic Island**, dan **Reset ke Pengaturan Awal**.
+
+---
+
+### ⏳ Fase 6 (Fase Terakhir): Dukungan Cross-Platform Windows (`win32`) & Packaging Installer `.exe` untuk Publik (BELUM DIIMPLEMENTASIKAN)
 
 - [ ] **1. Hybrid Window Overlay (Wayland Layer-Shell + Windows Topmost Overlay)**
   - Deteksi sistem operasi otomatis di `main.py` (`sys.platform == "win32"`) untuk memuat window tanpa bingkai (`Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool`) dengan Win32 API `HWND_TOPMOST` & `WS_EX_TOOLWINDOW` agar menempel mulus di tengah atas layar Windows 10/11 tanpa muncul di *Taskbar* atau *Alt+Tab*.
