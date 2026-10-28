@@ -149,6 +149,7 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 | **Privacy Dots (Cam / Mic In-Use)** | ❌ Belum | — | Deteksi node PipeWire aktif untuk menampilkan titik hijau (kamera) & oranye (mikrofon) ala iOS/macOS. |
 | **System Tray & Fullscreen Hide** | ❌ Belum | Daemon systemd / background via `run.sh`. | **`QSystemTrayIcon`** (menu konfigurasi cepat) & **Fullscreen App Auto-Hide** (sembunyi saat main game/video fullscreen). |
 | **Hardware, Suhu & TDP Monitor** | ✅ Selesai | **Processor TDP (`W` via `hwmon PPT`)**, **Suhu CPU (`k10temp`), GPU (`amdgpu`), & NVMe (`°C`)**, **Clock CPU (`GHz`)**, **GPU Load & VRAM**, **Top Process**, **Overheat HUD Alert (`≥85°C`)**, & **1-Click Power Profile Switcher** (`PageHardware.qml` + `services/system.py`). | Statistik riwayat suhu & kecepatan kipas (`RPM` jika tersedia). |
+| **Jadwal Sholat & Pengingat Azan** | ❌ Belum | — | **Jadwal 5 Waktu + Imsak/Syuruq (Metode Kemenag RI)**, *Countdown* waktu sholat berikutnya, **Pop-Up HUD Azan (`HudPrayer.qml`)**, pengingat 10 menit sebelum azan, **Auto-Pause Musik saat Azan**, & *Tracker Checklist Sholat 5 Waktu*. |
 | **Clipboard, Cuaca & Kamera** | ❌ Belum | — | **Clipboard History Manager**, **Live Weather & Day Progress Bar**, serta **Camera Mirror**. |
 | **Portabilitas Windows & `.exe` Installer** | ⏳ Sebagian | Seluruh UI/Animasi QML, Lirik (`LRCLIB`), Timer, Water, To-Do, File Shelf (`QDrag`), & statistik dasar (`psutil`) sudah *cross-platform*. | Adapter backend Windows (`sys.platform == "win32"` untuk SMTC Media, `pycaw` Audio, Bluetooth, WMI Thermal/Brightness) + bundel **`DynamicIsland-Setup.exe`** (**PyInstaller + Inno Setup**). |
 
@@ -221,17 +222,22 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 
 ---
 
-### ⏳ Fase 4: Fitur Produktivitas Ekstra & Smart Utilities (BELUM DIIMPLEMENTASIKAN)
+### ⏳ Fase 4: Fitur Produktivitas Ekstra, Ibadah & Smart Utilities (BELUM DIIMPLEMENTASIKAN)
 
-- [ ] **1. Clipboard History & Quick Paste (`services/clipboard.py` + `qml/PageClipboard.qml`)**: Menyimpan 15 teks/kode/gambar terakhir yang disalin (`Ctrl+C`), mendukung *Pin* item penting, dan menempelkannya kembali dengan sekali klik.
-- [ ] **2. Audio Output & Input Device Switcher**: Pilih perangkat output/input audio aktif (Speaker Laptop ↔ TWS Bluetooth ↔ Monitor HDMI) dan lihat *Real-Time Audio Spectrum Visualizer* (`PipeWire` / `cava`) langsung dari halaman Musik.
-- [ ] **3. Live Weather & Day Progress Bar**: Widget cuaca lokal *real-time* (`Open-Meteo` tanpa API key) lengkap dengan prakiraan suhu per jam dan bar persentase waktu hari yang telah berlalu (`Day Progress`).
-- [ ] **4. Camera Mirror & KDE Connect Quick Share**: Pratinjau cermin webcam cepat (*Live Camera Mirror*) untuk mengecek penampilan sebelum rapat online, serta integrasi **KDE Connect** di halaman *Shelf* untuk mengirim file yang di-*drop* langsung ke HP Android/iPhone dengan 1 klik (dan melihat baterai HP).
-- [ ] **5. Quick Voice Note Recorder & Screen Color Picker (Eyedropper)**:
+- [ ] **1. Jadwal Sholat & Pengingat Azan Pintar Real-Time Lokasi (`services/prayer.py` + `qml/PagePrayer.qml` + `qml/HudPrayer.qml`)**:
+  - **Deteksi Lokasi & Koordinat Real-Time Otomatis (`Latitude` & `Longitude`)**: Mendeteksi posisi pengguna secara otomatis melalui layanan lokasi sistem (**GeoClue2 D-Bus** / Wi-Fi Triangulation) dan *Multi-Provider IP Geolocation* (`ipwho.is` / `ip-api.com`) setiap kali jaringan terhubung/berpindah, lalu menghitung waktu *Imsak, Subuh, Syuruq, Dzuhur, Ashar, Maghrib, dan Isya* tepat berdasarkan **titik koordinat lintang-bujur (`lat, lon`) pengguna** dengan standar **Kemenag RI (Method 20)** + *fallback* kalkulasi astronomi lokal.
+  - **Countdown & Pre-Adzan Nudge (10 Menit Sebelum Waktu Sholat)**: Menampilkan hitung mundur menuju waktu sholat berikutnya (`Maghrib dalam 14m`) dan pengingat halus 10 menit sebelum azan agar pengguna bisa menyimpan pekerjaan lebih dulu.
+  - **Pop-Up Kapsul Azan (`HudPrayer.qml`) & Auto-Pause Musik**: Saat waktu azan tiba, tampilkan kapsul berlencana kubah/bulan sabit hijau-emas (`#10b981` / `#f59e0b`), kumandang audio pengingat lembut, serta opsi **otomatis menjeda (*pause*) musik/Spotify saat Azan berkumandang**.
+  - **Checklist Tracker Sholat 5 Waktu**: Fitur centang ibadah harian di halaman Jadwal Sholat untuk membantu menjaga konsistensi sholat tepat waktu.
+- [ ] **2. Clipboard History & Quick Paste (`services/clipboard.py` + `qml/PageClipboard.qml`)**: Menyimpan 15 teks/kode/gambar terakhir yang disalin (`Ctrl+C`), mendukung *Pin* item penting, dan menempelkannya kembali dengan sekali klik.
+- [ ] **3. Audio Output & Input Device Switcher**: Pilih perangkat output/input audio aktif (Speaker Laptop ↔ TWS Bluetooth ↔ Monitor HDMI) dan lihat *Real-Time Audio Spectrum Visualizer* (`PipeWire` / `cava`) langsung dari halaman Musik.
+- [ ] **4. Live Weather & Day Progress Bar**: Widget cuaca lokal *real-time* (`Open-Meteo` tanpa API key) lengkap dengan prakiraan suhu per jam dan bar persentase waktu hari yang telah berlalu (`Day Progress`).
+- [ ] **5. Camera Mirror & KDE Connect Quick Share**: Pratinjau cermin webcam cepat (*Live Camera Mirror*) untuk mengecek penampilan sebelum rapat online, serta integrasi **KDE Connect** di halaman *Shelf* untuk mengirim file yang di-*drop* langsung ke HP Android/iPhone dengan 1 klik (dan melihat baterai HP).
+- [ ] **6. Quick Voice Note Recorder & Screen Color Picker (Eyedropper)**:
   - **Voice Memo ke Shelf**: Rekam catatan suara singkat dengan visualisasi gelombang suara yang otomatis masuk ke **Rak File (`Shelf`)** agar siap di-*drag* ke WhatsApp/Telegram/Discord.
   - **Eyedropper Color Picker**: Ambil sampel warna piksel mana pun di layar dan otomatis salin kode `#HEX` / `RGB` ke *Clipboard* beserta pratinjau warnanya di HUD.
-- [ ] **6. To-Do Edit & Due Time Reminder**: Tambahkan fitur edit teks tugas dan opsi jam pengingat (`HH:MM`) pada setiap tugas di halaman To-Do yang otomatis memicu HUD Notifikasi saat jatuh tempo.
-- [ ] **7. Guided Breathing (Relaksasi Pernapasan)**: Animasi lingkaran pernapasan *Inhale (4s) — Hold (4s) — Exhale (4s)* di halaman Kesehatan untuk meredakan kelelahan saat bekerja.
+- [ ] **7. To-Do Edit & Due Time Reminder**: Tambahkan fitur edit teks tugas dan opsi jam pengingat (`HH:MM`) pada setiap tugas di halaman To-Do yang otomatis memicu HUD Notifikasi saat jatuh tempo.
+- [ ] **8. Guided Breathing (Relaksasi Pernapasan)**: Animasi lingkaran pernapasan *Inhale (4s) — Hold (4s) — Exhale (4s)* di halaman Kesehatan untuk meredakan kelelahan saat bekerja.
 
 ---
 
