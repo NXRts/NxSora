@@ -204,7 +204,7 @@ class LyricsService(QObject):
         clean_t, clean_a, alt_t, alt_a = self._clean_metadata(title, artist)
 
         headers = {
-            "User-Agent": "KDE-Dynamic-Island/2.0 (https://github.com/rama2555/nusa-inspired)"
+            "User-Agent": "KDE-Dynamic-Island/2.0 (https://github.com/NXRts/Projek-Dynamic-Island)"
         }
 
         def query_json(url: str):

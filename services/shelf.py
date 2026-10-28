@@ -1,5 +1,5 @@
 """
-Wayland File Shelf Service (Nusa & Boring.Notch Style)
+Wayland File Shelf Service (Wayland File Shelf Style)
 Stores dropped file/folder paths persistently in ~/.config/dynamic_island/shelf.json
 without copying file contents into memory, and supports native Wayland Drag-Out (QDrag).
 """

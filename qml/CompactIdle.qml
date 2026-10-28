@@ -22,7 +22,7 @@ Item {
         }
     }
 
-    // 1. Mascot Eyes Mode (Nusa Style)
+    // 1. Mascot Eyes Mode (Dynamic Notch Style)
     MascotEyes {
         anchors.fill: parent
         visible: opacity > 0
@@ -30,7 +30,7 @@ Item {
         Behavior on opacity { NumberAnimation { duration: 250 } }
     }
 
-    // 2. Nusa "Closed" Capsule Mode: [Circular Battery Ring] [Digital Clock] [Mini Wave / Battery %]
+    // 2. Closed Capsule Mode: [Circular Battery Ring] [Digital Clock] [Mini Wave / Battery %]
     RowLayout {
         anchors.centerIn: parent
         spacing: 8
@@ -38,7 +38,7 @@ Item {
         opacity: IslandController.mascotMode ? 0.0 : 1.0
         Behavior on opacity { NumberAnimation { duration: 250 } }
 
-        // LEFT: Nusa Circular Battery Conic Ring (15x15)
+        // LEFT: Circular Battery Conic Ring (15x15)
         Item {
             width: 15
             height: 15
@@ -69,7 +69,7 @@ Item {
                     ctx.strokeStyle = "#1f2937";
                     ctx.stroke();
 
-                    // Active battery conic arc (#33e07a green like Nusa)
+                    // Active battery conic arc (#33e07a green modern style)
                     var ratio = Math.max(0.08, Math.min(1.0, pct / 100.0));
                     var startAngle = -Math.PI / 2;
                     var endAngle = startAngle + (Math.PI * 2 * ratio);

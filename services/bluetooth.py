@@ -1,7 +1,7 @@
 """
 Bluetooth Audio & Device Manager Service (BlueZ D-Bus)
 Monitors org.bluez for Adapter status, Connected/Paired Bluetooth devices,
-and battery levels. Powers both the 310x60px Nusa Headphones Peek HUD
+and battery levels. Powers both the 310x60px Headphones Peek HUD
 (with TWS Case & Earbuds Pop-Out / Put-In animations) and the dedicated
 Bluetooth & Perangkat Hub Page.
 """

@@ -520,7 +520,7 @@ Item {
             }
 
             // -----------------------------------------------------------------
-            // PAGE 0: SISTEM & NUSA POMODORO FOCUS TIMER
+            // PAGE 0: SISTEM & POMODORO FOCUS TIMER
             // -----------------------------------------------------------------
             Item {
                 id: pageSystem
@@ -716,13 +716,13 @@ Item {
                         }
                     }
 
-                    // 2. Bottom Row: NUSA POMODORO FOCUS TIMER RING + QUICK MUTE
+                    // 2. Bottom Row: POMODORO FOCUS TIMER RING + QUICK MUTE
                     RowLayout {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         spacing: 8
 
-                        // NUSA POMODORO FOCUS TIMER CARD
+                        // POMODORO FOCUS TIMER CARD
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
@@ -739,7 +739,7 @@ Item {
                                 anchors.rightMargin: 12
                                 spacing: 14
 
-                                // --- LEFT: GLOWING CONIC RING (Nusa .pring & .pglow) ---
+                                // --- LEFT: GLOWING CONIC RING (Conic Ring & Glow) ---
                                 Item {
                                     width: 68
                                     height: 68
@@ -811,7 +811,7 @@ Item {
                                     }
                                 }
 
-                                // --- RIGHT: TIME READOUT, RESET & 3 NUSA PILL BUTTONS ---
+                                // --- RIGHT: TIME READOUT, RESET & 3 PILL BUTTONS ---
                                 ColumnLayout {
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignVCenter
@@ -848,7 +848,7 @@ Item {
 
                                         Item { Layout.fillWidth: true }
 
-                                        // Circular Reset Button (Nusa style)
+                                        // Circular Reset Button (Dynamic Notch style)
                                         Rectangle {
                                             width: 24
                                             height: 24
@@ -908,7 +908,7 @@ Item {
                                             }
                                         }
 
-                                        // 2. Center Play / Pause Pill (#ff4b55 in Nusa)
+                                        // 2. Center Play / Pause Pill (#ff4b55 accent color)
                                         Rectangle {
                                             width: 48
                                             height: 26
@@ -1008,7 +1008,7 @@ Item {
             }
 
             // -----------------------------------------------------------------
-            // PAGE 1: PEMUTAR MUSIK + NUSA 520px SPLIT SYNCED LYRICS KARAOKE
+            // PAGE 1: PEMUTAR MUSIK + 520px SPLIT SYNCED LYRICS KARAOKE
             // -----------------------------------------------------------------
             Item {
                 id: pageMusic
@@ -1080,7 +1080,7 @@ Item {
                             }
                         }
 
-                        // Seek timeline (Elapsed on left, -Remaining on right like Nusa!)
+                        // Seek timeline (Elapsed on left, -Remaining on right modern style!)
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 2
@@ -1176,7 +1176,7 @@ Item {
                             Layout.fillWidth: true
                             spacing: 6
 
-                            // 1. LEFT: Nusa Lyrics Button (Vector SVG icon, Pill when off, Active Circle when on)
+                            // 1. LEFT: Lyrics Button (Vector SVG icon, Pill when off, Active Circle when on)
                             Rectangle {
                                 height: 30
                                 radius: 15
@@ -1458,7 +1458,7 @@ Item {
                         }
                     }
 
-                    // --- VERTICAL DIVIDER (Nusa x=252px split line) ---
+                    // --- VERTICAL DIVIDER (x=252px split line) ---
                     Rectangle {
                         visible: IslandController.lyricsModeActive
                         width: 1
@@ -1468,7 +1468,7 @@ Item {
                         color: "#262b40"
                     }
 
-                    // --- RIGHT COLUMN: NUSA SYNCED LYRICS KARAOKE VIEW ---
+                    // --- RIGHT COLUMN: SYNCED LYRICS KARAOKE VIEW ---
                     Item {
                         visible: IslandController.lyricsModeActive
                         Layout.fillWidth: true

@@ -10,7 +10,7 @@ Item {
         spacing: 8
 
         // =====================================================================
-        // SECTION 1: NUSA SPLIT WATER TRACKER + HOURLY HISTOGRAM CHART
+        // SECTION 1: SPLIT WATER TRACKER + HOURLY HISTOGRAM CHART
         // =====================================================================
         Rectangle {
             Layout.fillWidth: true
@@ -109,7 +109,7 @@ Item {
                         Item { Layout.fillWidth: true }
                     }
 
-                    // Horizontal Gradient Progress Bar (Nusa .wbar)
+                    // Horizontal Gradient Progress Bar (.wbar)
                     Rectangle {
                         Layout.fillWidth: true
                         height: 5
@@ -171,7 +171,7 @@ Item {
                             }
                         }
 
-                        // Cup & Goal Settings Pill (Nusa Settings button)
+                        // Cup & Goal Settings Pill (Settings button)
                         Rectangle {
                             height: 24
                             radius: 12
@@ -233,7 +233,7 @@ Item {
                     }
                 }
 
-                // Vertical Divider (Nusa x=208px divider)
+                // Vertical Divider (x=208px divider)
                 Rectangle {
                     width: 1
                     Layout.fillHeight: true
@@ -242,7 +242,7 @@ Item {
                     color: "#22293e"
                 }
 
-                // --- RIGHT SIDE: NUSA HOURLY HISTOGRAM CHART (09..16) ---
+                // --- RIGHT SIDE: HOURLY HISTOGRAM CHART (09..16) ---
                 ColumnLayout {
                     Layout.preferredWidth: 132
                     Layout.fillHeight: true
@@ -320,7 +320,7 @@ Item {
                                         color: "#1a2032"
                                     }
 
-                                    // Active Growing Bar (Nusa .wbar-col.wgrow)
+                                    // Active Growing Bar (.wbar-col.wgrow)
                                     Rectangle {
                                         anchors.left: parent.left
                                         anchors.right: parent.right

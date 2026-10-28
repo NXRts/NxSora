@@ -38,7 +38,7 @@ Item {
         }
     }
 
-    // Gentle ambient glow behind the eyes (Nusa style)
+    // Gentle ambient glow behind the eyes (Dynamic Notch style)
     Rectangle {
         anchors.centerIn: parent
         width: 76

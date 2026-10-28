@@ -343,7 +343,7 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 25px var(--notch-glow, rgba(56, 189, 248, 0.2));
     }
 
-    /* Concave Ear Curves (Apple & Nusa Notch Style) */
+    /* Concave Ear Curves (MacBook & Dynamic Notch Style) */
     .notch-body::before,
     .notch-body::after {
       content: "";
@@ -452,6 +452,474 @@
       100% { height: 100%; }
     }
 
+    /* ==========================================================================
+       Pixel-Perfect QML Expanded Hub & Notch Simulator CSS (1:1 with Real App)
+       ========================================================================== */
+    .notch-body {
+      position: relative;
+      background: #07070a;
+      border-bottom: 1.5px solid var(--notch-border, #282b3d);
+      border-left: 1.5px solid var(--notch-border, #282b3d);
+      border-right: 1.5px solid var(--notch-border, #282b3d);
+      border-top: none;
+      transition: width 0.32s var(--ease-spring), height 0.32s var(--ease-spring), border-color 0.25s, box-shadow 0.25s;
+      cursor: default;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.9), 0 0 25px var(--notch-glow, rgba(56, 189, 248, 0.12));
+      overflow: hidden;
+    }
+
+    /* Concave Ear Curves - Flush to Top Panel */
+    .notch-body::before,
+    .notch-body::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 12px;
+      height: 12px;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .notch-body::before {
+      right: 100%;
+      background: radial-gradient(circle at 0% 100%, transparent 11px, #07070a 11.5px);
+    }
+    .notch-body::after {
+      left: 100%;
+      background: radial-gradient(circle at 100% 100%, transparent 11px, #07070a 11.5px);
+    }
+
+    /* Full Expanded Hub Container (Exact QML Dimension: 440x245px) */
+    .hub-full-layout {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 14px;
+      gap: 10px;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    /* 1. Header: [ < | > ] [Title + 9 Indicator Dots] [ 🔔 9+ | 📌 | ✕ ] */
+    .hub-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      height: 28px;
+    }
+
+    .hub-nav-capsule {
+      width: 62px;
+      height: 28px;
+      border-radius: 14px;
+      background: #181a26;
+      border: 1px solid #282b3d;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px;
+      box-sizing: border-box;
+    }
+    .hub-nav-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+    }
+    .hub-nav-btn:hover { color: #ffffff; }
+    .hub-nav-divider {
+      width: 1px;
+      height: 14px;
+      background: #282b3d;
+    }
+
+    .hub-title-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-left: 8px;
+      flex: 1;
+    }
+    .hub-title-text {
+      color: #f8fafc;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .hub-dots-row {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      margin-top: 3px;
+    }
+    .hub-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 2.5px;
+      background: #475569;
+      cursor: pointer;
+      transition: width 0.2s, background-color 0.2s;
+    }
+    .hub-dot.active {
+      width: 14px;
+      background: #38bdf8;
+      border-radius: 2.5px;
+    }
+
+    .hub-action-btns {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hub-action-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 14px;
+      background: #181a24;
+      border: 1px solid #282a36;
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 11px;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .hub-action-btn:hover {
+      background: #252836;
+      color: #ffffff;
+      border-color: #3b3f54;
+    }
+    .hub-unread-badge {
+      position: absolute;
+      top: -3px;
+      right: -3px;
+      width: 14px;
+      height: 14px;
+      border-radius: 7px;
+      background: #818cf8;
+      color: #ffffff;
+      font-size: 8px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid #07070a;
+    }
+
+    /* 2. Hub Page Content Box */
+    .hub-body-page {
+      display: none;
+      width: 100%;
+      height: 182px;
+      flex-direction: column;
+      animation: hubFadeIn 0.2s ease-out;
+    }
+    .hub-body-page.active {
+      display: flex;
+    }
+    @keyframes hubFadeIn {
+      from { opacity: 0; transform: translateY(3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================================
+       Page 3: Hardware, Suhu & TDP View (EXACT MATCH SCREENSHOT 2)
+       ========================================================================== */
+    .hw-page-view {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+      height: 100%;
+    }
+    .hw-top-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      height: 86px;
+    }
+    .hw-card-item {
+      background: #12131c;
+      border: 1px solid #24273a;
+      border-radius: 10px;
+      padding: 8px 9px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+      text-align: left;
+    }
+    .hw-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .hw-card-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+    .hw-temp-pill {
+      font-size: 9px;
+      font-weight: 800;
+      border-radius: 8px;
+      padding: 1px 6px;
+      line-height: 1.2;
+    }
+    .hw-temp-pill.orange {
+      background: #382610;
+      border: 1px solid #f59e0b;
+      color: #f59e0b;
+    }
+    .hw-temp-pill.green {
+      background: #112e21;
+      border: 1px solid #22c55e;
+      color: #22c55e;
+    }
+    .hw-stat-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      width: 100%;
+      margin: 2px 0;
+    }
+    .hw-stat-number {
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .hw-stat-freq {
+      font-size: 9px;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+    .hw-bar-track {
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #1e2433;
+      overflow: hidden;
+      margin-bottom: 2px;
+    }
+    .hw-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+    }
+    .hw-sub-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 8.5px;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    /* Row 2: 2 Proportional Cards (Jaringan & AMD Ryzen Top Process) */
+    .hw-mid-cards {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 6px;
+      height: 46px;
+    }
+    .hw-info-card {
+      background: #12131c;
+      border: 1px solid #24273a;
+      border-radius: 10px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-sizing: border-box;
+      text-align: left;
+    }
+    .hw-icon-circle {
+      width: 26px;
+      height: 26px;
+      border-radius: 13px;
+      background: #101c2e;
+      border: 1px solid #1e3a5f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #38bdf8;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    /* Row 3: Footer TDP Modes */
+    .hw-footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 28px;
+      padding: 0 2px;
+    }
+    .hw-tdp-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .hw-tdp-buttons {
+      display: flex;
+      gap: 6px;
+    }
+    .hw-tdp-btn {
+      height: 24px;
+      padding: 0 10px;
+      border-radius: 12px;
+      background: #141724;
+      border: 1px solid #232738;
+      color: #94a3b8;
+      font-size: 9.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .hw-tdp-btn:hover { color: #f8fafc; border-color: #3b4259; }
+    .hw-tdp-btn.active-red {
+      background: #2c141d;
+      border: 1.5px solid #f43f5e;
+      color: #fda4af;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(244, 63, 94, 0.35);
+    }
+
+    /* Page 0: Sistem & Pomodoro */
+    .sys-top-meters {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      height: 48px;
+    }
+    .sys-meter-box {
+      background: #121217;
+      border: 1px solid #22222a;
+      border-radius: 10px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left;
+    }
+    .pomodoro-card {
+      flex: 1;
+      border-radius: 12px;
+      background: #11131d;
+      border: 1px solid #222436;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 16px;
+      margin-top: 6px;
+    }
+    .pomo-ring-mock {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: conic-gradient(#f43f5e 0% 75%, #222436 75% 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px rgba(244, 63, 94, 0.3);
+      position: relative;
+    }
+    .pomo-inner {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #0d0f17;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Page 1: Media Player */
+    .music-full-box {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      gap: 12px;
+      align-items: center;
+    }
+    .music-cover-art {
+      width: 64px;
+      height: 64px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f43f5e, #fb923c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 18px rgba(244, 63, 94, 0.4);
+      flex-shrink: 0;
+    }
+
+    /* Page 4: Bluetooth */
+    .bt-page-layout {
+      display: grid;
+      grid-template-columns: 134px 1fr;
+      gap: 8px;
+      height: 100%;
+      text-align: left;
+    }
+    .bt-hero-card {
+      background: #121217;
+      border: 1px solid #1e3a5f;
+      border-radius: 12px;
+      padding: 9px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Page 5: Notifications */
+    .notif-page-layout {
+      display: grid;
+      grid-template-columns: 164px 1fr;
+      gap: 8px;
+      height: 100%;
+      text-align: left;
+    }
+    .notif-left-inbox {
+      background: #121217;
+      border: 1px solid #22222a;
+      border-radius: 12px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow: hidden;
+    }
+
+    /* Page 9: Prayer Times Sun Arc */
+    .prayer-page-layout {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 12px;
+      height: 100%;
+      align-items: center;
+      text-align: left;
+    }
+
     /* Simulator Switcher Controls */
     .sim-controls {
       display: flex;
@@ -467,23 +935,21 @@
     .sim-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
+      gap: 6px;
+      padding: 7px 14px;
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid var(--border);
       color: var(--text-muted);
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
     }
-
     .sim-btn:hover {
       color: #fff;
-      border-color: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.25);
     }
-
     .sim-btn.active {
       background: rgba(56, 189, 248, 0.15);
       border-color: var(--cyan);
@@ -924,27 +1390,37 @@
         <!-- Virtual Screen with Dynamic Island Hanging -->
         <div class="virtual-screen">
           <div class="notch-container">
-            <div id="sim-notch" class="notch-body" onclick="toggleExpandSimulator()" title="Klik untuk Buka/Tutup Expanded Card">
+            <div id="sim-notch" class="notch-body" title="Dynamic Island Simulator — Navigasi 1:1 persis aplikasi KDE Plasma">
               
+              <!-- ==============================================================
+                   A. MODE KAPSUL TERTUTUP (IDLE, PEEK & HUD)
+                   ============================================================== -->
               <!-- 1. Mode Maskot (Blinking Eyes) -->
-              <div id="view-mascot" class="view-content active">
+              <div id="view-mascot" class="view-content active" onclick="openExpandedPage(3)">
                 <div class="mascot-eyes">
                   <div class="mascot-eye"></div>
                   <div class="mascot-eye"></div>
                 </div>
               </div>
 
-              <!-- 2. Mode Jam Digital & Status -->
-              <div id="view-clock" class="view-content">
+              <!-- 2. Mode Jam Digital & Status Ring -->
+              <div id="view-clock" class="view-content" onclick="openExpandedPage(3)">
                 <div style="display:flex; align-items:center; gap:8px;">
                   <span style="width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green);"></span>
                   <span id="notch-clock" style="font-weight:700; font-size:12px; color:#fff;">21:30</span>
                 </div>
-                <span style="font-size:10.5px; color:#94a3b8; font-weight:600;">85% ⚡</span>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <div class="eq-wave" style="height:10px;">
+                    <div class="eq-bar" style="width:2px;"></div>
+                    <div class="eq-bar" style="width:2px;"></div>
+                    <div class="eq-bar" style="width:2px;"></div>
+                  </div>
+                  <span style="font-size:10px; color:#38bdf8; font-weight:700;">85% ⚡</span>
+                </div>
               </div>
 
               <!-- 3. Mode Musik Kapsul -->
-              <div id="view-music" class="view-content">
+              <div id="view-music-compact" class="view-content" onclick="openExpandedPage(1)">
                 <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
                   <div class="music-art">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="#fff"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
@@ -962,44 +1438,521 @@
                 </div>
               </div>
 
-              <!-- 4. Mode HUD Volume -->
-              <div id="view-volume" class="view-content">
+              <!-- 4. Mode Volume HUD (230x32px) -->
+              <div id="view-volume-hud" class="view-content">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
                 <div style="flex:1; height:5px; background:#1e293b; border-radius:3px; margin:0 12px; overflow:hidden;">
-                  <div id="sim-vol-bar" style="width:75%; height:100%; background:var(--cyan); border-radius:3px;"></div>
+                  <div style="width:75%; height:100%; background:var(--cyan); border-radius:3px;"></div>
                 </div>
-                <span id="sim-vol-text" style="font-size:11.5px; font-weight:700; color:#fff;">75%</span>
+                <span style="font-size:11.5px; font-weight:700; color:#fff;">75%</span>
               </div>
 
-              <!-- 5. Mode Expanded Hub -->
-              <div id="view-expanded" class="view-content" style="flex-direction:column; padding:14px; gap:12px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <div style="display:flex; background:#1e2433; border-radius:12px; padding:2px 8px; font-size:11px; font-weight:700; color:#38bdf8;">
-                      &lt; | &gt;
+              <!-- 5. Mode Bluetooth & TWS Peek (310x60px) -->
+              <div id="view-bluetooth-hud" class="view-content" style="padding:10px 14px;" onclick="openExpandedPage(4)">
+                <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:36px; height:36px; border-radius:50%; background:conic-gradient(#5ec2ff 0% 85%, rgba(255,255,255,0.1) 85% 100%); display:flex; align-items:center; justify-content:center;">
+                      <div style="width:28px; height:28px; border-radius:50%; background:#07070a; display:flex; align-items:center; justify-content:center;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5ec2ff" stroke-width="2.5"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></svg>
+                      </div>
                     </div>
-                    <span style="font-weight:700; font-size:12.5px; color:#fff;">Pemutar Musik & Media</span>
-                  </div>
-                  <span style="font-size:11px; padding:2px 8px; border-radius:6px; background:rgba(255,255,255,0.08); color:var(--text-muted); cursor:pointer;">✕ Tutup</span>
-                </div>
-
-                <div style="display:flex; gap:14px; align-items:center; width:100%;">
-                  <div style="width:64px; height:64px; border-radius:10px; background:linear-gradient(135deg, #f43f5e, #fb923c); display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(244,63,94,0.4);">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-                  </div>
-                  <div style="flex:1; text-align:left;">
-                    <div style="font-weight:700; font-size:13px; color:#fff;">Nanti Kita Seperti Ini</div>
-                    <div style="font-size:11px; color:#94a3b8; margin-bottom:6px;">Batas Senja • Spotify</div>
-                    <div style="height:4px; background:#1e293b; border-radius:2px; overflow:hidden;">
-                      <div style="width:45%; height:100%; background:linear-gradient(90deg, #38bdf8, #818cf8);"></div>
+                    <div style="text-align:left;">
+                      <div style="font-size:12.5px; font-weight:700; color:#fff;">soundcore R50i</div>
+                      <div style="font-size:10.5px; color:#5ec2ff; font-weight:600;">Connected • 85% 🔋</div>
                     </div>
                   </div>
+                  <div style="display:flex; gap:6px; background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+                    <div style="width:10px; height:18px; border-radius:5px; background:linear-gradient(180deg,#fff,#94a3b8); box-shadow:0 0 8px rgba(94,194,255,0.6);"></div>
+                    <div style="width:10px; height:18px; border-radius:5px; background:linear-gradient(180deg,#fff,#94a3b8); box-shadow:0 0 8px rgba(94,194,255,0.6);"></div>
+                  </div>
                 </div>
+              </div>
 
-                <div style="display:flex; justify-content:center; gap:20px; width:100%; align-items:center;">
-                  <button style="background:none; border:none; color:#cbd5e1; cursor:pointer;">⏮️</button>
-                  <button style="background:var(--cyan); border:none; width:30px; height:30px; border-radius:50%; color:#040814; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center;">⏸</button>
-                  <button style="background:none; border:none; color:#cbd5e1; cursor:pointer;">⏭️</button>
+              <!-- 6. Mode Charging Peek (310x60px) -->
+              <div id="view-charging-hud" class="view-content" style="padding:10px 16px;" onclick="openExpandedPage(0)">
+                <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                  <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="width:36px; height:36px; border-radius:50%; background:conic-gradient(#22c55e 0% 85%, rgba(255,255,255,0.1) 85% 100%); display:flex; align-items:center; justify-content:center; box-shadow:0 0 14px rgba(34,197,94,0.35);">
+                      <div style="width:28px; height:28px; border-radius:50%; background:#07070a; display:flex; align-items:center; justify-content:center;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#22c55e"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                      </div>
+                    </div>
+                    <div style="text-align:left;">
+                      <div style="font-size:13px; font-weight:800; color:#fff;">Charging</div>
+                      <div style="font-size:10px; color:#94a3b8;">Charger connected</div>
+                    </div>
+                  </div>
+                  <div style="font-size:20px; font-weight:800; color:#22c55e;">85%</div>
+                </div>
+              </div>
+
+              <!-- ==============================================================
+                   B. MODE EXPANDED HUB PENUH (440x245px) DENGAN 9+ HALAMAN
+                   ============================================================== -->
+              <div id="view-expanded" class="view-content" style="padding:0;">
+                <div class="hub-full-layout">
+                  
+                  <!-- 1. Header Resmi: [ < | > ] [Title + 9 Dots] [ 🔔 9+ | 📌 | ✕ ] -->
+                  <div class="hub-header">
+                    <!-- Nav Capsule -->
+                    <div class="hub-nav-capsule">
+                      <button class="hub-nav-btn" onclick="prevHubPage()" title="Halaman Sebelumnya">❮</button>
+                      <div class="hub-nav-divider"></div>
+                      <button class="hub-nav-btn" onclick="nextHubPage()" title="Halaman Selanjutnya">❯</button>
+                    </div>
+
+                    <!-- Title & 9/10 Dots -->
+                    <div class="hub-title-box">
+                      <div id="hub-title" class="hub-title-text">Hardware, Suhu & TDP</div>
+                      <div class="hub-dots-row" id="hub-dots-container">
+                        <span class="hub-dot" onclick="jumpHubPage(0)" title="0. Sistem & Pomodoro"></span>
+                        <span class="hub-dot" onclick="jumpHubPage(1)" title="1. Musik & Lirik"></span>
+                        <span class="hub-dot" onclick="jumpHubPage(2)" title="2. Pintasan Cepat"></span>
+                        <span class="hub-dot active" onclick="jumpHubPage(3)" title="3. Hardware, Suhu & TDP"></span>
+                        <span class="hub-dot" onclick="jumpHubPage(4)" title="4. Bluetooth & Perangkat"></span>
+                        <span class="hub-dot" onclick="jumpHubPage(5)" title="5. Pusat Notifikasi"></span>
+                        <span class="hub-dot" onclick="jumpHubPage(6)" title="6. Kesehatan & Air"></span>
+                        <span class="hub-dot" onclick="jumpHubPage(7)" title="7. Daftar Tugas"></span>
+                        <span class="hub-dot" onclick="jumpHubPage(8)" title="8. Rak File"></span>
+                        <span class="hub-dot" onclick="jumpHubPage(9)" title="9. Sholat Sun Arc"></span>
+                      </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="hub-action-btns">
+                      <div class="hub-action-btn" onclick="jumpHubPage(5)" title="Pusat Notifikasi">
+                        <span>🔔</span>
+                        <div class="hub-unread-badge">9+</div>
+                      </div>
+                      <div id="hub-pin-btn" class="hub-action-btn" onclick="toggleHubPin(this)" title="Pin Notch Tetap Terbuka">
+                        <span>📌</span>
+                      </div>
+                      <div class="hub-action-btn" onclick="collapseSimulator()" title="Tutup ke Kapsul">
+                        <span>✕</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 2. Halaman-Halaman Konten di dalam Hub -->
+                  <!-- ==============================================================
+                       HALAMAN 3: HARDWARE, SUHU & TDP (1:1 DENGAN SCREENSHOT 2 ASLI)
+                       ============================================================== -->
+                  <div id="hub-page-3" class="hub-body-page active">
+                    <div class="hw-page-view">
+                      <!-- Row 1: 3 Equal Hardware Cards (86px) -->
+                      <div class="hw-top-cards">
+                        <!-- Card 1: CPU & TDP -->
+                        <div class="hw-card-item">
+                          <div class="hw-card-header">
+                            <span class="hw-card-title">CPU & TDP</span>
+                            <span class="hw-temp-pill orange">67°C</span>
+                          </div>
+                          <div class="hw-stat-row">
+                            <span class="hw-stat-number" style="color:#38bdf8;">23.0 W</span>
+                            <span class="hw-stat-freq">2.42 GHz</span>
+                          </div>
+                          <div class="hw-bar-track">
+                            <div class="hw-bar-fill" style="width:38%; background:#38bdf8;"></div>
+                          </div>
+                          <div class="hw-sub-row">
+                            <span>CPU 5%</span>
+                            <span>Maks 54W</span>
+                          </div>
+                        </div>
+
+                        <!-- Card 2: GPU & VRAM -->
+                        <div class="hw-card-item">
+                          <div class="hw-card-header">
+                            <span class="hw-card-title">GPU & VRAM</span>
+                            <span class="hw-temp-pill green">60°C</span>
+                          </div>
+                          <div class="hw-stat-row">
+                            <span class="hw-stat-number" style="color:#c084fc;">9%</span>
+                            <span class="hw-stat-freq">400 MHz</span>
+                          </div>
+                          <div class="hw-bar-track">
+                            <div class="hw-bar-fill" style="width:14%; background:#c084fc;"></div>
+                          </div>
+                          <div class="hw-sub-row">
+                            <span>VRAM</span>
+                            <span>908/1024 MB</span>
+                          </div>
+                        </div>
+
+                        <!-- Card 3: NVMe SSD & RAM -->
+                        <div class="hw-card-item">
+                          <div class="hw-card-header">
+                            <span class="hw-card-title">NVMe SSD</span>
+                            <span class="hw-temp-pill green">37°C</span>
+                          </div>
+                          <div class="hw-stat-row">
+                            <span class="hw-stat-number" style="color:#22c55e;">65%</span>
+                            <span class="hw-stat-freq">309/476 GB</span>
+                          </div>
+                          <div class="hw-bar-track">
+                            <div class="hw-bar-fill" style="width:65%; background:#22c55e;"></div>
+                          </div>
+                          <div class="hw-sub-row">
+                            <span>RAM</span>
+                            <span>8.4/14.5 GB</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Row 2: 2 Middle Proportional Cards (46px) -->
+                      <div class="hw-mid-cards">
+                        <!-- Jaringan Live Trafik -->
+                        <div class="hw-info-card">
+                          <div style="display:flex; align-items:center; gap:8px;">
+                            <div class="hw-icon-circle">📶</div>
+                            <div>
+                              <div style="font-size:10.5px; font-weight:700; color:#e2e8f0;">Jaringan</div>
+                              <div style="font-size:8.5px; color:#94a3b8;">Live Trafik</div>
+                            </div>
+                          </div>
+                          <div style="text-align:right; font-size:10px; font-weight:700;">
+                            <div style="color:#38bdf8;">↓ 11 KB/s</div>
+                            <div style="color:#22c55e;">↑ 11 KB/s</div>
+                          </div>
+                        </div>
+
+                        <!-- AMD Ryzen & Top Process -->
+                        <div class="hw-info-card">
+                          <div style="display:flex; align-items:center; gap:8px;">
+                            <div class="hw-icon-circle" style="color:#60a5fa;">💻</div>
+                            <div style="overflow:hidden;">
+                              <div style="font-size:10.5px; font-weight:700; color:#e2e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">AMD Ryzen 7 5700U</div>
+                              <div style="font-size:8.5px; color:#cbd5e1; margin-top:1px;">🔥 Top: kwin_wayland (19%)</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Row 3: Footer TDP Modes -->
+                      <div class="hw-footer-row">
+                        <div class="hw-tdp-label">
+                          <span>⚡</span> <span>Mode TDP:</span>
+                        </div>
+                        <div class="hw-tdp-buttons">
+                          <button class="hw-tdp-btn" onclick="selectTdpMode(this, 'hemat')">🍃 Hemat</button>
+                          <button class="hw-tdp-btn" onclick="selectTdpMode(this, 'seimbang')">⚖️ Seimbang</button>
+                          <button class="hw-tdp-btn active-red" onclick="selectTdpMode(this, 'performa')">🚀 Performa</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ==============================================================
+                       HALAMAN 0: SISTEM & POMODORO FOKUS
+                       ============================================================== -->
+                  <div id="hub-page-0" class="hub-body-page">
+                    <div class="sys-top-meters">
+                      <div class="sys-meter-box">
+                        <div style="display:flex; justify-content:space-between; font-size:9.5px; color:#94a3b8;">
+                          <span>CPU • 58°C</span> <span style="color:#38bdf8; font-weight:bold;">24.5 W</span>
+                        </div>
+                        <div class="hw-bar-track" style="margin:2px 0;"><div class="hw-bar-fill" style="width:18%; background:#38bdf8;"></div></div>
+                        <div style="font-size:9px; color:#f8fafc; font-weight:bold; text-align:right;">18% Beban</div>
+                      </div>
+                      <div class="sys-meter-box">
+                        <div style="display:flex; justify-content:space-between; font-size:9.5px; color:#94a3b8;">
+                          <span>RAM</span> <span style="color:#818cf8; font-weight:bold;">8.4 GB</span>
+                        </div>
+                        <div class="hw-bar-track" style="margin:2px 0;"><div class="hw-bar-fill" style="width:48%; background:#818cf8;"></div></div>
+                        <div style="font-size:9px; color:#f8fafc; font-weight:bold; text-align:right;">48% Beban</div>
+                      </div>
+                      <div class="sys-meter-box">
+                        <div style="display:flex; justify-content:space-between; font-size:9.5px; color:#94a3b8;">
+                          <span>Baterai</span> <span style="color:#22c55e; font-weight:bold;">Charging ⚡</span>
+                        </div>
+                        <div class="hw-bar-track" style="margin:2px 0;"><div class="hw-bar-fill" style="width:85%; background:#22c55e;"></div></div>
+                        <div style="font-size:9px; color:#22c55e; font-weight:bold; text-align:right;">85% Tersedia</div>
+                      </div>
+                    </div>
+
+                    <!-- Pomodoro Card -->
+                    <div class="pomodoro-card">
+                      <div class="pomo-ring-mock">
+                        <div class="pomo-inner">
+                          <span style="font-size:13px; font-weight:800; color:#fff;">25:00</span>
+                          <span style="font-size:7.5px; color:#fda4af; text-transform:uppercase; font-weight:700;">Focus</span>
+                        </div>
+                      </div>
+                      <div style="flex:1; text-align:left;">
+                        <div style="font-size:12.5px; font-weight:700; color:#fff;">Pomodoro Fokus</div>
+                        <div style="font-size:10px; color:#94a3b8; margin-bottom:8px;">Sesi ke-2 hari ini • Soft Chime aktif</div>
+                        <div style="display:flex; gap:8px;">
+                          <button style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#cbd5e1; padding:4px 10px; border-radius:6px; font-size:10px; font-weight:600; cursor:pointer;">☕ Break (5m)</button>
+                          <button style="background:#f43f5e; border:none; color:#fff; padding:4px 14px; border-radius:6px; font-size:10px; font-weight:700; cursor:pointer;">▶ Mulai</button>
+                          <button style="background:rgba(255,255,255,0.06); border:none; color:#94a3b8; padding:4px 8px; border-radius:6px; font-size:10px; cursor:pointer;">↺</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ==============================================================
+                       HALAMAN 1: PEMUTAR MUSIK & LIRIK KARAOKE
+                       ============================================================== -->
+                  <div id="hub-page-1" class="hub-body-page">
+                    <div class="music-full-box">
+                      <div class="music-cover-art">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                      </div>
+                      <div style="flex:1; text-align:left; display:flex; flex-direction:column; justify-content:space-between; height:100%;">
+                        <div>
+                          <div style="font-size:13px; font-weight:700; color:#fff;">Nanti Kita Seperti Ini</div>
+                          <div style="font-size:11px; color:#94a3b8;">Batas Senja • Spotify Desktop</div>
+                        </div>
+                        <div>
+                          <div style="display:flex; justify-content:space-between; font-size:9.5px; color:#94a3b8; margin-bottom:3px;">
+                            <span>01:42</span>
+                            <span>-02:18</span>
+                          </div>
+                          <div class="hw-bar-track">
+                            <div class="hw-bar-fill" style="width:44%; background:linear-gradient(90deg, #38bdf8, #818cf8);"></div>
+                          </div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                          <button style="background:rgba(56,189,248,0.15); border:1px solid var(--cyan); color:var(--cyan); border-radius:6px; padding:3px 8px; font-size:10px; font-weight:700; cursor:pointer;">💬 Lirik (520px)</button>
+                          <div style="display:flex; gap:16px; align-items:center;">
+                            <button style="background:none; border:none; color:#cbd5e1; cursor:pointer; font-size:14px;">⏮️</button>
+                            <button style="background:var(--cyan); border:none; width:28px; height:28px; border-radius:50%; color:#040814; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center;">⏸</button>
+                            <button style="background:none; border:none; color:#cbd5e1; cursor:pointer; font-size:14px;">⏭️</button>
+                          </div>
+                          <span style="font-size:10.5px; color:#cbd5e1; font-weight:600;">🔊 75%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ==============================================================
+                       HALAMAN 2: PINTASAN CEPAT
+                       ============================================================== -->
+                  <div id="hub-page-2" class="hub-body-page">
+                    <div style="display:flex; flex-direction:column; gap:8px; height:100%; text-align:left;">
+                      <div class="hw-card-item" style="height:auto; padding:6px 10px;">
+                        <div style="display:flex; justify-content:space-between; font-size:10.5px; color:#cbd5e1; margin-bottom:4px;">
+                          <span>☀ Kecerahan Layar (amdgpu_bl1)</span> <span style="color:#facc15; font-weight:bold;">85%</span>
+                        </div>
+                        <div class="hw-bar-track"><div class="hw-bar-fill" style="width:85%; background:#facc15;"></div></div>
+                      </div>
+                      <div class="hw-card-item" style="height:auto; padding:6px 10px;">
+                        <div style="display:flex; justify-content:space-between; font-size:10.5px; color:#cbd5e1; margin-bottom:4px;">
+                          <span>🔊 Volume Sistem (PipeWire wpctl)</span> <span style="color:#38bdf8; font-weight:bold;">75%</span>
+                        </div>
+                        <div class="hw-bar-track"><div class="hw-bar-fill" style="width:75%; background:#38bdf8;"></div></div>
+                      </div>
+                      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;">
+                        <button class="hw-tdp-btn" style="justify-content:center;">🎤 Mic: Aktif</button>
+                        <button class="hw-tdp-btn" style="justify-content:center;">📶 WiFi: HomeNet</button>
+                        <button class="hw-tdp-btn" style="justify-content:center;" onclick="setSimMode('charging', null)">⚡ Test Cas</button>
+                        <button class="hw-tdp-btn" style="justify-content:center;" onclick="setSimMode('bluetooth', null)">🎧 Test TWS</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ==============================================================
+                       HALAMAN 4: BLUETOOTH & PERANGKAT
+                       ============================================================== -->
+                  <div id="hub-page-4" class="hub-body-page">
+                    <div class="bt-page-layout">
+                      <div class="bt-hero-card">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                          <div class="hw-icon-circle" style="color:#5ec2ff; border-color:#5ec2ff;">🎧</div>
+                          <div>
+                            <div style="font-size:11px; font-weight:700; color:#fff;">soundcore R50i</div>
+                            <div style="font-size:9px; color:#5ec2ff; font-weight:600;">Tersambung • 85% 🔋</div>
+                          </div>
+                        </div>
+                        <div style="font-size:8.5px; color:#94a3b8; line-height:1.3; margin:4px 0;">Audio Sink BlueZ aktif • Latensi rendah</div>
+                        <button style="background:rgba(239,68,68,0.15); border:1px solid #ef4444; color:#fca5a5; border-radius:6px; padding:3px 8px; font-size:9.5px; font-weight:600; cursor:pointer;">Putuskan</button>
+                      </div>
+                      <div style="display:flex; flex-direction:column; gap:6px; justify-content:space-between;">
+                        <div class="hw-info-card" style="height:44px;">
+                          <div>
+                            <div style="font-size:11px; font-weight:700; color:#fff;">thinkplus-TH30</div>
+                            <div style="font-size:8.5px; color:#94a3b8;">Tersimpan • 70% Baterai</div>
+                          </div>
+                          <button class="hw-tdp-btn">Sambung</button>
+                        </div>
+                        <div class="hw-info-card" style="height:44px;">
+                          <div>
+                            <div style="font-size:11px; font-weight:700; color:#fff;">DualSense Wireless</div>
+                            <div style="font-size:8.5px; color:#94a3b8;">Gamepad Bluetooth</div>
+                          </div>
+                          <button class="hw-tdp-btn">Sambung</button>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:#94a3b8;">
+                          <span>Bluetooth: Aktif</span>
+                          <span style="color:#38bdf8; cursor:pointer;">Buka Pengaturan KDE ▸</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ==============================================================
+                       HALAMAN 5: PUSAT NOTIFIKASI
+                       ============================================================== -->
+                  <div id="hub-page-5" class="hub-body-page">
+                    <div class="notif-page-layout">
+                      <div class="notif-left-inbox">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                          <span style="font-size:10.5px; font-weight:700; color:#fff;">Masuk (9+)</span>
+                          <span style="font-size:8.5px; color:#94a3b8; cursor:pointer;">Bersihkan</span>
+                        </div>
+                        <div style="padding:4px 6px; border-radius:6px; background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); font-size:9.5px;">
+                          <div style="font-weight:700; color:#f59e0b;">💬 WhatsApp</div>
+                          <div style="color:#cbd5e1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Security code: 492-817</div>
+                        </div>
+                        <div style="padding:4px 6px; border-radius:6px; background:rgba(255,255,255,0.03); font-size:9.5px;">
+                          <div style="font-weight:700; color:#38bdf8;">⚡ Suhu CPU</div>
+                          <div style="color:#cbd5e1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Suhu stabil 58°C</div>
+                        </div>
+                      </div>
+                      <div style="display:flex; flex-direction:column; justify-content:space-between; height:100%;">
+                        <div>
+                          <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-size:11.5px; font-weight:700; color:#fff;">WhatsApp Desktop</span>
+                            <span style="font-size:9px; background:rgba(34,197,94,0.15); color:#22c55e; padding:1px 6px; border-radius:4px; font-weight:bold;">OTP Terdeteksi</span>
+                          </div>
+                          <p style="font-size:10.5px; color:#cbd5e1; line-height:1.4; margin-top:6px;">
+                            Kode rahasia verifikasi login Anda adalah <strong>492-817</strong>. Jangan bagikan kepada siapa pun termasuk pihak WhatsApp.
+                          </p>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                          <button style="background:rgba(56,189,248,0.2); border:1px solid var(--cyan); color:var(--cyan); padding:4px 10px; border-radius:6px; font-size:10px; font-weight:700; cursor:pointer;" onclick="this.textContent='Tersalin ke Clipboard! ✓'">📋 Salin OTP</button>
+                          <span style="font-size:9px; color:#94a3b8;">🔕 Mode Jangan Ganggu (DND): Mati</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ==============================================================
+                       HALAMAN 6: KESEHATAN & AIR
+                       ============================================================== -->
+                  <div id="hub-page-6" class="hub-body-page">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; height:100%; text-align:left;">
+                      <div class="hw-card-item">
+                        <div style="font-size:11px; font-weight:700; color:#fff;">💧 Target Minum Harian</div>
+                        <div style="font-size:16px; font-weight:800; color:#38bdf8;">1500 / 2000 ml</div>
+                        <div class="hw-bar-track"><div class="hw-bar-fill" style="width:75%; background:#38bdf8;"></div></div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                          <span style="font-size:9px; color:#94a3b8;">75% Tercapai</span>
+                          <button class="btn-drink" onclick="drinkDemoWater()">+250ml 💧</button>
+                        </div>
+                      </div>
+                      <div class="hw-card-item" style="justify-content:space-between;">
+                        <div style="display:flex; justify-content:space-between; font-size:9.5px; color:#94a3b8;">
+                          <span>Histogram Per Jam</span> <span>09..16</span>
+                        </div>
+                        <div style="display:flex; align-items:flex-end; gap:4px; height:60px; justify-content:space-between; padding:0 4px;">
+                          <div style="width:10px; height:40%; background:#0284c7; border-radius:2px;"></div>
+                          <div style="width:10px; height:70%; background:#0284c7; border-radius:2px;"></div>
+                          <div style="width:10px; height:50%; background:#0284c7; border-radius:2px;"></div>
+                          <div style="width:10px; height:90%; background:#38bdf8; border-radius:2px;"></div>
+                          <div style="width:10px; height:65%; background:#0284c7; border-radius:2px;"></div>
+                          <div style="width:10px; height:85%; background:#38bdf8; border-radius:2px;"></div>
+                        </div>
+                        <div style="font-size:8.5px; color:#94a3b8; text-align:center;">Pengingat Istirahat Mata 20-20-20 Aktif</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ==============================================================
+                       HALAMAN 7: DAFTAR TUGAS (TO-DO)
+                       ============================================================== -->
+                  <div id="hub-page-7" class="hub-body-page">
+                    <div style="display:flex; flex-direction:column; gap:6px; height:100%; text-align:left;">
+                      <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11px; font-weight:700; color:#fff;">✓ Daftar Tugas Hari Ini</span>
+                        <span style="font-size:9px; background:#14532d; color:#86efac; padding:1px 6px; border-radius:6px; font-weight:bold;">2 Selesai</span>
+                      </div>
+                      <div style="display:flex; flex-direction:column; gap:5px; flex:1; overflow-y:auto;">
+                        <div class="mini-todo-item done" onclick="toggleDemoTodo(this)">
+                          <div class="mini-checkbox">✓</div>
+                          <span style="font-size:11px;">Rilis update Dynamic Island ke GitHub</span>
+                        </div>
+                        <div class="mini-todo-item" onclick="toggleDemoTodo(this)">
+                          <div class="mini-checkbox"></div>
+                          <span style="font-size:11px;">Review masukan dan fitur sholat azan</span>
+                        </div>
+                      </div>
+                      <div style="display:flex; gap:6px;">
+                        <input type="text" placeholder="+ Tambah tugas baru..." style="flex:1; background:#12131c; border:1px solid #24273a; border-radius:6px; padding:4px 8px; color:#fff; font-size:10px; outline:none;">
+                        <button class="hw-tdp-btn" style="background:#22c55e; color:#07070a; font-weight:bold; border:none;">Tambah</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ==============================================================
+                       HALAMAN 8: RAK FILE (SHELF)
+                       ============================================================== -->
+                  <div id="hub-page-8" class="hub-body-page">
+                    <div style="display:flex; flex-direction:column; justify-content:space-between; height:100%; text-align:left;">
+                      <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:11.5px; font-weight:700; color:#fff;">📂 Rak File Sementara (Shelf)</span>
+                        <span style="font-size:9px; color:#c084fc; font-weight:bold;">Drag out anytime</span>
+                      </div>
+                      <div style="border:1.5px dashed rgba(129,140,248,0.4); border-radius:10px; background:rgba(129,140,248,0.05); padding:10px; display:flex; gap:10px; align-items:center;">
+                        <div class="shelf-file-card">
+                          <span style="font-size:16px;">🖼️</span>
+                          <div>
+                            <div style="color:#fff; font-weight:700; font-size:10.5px;">screenshot.png</div>
+                            <div style="color:#94a3b8; font-size:9px;">2.4 MB</div>
+                          </div>
+                        </div>
+                        <div class="shelf-file-card">
+                          <span style="font-size:16px;">📄</span>
+                          <div>
+                            <div style="color:#fff; font-weight:700; font-size:10.5px;">dokumen.pdf</div>
+                            <div style="color:#94a3b8; font-size:9px;">5.1 MB</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div style="display:flex; justify-content:space-between; align-items:center; font-size:9px; color:#94a3b8;">
+                        <span>Native Wayland QDrag text/uri-list</span>
+                        <span style="color:#ef4444; cursor:pointer;">Bersihkan Semua</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ==============================================================
+                       HALAMAN 9: JADWAL SHOLAT SUN ARC (DAY TRAJECTORY)
+                       ============================================================== -->
+                  <div id="hub-page-9" class="hub-body-page">
+                    <div class="prayer-page-layout">
+                      <div>
+                        <div style="font-size:10px; color:#94a3b8; font-weight:600;">Prayer • Jakarta</div>
+                        <div style="font-size:9px; color:#fbbf24; text-transform:uppercase; font-weight:700; margin-top:2px;">Next</div>
+                        <div style="font-size:18px; font-weight:800; color:#fff; line-height:1.1;">Maghrib</div>
+                        <div style="font-size:11px; color:#cbd5e1; font-weight:600; margin-top:2px;">
+                          <span style="color:#fbbf24;">17:52</span> <span style="font-size:9px; color:#94a3b8;">in 1 h 12 min</span>
+                        </div>
+                      </div>
+                      <div style="display:flex; flex-direction:column; justify-content:center;">
+                        <svg class="sun-arc-svg" viewBox="0 0 200 65" style="height:64px;">
+                          <path d="M 10 55 Q 100 5 190 55" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.8" stroke-dasharray="3 3"/>
+                          <path d="M 10 55 Q 100 5 160 45" fill="none" stroke="url(#sun-grad-2)" stroke-width="2.5"/>
+                          <circle cx="160" cy="45" r="5.5" fill="#fbbf24" filter="drop-shadow(0 0 6px #f59e0b)"/>
+                          <defs>
+                            <linearGradient id="sun-grad-2" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.3"/>
+                              <stop offset="60%" stop-color="#fb923c" stop-opacity="0.8"/>
+                              <stop offset="100%" stop-color="#fbbf24" stop-opacity="1"/>
+                            </linearGradient>
+                          </defs>
+                        </svg>
+                        <div class="prayer-times-bar" style="display:flex; justify-content:space-between; font-size:9px; color:#94a3b8;">
+                          <span style="opacity:0.4;">Subuh<br>04:03</span>
+                          <span style="opacity:0.4;">Dzuhur<br>11:38</span>
+                          <span style="opacity:0.4;">Ashar<br>14:46</span>
+                          <span style="color:#fbbf24; font-weight:bold;">Maghrib<br>17:52</span>
+                          <span style="opacity:0.7;">Isya<br>19:03</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
 
@@ -1009,13 +1962,22 @@
 
         <!-- Simulator Switcher Controls -->
         <div class="sim-controls">
-          <button class="sim-btn active" onclick="setSimMode('mascot', this)">🐱 Mode Maskot</button>
-          <button class="sim-btn" onclick="setSimMode('clock', this)">⏰ Jam & Status</button>
-          <button class="sim-btn" onclick="setSimMode('music', this)">🎵 Pemutar Musik</button>
-          <button class="sim-btn" onclick="setSimMode('volume', this)">🔊 Volume HUD</button>
-          <button class="sim-btn" onclick="setSimMode('expanded', this)">📱 Expanded Card</button>
+          <button class="sim-btn active" onclick="openExpandedPage(3, this)">⚡ 3. Hardware, Suhu & TDP (Persis Asli)</button>
+          <button class="sim-btn" onclick="openExpandedPage(0, this)">⏱️ 0. Sistem & Pomodoro</button>
+          <button class="sim-btn" onclick="openExpandedPage(1, this)">🎵 1. Musik & Lirik</button>
+          <button class="sim-btn" onclick="openExpandedPage(2, this)">⚡ 2. Pintasan Cepat</button>
+          <button class="sim-btn" onclick="openExpandedPage(4, this)">🎧 4. Bluetooth TWS</button>
+          <button class="sim-btn" onclick="openExpandedPage(5, this)">🔔 5. Notifikasi (9+)</button>
+          <button class="sim-btn" onclick="openExpandedPage(6, this)">💧 6. Kesehatan & Air</button>
+          <button class="sim-btn" onclick="openExpandedPage(7, this)">✓ 7. To-Do Harian</button>
+          <button class="sim-btn" onclick="openExpandedPage(8, this)">📂 8. Rak File Shelf</button>
+          <button class="sim-btn" onclick="openExpandedPage(9, this)">🌙 9. Sholat Sun Arc</button>
+          <button class="sim-btn" onclick="setCompactMode('mascot', this)">🐱 Maskot Santai</button>
+          <button class="sim-btn" onclick="setCompactMode('clock', this)">⏰ Kapsul Jam</button>
+          <button class="sim-btn" onclick="setCompactMode('charging', this)">⚡ Charging Peek (310px)</button>
+          <button class="sim-btn" onclick="setCompactMode('bluetooth', this)">🎧 TWS Peek (310px)</button>
         </div>
-        <div class="sim-hint">💡 Klik langsung pada kapsul di atas untuk membuka atau menutup Expanded Card secara interaktif!</div>
+        <div class="sim-hint">💡 Klik tombol mode di atas untuk menguji ukuran dinamis dan animasi Dynamic Island secara real-time!</div>
       </div>
     </div>
   </section>
@@ -1038,40 +2000,126 @@
           </div>
           <h3 class="bento-title">Flush Hardware Notch (Margin 0)</h3>
           <p class="bento-desc">
-            Menempel rapat di bawah panel atas KDE dengan lekukan telinga halus (<em>concave ear curves</em> ala Nusa & MacBook). Profil ultra-ramping (28px) memastikan tab editor VS Code dan browser Anda 100% tidak terhalang.
+            Menempel rapat di bawah panel atas KDE dengan lekukan telinga halus (<em>concave ear curves</em> ala MacBook & Dynamic Notch). Profil ultra-ramping (28px) memastikan tab editor VS Code dan browser Anda 100% tidak terhalang.
           </p>
         </div>
         <div class="bento-visual" style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:12.5px; color:#cbd5e1;">🎯 Click-Through Otomatis</span>
+          <span style="font-size:12.5px; color:#cbd5e1;">🎯 Click-Through Otomatis (Wayland Layer-Shell)</span>
           <span style="font-size:12px; padding:3px 10px; border-radius:12px; background:rgba(34,197,94,0.15); color:var(--green); font-weight:600;">100% Tembus Klik</span>
         </div>
       </div>
 
-      <!-- Card 2: Adaptive Ambient Glow -->
+      <!-- Card 2: Synced Lyrics Karaoke -->
       <div class="bento-card">
         <div>
-          <div class="bento-icon-box" style="color:var(--purple);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          <div class="bento-icon-box" style="color:#f43f5e;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
           </div>
-          <h3 class="bento-title">Adaptive Ambient Glow</h3>
+          <h3 class="bento-title">Lirik Karaoke LRCLIB (520px)</h3>
           <p class="bento-desc">
-            Ekstraksi palet warna album lagu secara otomatis menggunakan Pillow. Kapsul dan border memancarkan pendaran cahaya dinamis yang selaras dengan lagu yang sedang berputar.
+            Ekspansi dinamis 520px Split-View. Mengambil lirik lagu tersinkronisasi otomatis dari API LRCLIB gratis dengan cache lokal, baris aktif menyala tebal, dan klik lirik untuk <em>seek</em> lagu.
           </p>
         </div>
-        <div class="bento-visual" style="text-align:center;">
-          <div style="height:10px; border-radius:5px; background:linear-gradient(90deg, #38bdf8, #818cf8, #f43f5e); box-shadow:0 0 15px rgba(129,140,248,0.5);"></div>
+        <div class="bento-visual" style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; color:var(--cyan); font-weight:600;">🎤 Click-to-Seek Support</span>
+          <span style="font-size:11.5px; color:#cbd5e1;">Otomatis Spotify & Browser</span>
         </div>
       </div>
 
-      <!-- Card 3: Health & Hydration Hub -->
+      <!-- Card 3: Jadwal Sholat Sun Arc -->
+      <div class="bento-card col-span-2">
+        <div>
+          <div class="bento-icon-box" style="color:#fbbf24;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </div>
+          <h3 class="bento-title">Jadwal Sholat & Sun Arc (Day Trajectory)</h3>
+          <p class="bento-desc">
+            <em>Prayer times, right in the notch</em>. Menampilkan kurva busur pergerakan matahari harian (<em>Sun Arc Trajectory</em>), penanda waktu sholat aktif menyala berpendar (<em>glowing next prayer</em>), hitung mundur lembut, serta heads-up hening 10 menit sebelum waktu sholat dan pop-up tenang saat waktu sholat tiba. Dihitung 100% lokal di PC Anda dengan metode resmi Kemenag RI tanpa memerlukan koneksi internet konstan.
+          </p>
+        </div>
+        <div class="bento-visual" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <span style="font-size:12px; color:#fbbf24; font-weight:700;">🌙 Maghrib 17:52 • Subuh, Dzuhur, Ashar, Maghrib, Isya</span>
+          <span style="font-size:11.5px; padding:2px 8px; border-radius:6px; background:rgba(251,191,36,0.15); color:#fbbf24;">Kemenag RI Offline</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Bluetooth TWS Manager & Animated Peek -->
       <div class="bento-card">
         <div>
-          <div class="bento-icon-box" style="color:var(--cyan);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          <div class="bento-icon-box" style="color:#5ec2ff;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m7 7 10 10-5 5V2l5 5L7 17"/></svg>
           </div>
-          <h3 class="bento-title">Kesehatan & Minum Air</h3>
+          <h3 class="bento-title">Bluetooth TWS Manager & Peek</h3>
           <p class="bento-desc">
-            Target hidrasi harian 2000ml dan pengingat istirahat mata 20-20-20 setiap 20 menit agar kesehatan Anda tetap terjaga saat bekerja di depan monitor.
+            Integrasi BlueZ D-Bus. Kapsul pop-up 310x60px dengan animasi lepas-pasang TWS saat earbud dicolokkan atau dicabut, persentase baterai real-time, dan halaman manajemen perangkat bluetooth 1-klik sambung/putus.
+          </p>
+        </div>
+        <div class="bento-visual" style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; color:#5ec2ff; font-weight:700;">🔋 85% Baterai TWS</span>
+          <span style="font-size:11.5px; color:var(--text-dim);">D-Bus org.bluez</span>
+        </div>
+      </div>
+
+      <!-- Card 5: Pusat Notifikasi & OTP Copy -->
+      <div class="bento-card">
+        <div>
+          <div class="bento-icon-box" style="color:#f59e0b;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          </div>
+          <h3 class="bento-title">Pusat Notifikasi & 1-Click Salin OTP</h3>
+          <p class="bento-desc">
+            Mencegat notifikasi sistem ke Split-View inbox 40 riwayat terakhir dengan kategori pintar. Dilengkapi tombol 1-klik salin kode OTP langsung ke clipboard (<code>wl-copy</code>) serta toggle mode Jangan Ganggu (DND).
+          </p>
+        </div>
+        <div class="bento-visual" style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; color:#f59e0b; font-weight:700;">📋 1-Click OTP Copy</span>
+          <span style="font-size:11.5px; color:var(--text-dim);">🔕 Mode Do Not Disturb</span>
+        </div>
+      </div>
+
+      <!-- Card 6: Hardware, Suhu & Processor TDP -->
+      <div class="bento-card col-span-2">
+        <div>
+          <div class="bento-icon-box" style="color:var(--cyan);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          </div>
+          <h3 class="bento-title">Hardware Telemetry & Processor TDP Monitor</h3>
+          <p class="bento-desc">
+            Pemantauan langsung dari sensor kernel Linux: <strong>Processor Package Power / TDP (Watt PPT)</strong>, suhu CPU (<code>k10temp</code>), GPU (<code>amdgpu</code>), dan SSD NVMe (°C), CPU Clock GHz, GPU Load & VRAM, deteksi proses terberat (<em>Top Process</em>), peringatan otomatis jika suhu melewati 85°C, serta sakelar 1-klik profil daya (🍃 Hemat, ⚖️ Seimbang, 🚀 Performa).
+          </p>
+        </div>
+        <div class="bento-visual" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <span style="font-size:12px; color:var(--cyan); font-weight:700;">⚡ 24.5 W TDP • 58°C CPU • 49°C GPU</span>
+          <span style="font-size:11.5px; color:var(--green); font-weight:600;">powerprofilesctl Ready</span>
+        </div>
+      </div>
+
+      <!-- Card 7: Wayland File Shelf -->
+      <div class="bento-card">
+        <div>
+          <div class="bento-icon-box" style="color:var(--purple);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <h3 class="bento-title">Wayland File Shelf (Drag & Drop)</h3>
+          <p class="bento-desc">
+            Seret file apa saja ke Dynamic Island bagian atas. Island otomatis membuka halaman Shelf dengan animasi pendaran "Island Gulp". Dilengkapi thumbnail gambar asli dan seret keluar kembali (Native Wayland <code>QDrag</code>) ke aplikasi lain.
+          </p>
+        </div>
+        <div class="bento-visual" style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; color:var(--purple); font-weight:700;">📂 Native QDrag Wayland</span>
+          <span style="font-size:11.5px; color:var(--text-dim);">text/uri-list Drop</span>
+        </div>
+      </div>
+
+      <!-- Card 8: Health, Hydration & Pomodoro -->
+      <div class="bento-card">
+        <div>
+          <div class="bento-icon-box" style="color:var(--green);">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3 class="bento-title">Pomodoro & Water Histogram</h3>
+          <p class="bento-desc">
+            Timer Pomodoro dengan Circular Conic Ring bercahaya, transisi Focus 25m ↔ Break 5m + lonceng soft chime, serta grafik histogram minum air per jam dan pengingat istirahat mata 20-20-20.
           </p>
         </div>
         <div class="bento-visual">
@@ -1082,46 +2130,6 @@
           <div class="water-progress-bar" style="margin-top:8px;">
             <div id="demo-water-bar" class="water-fill"></div>
           </div>
-        </div>
-      </div>
-
-      <!-- Card 4: Interactive To-Do List -->
-      <div class="bento-card">
-        <div>
-          <div class="bento-icon-box" style="color:var(--green);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          </div>
-          <h3 class="bento-title">Daftar Tugas Cepat (To-Do)</h3>
-          <p class="bento-desc">
-            Checklist pekerjaan harian yang tersimpan otomatis di disk. Centang tugas yang selesai langsung dari Dynamic Island tanpa perlu membuka aplikasi terpisah.
-          </p>
-        </div>
-        <div class="bento-visual">
-          <div class="mini-todo-item done" onclick="toggleDemoTodo(this)">
-            <div class="mini-checkbox">✓</div>
-            <span>Meeting projek Dynamic Island</span>
-          </div>
-          <div class="mini-todo-item" onclick="toggleDemoTodo(this)">
-            <div class="mini-checkbox"></div>
-            <span>Review pull request GitHub</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 5: Scroll Wheel Volume HUD -->
-      <div class="bento-card">
-        <div>
-          <div class="bento-icon-box" style="color:var(--amber);">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          </div>
-          <h3 class="bento-title">Scroll Wheel Volume HUD</h3>
-          <p class="bento-desc">
-            Arahkan kursor ke atas Dynamic Island dan lakukan <strong>scroll mouse wheel</strong> untuk menaikkan/menurunkan volume PipeWire WirePlumber secara instan.
-          </p>
-        </div>
-        <div class="bento-visual" style="display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-size:12px; color:var(--text-muted);">🖱️ Mouse Wheel Scroll</span>
-          <span style="font-size:12px; color:var(--amber); font-weight:700;">±3% Per Step</span>
         </div>
       </div>
     </div>
@@ -1234,31 +2242,141 @@
 
     // Mode Switcher for Interactive Notch Playground
     const simNotch = document.getElementById('sim-notch');
-    const views = {
+    const compactViews = {
       mascot: document.getElementById('view-mascot'),
       clock: document.getElementById('view-clock'),
-      music: document.getElementById('view-music'),
-      volume: document.getElementById('view-volume'),
-      expanded: document.getElementById('view-expanded')
+      music: document.getElementById('view-music-compact'),
+      volume: document.getElementById('view-volume-hud'),
+      bluetooth: document.getElementById('view-bluetooth-hud'),
+      charging: document.getElementById('view-charging-hud')
     };
+    const viewExpanded = document.getElementById('view-expanded');
 
-    let currentMode = 'mascot';
+    const hubTitles = [
+      "Sistem & Pomodoro Fokus",
+      "Pemutar Musik & Media",
+      "Pintasan Cepat",
+      "Hardware, Suhu & TDP",
+      "Bluetooth & Perangkat",
+      "Pusat Notifikasi",
+      "Kesehatan & Air",
+      "Daftar Tugas (To-Do)",
+      "Rak File (Shelf)",
+      "Jadwal Sholat Sun Arc"
+    ];
 
-    function setSimMode(mode, btnElement) {
-      currentMode = mode;
-      
-      // Update Buttons
-      document.querySelectorAll('.sim-btn').forEach(b => b.classList.remove('active'));
-      if (btnElement) btnElement.classList.add('active');
+    let currentHubPage = 3; // Default Page: Hardware, Suhu & TDP (Match User Screenshot 2)
+    let isExpandedState = true;
+    let isPinnedState = false;
 
-      // Hide all views
-      Object.values(views).forEach(v => {
+    function updateHubUI() {
+      // 1. Update Title Text
+      const titleEl = document.getElementById('hub-title');
+      if (titleEl) {
+        titleEl.textContent = hubTitles[currentHubPage] || "Control Hub";
+      }
+
+      // 2. Hide all hub body pages & activate current
+      for (let i = 0; i <= 9; i++) {
+        const p = document.getElementById(`hub-page-${i}`);
+        if (p) p.classList.toggle('active', i === currentHubPage);
+      }
+
+      // 3. Update Indicator Dots
+      const dots = document.querySelectorAll('.hub-dot');
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === currentHubPage);
+      });
+
+      // 4. Update Border & Glow colors based on page
+      if (currentHubPage === 3) {
+        simNotch.style.setProperty('--notch-border', '#3b4259');
+        simNotch.style.setProperty('--notch-glow', 'rgba(56, 189, 248, 0.15)');
+      } else if (currentHubPage === 5) {
+        simNotch.style.setProperty('--notch-border', '#818cf8');
+        simNotch.style.setProperty('--notch-glow', 'rgba(129, 140, 248, 0.25)');
+      } else if (currentHubPage === 9) {
+        simNotch.style.setProperty('--notch-border', '#fbbf24');
+        simNotch.style.setProperty('--notch-glow', 'rgba(251, 191, 36, 0.25)');
+      } else {
+        simNotch.style.setProperty('--notch-border', '#282b3d');
+        simNotch.style.setProperty('--notch-glow', 'rgba(56, 189, 248, 0.1)');
+      }
+    }
+
+    function openExpandedPage(pageIdx, btnElement) {
+      isExpandedState = true;
+      currentHubPage = pageIdx;
+
+      // Hide compact views
+      Object.values(compactViews).forEach(v => {
         if (v) v.classList.remove('active');
       });
 
-      // Show selected view & adjust notch dimensions
-      const targetView = views[mode];
+      // Show expanded view
+      if (viewExpanded) viewExpanded.classList.add('active');
+
+      // Adjust Notch Dimensions (Exact QML size: 440px x 245px)
+      simNotch.style.width = '440px';
+      simNotch.style.height = '245px';
+      simNotch.style.borderRadius = '0 0 20px 20px';
+
+      updateHubUI();
+
+      // Update control buttons active state
+      document.querySelectorAll('.sim-btn').forEach(b => b.classList.remove('active'));
+      if (btnElement) {
+        btnElement.classList.add('active');
+      } else {
+        const matchingBtn = document.querySelectorAll('.sim-controls .sim-btn')[pageIdx];
+        if (matchingBtn) matchingBtn.classList.add('active');
+      }
+    }
+
+    function prevHubPage() {
+      currentHubPage = (currentHubPage > 0) ? currentHubPage - 1 : 9;
+      openExpandedPage(currentHubPage);
+    }
+
+    function nextHubPage() {
+      currentHubPage = (currentHubPage < 9) ? currentHubPage + 1 : 0;
+      openExpandedPage(currentHubPage);
+    }
+
+    function jumpHubPage(idx) {
+      openExpandedPage(idx);
+    }
+
+    function collapseSimulator() {
+      setCompactMode('clock', document.querySelectorAll('.sim-btn')[11]);
+    }
+
+    function toggleHubPin(btn) {
+      isPinnedState = !isPinnedState;
+      if (btn) {
+        btn.style.color = isPinnedState ? '#38bdf8' : '#cbd5e1';
+        btn.style.borderColor = isPinnedState ? '#38bdf8' : '#282a36';
+      }
+    }
+
+    function setCompactMode(mode, btnElement) {
+      isExpandedState = false;
+
+      // Hide expanded view
+      if (viewExpanded) viewExpanded.classList.remove('active');
+
+      // Hide all compact views
+      Object.values(compactViews).forEach(v => {
+        if (v) v.classList.remove('active');
+      });
+
+      // Show target compact view
+      const targetView = compactViews[mode];
       if (targetView) targetView.classList.add('active');
+
+      // Update Buttons
+      document.querySelectorAll('.sim-btn').forEach(b => b.classList.remove('active'));
+      if (btnElement) btnElement.classList.add('active');
 
       switch (mode) {
         case 'mascot':
@@ -1269,7 +2387,7 @@
           simNotch.style.setProperty('--notch-glow', 'rgba(56, 189, 248, 0.25)');
           break;
         case 'clock':
-          simNotch.style.width = '140px';
+          simNotch.style.width = '150px';
           simNotch.style.height = '28px';
           simNotch.style.borderRadius = '0 0 14px 14px';
           simNotch.style.setProperty('--notch-border', '#22c55e');
@@ -1289,13 +2407,37 @@
           simNotch.style.setProperty('--notch-border', '#38bdf8');
           simNotch.style.setProperty('--notch-glow', 'rgba(56, 189, 248, 0.3)');
           break;
-        case 'expanded':
-          simNotch.style.width = '390px';
-          simNotch.style.height = '180px';
-          simNotch.style.borderRadius = '0 0 20px 20px';
-          simNotch.style.setProperty('--notch-border', '#818cf8');
-          simNotch.style.setProperty('--notch-glow', 'rgba(129, 140, 248, 0.35)');
+        case 'bluetooth':
+          simNotch.style.width = '310px';
+          simNotch.style.height = '60px';
+          simNotch.style.borderRadius = '0 0 18px 18px';
+          simNotch.style.setProperty('--notch-border', '#5ec2ff');
+          simNotch.style.setProperty('--notch-glow', 'rgba(94, 194, 255, 0.35)');
           break;
+        case 'charging':
+          simNotch.style.width = '310px';
+          simNotch.style.height = '60px';
+          simNotch.style.borderRadius = '0 0 18px 18px';
+          simNotch.style.setProperty('--notch-border', '#22c55e');
+          simNotch.style.setProperty('--notch-glow', 'rgba(34, 197, 94, 0.35)');
+          break;
+      }
+    }
+
+    function selectTdpMode(btn, modeName) {
+      document.querySelectorAll('.hw-tdp-btn').forEach(b => {
+        b.classList.remove('active-red');
+        b.style.borderColor = '';
+        b.style.color = '';
+      });
+      if (modeName === 'performa') {
+        btn.classList.add('active-red');
+      } else if (modeName === 'hemat') {
+        btn.style.borderColor = 'var(--green)';
+        btn.style.color = 'var(--green)';
+      } else {
+        btn.style.borderColor = 'var(--cyan)';
+        btn.style.color = 'var(--cyan)';
       }
     }
 
@@ -1342,8 +2484,8 @@
       }
     }
 
-    // Initial setup
-    setSimMode('mascot', document.querySelectorAll('.sim-btn')[0]);
+    // Initial setup: Show Page 3 Hardware, Suhu & TDP immediately (1:1 with Real Desktop App)
+    openExpandedPage(3, document.querySelectorAll('.sim-controls .sim-btn')[0]);
   </script>
 </body>
 </html>

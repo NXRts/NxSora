@@ -111,7 +111,7 @@ Gunakan tombol navigasi **`<`** dan **`>`** (atau geser / klik titik indikator) 
 5. **Halaman 5: 💧 Kesehatan & Pelacak Air (Health Tracker)**:
    * **Pelacak Minum Air**: Tampilan target harian (misal: `1.5 / 2.0 L · 75% Target`), tombol cepat **`+250 ml`** untuk mencatat 1 gelas minum, tombol reset, dan bar progres hidrasi.
    * **Jeda Mata 20-20-20**: Timer istirahat mata setiap 20 menit untuk memandang kejauhan selama 20 detik demi kesehatan mata.
-   * **Mode Maskot Santai**: Sakelar satu klik untuk mengubah tampilan kapsul idle antara jam digital standar dan sepasang mata maskot berkedip (*Nusa-style*).
+   * **Mode Maskot Santai**: Sakelar satu klik untuk mengubah tampilan kapsul idle antara jam digital standar dan sepasang mata maskot berkedip (*Mascot Eyes*).
 
 6. **Halaman 6: ✓ Daftar Tugas (To-Do List Harian)**:
    * **Rekap Tugas**: Indikator jumlah tugas yang telah selesai hari ini.

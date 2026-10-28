@@ -1,6 +1,6 @@
 # 🏝️ Dynamic Island untuk CachyOS (KDE Plasma 6 Wayland)
 
-Aplikasi **Dynamic Island** native, modern, dan berkinerja tinggi untuk **KDE Plasma 6 pada Wayland**, dibangun menggunakan **Python 3**, **PyQt6**, **QML (QtQuick)**, dan protokol **Wayland Layer-Shell** (`layer-shell-qt`). Desain terinspirasi dari [Nusa](https://rama2555.github.io/nusa/) dan Dynamic Island iOS/macOS.
+Aplikasi **Dynamic Island** native, modern, dan berkinerja tinggi untuk **KDE Plasma 6 pada Wayland**, dibangun menggunakan **Python 3**, **PyQt6**, **QML (QtQuick)**, dan protokol **Wayland Layer-Shell** (`layer-shell-qt`). Desain notch interaktif terinspirasi dari Dynamic Island iOS/macOS.
 
 > 📌 Roadmap lengkap fitur (yang sudah & belum diimplementasikan) ada di [`Next.md`](Next.md). Panduan penggunaan ada di [`Tutorial.md`](Tutorial.md).
 
@@ -25,7 +25,7 @@ Aplikasi **Dynamic Island** native, modern, dan berkinerja tinggi untuk **KDE Pl
 - **Kecerahan Layar, Caps Lock & Mic Mute** (`250x36px`): terdeteksi langsung dari sysfs (`/sys/class/backlight`, `/sys/class/leds`) dan PipeWire, plus slider kecerahan & tombol Mic di halaman *Pintasan Cepat*.
 
 ### ⚡ 4. Charging Peek & Closed Battery Ring
-- Kapsul pop-up `310x60px` bergaya Nusa saat charger dicolok/dicabut: **cincin konik hijau neon**, ikon petir, dan persentase besar.
+- Kapsul pop-up `310x60px` saat charger dicolok/dicabut: **cincin konik hijau neon**, ikon petir, dan persentase besar.
 - Kapsul tertutup menampilkan **cincin baterai melingkar**, jam digital, dan indikator suhu CPU tinggi.
 
 ### 🎧 5. Bluetooth Peek & Halaman Bluetooth
@@ -114,10 +114,11 @@ Log tersimpan di `/tmp/dynamic_island_kde.log`.
 Fase yang sudah selesai: **Fase 1** (Lirik, Shelf, Pomodoro, Water), **Fase 2** (Bluetooth/Charging/Hardware HUD, Pusat Notifikasi), serta Hardware & TDP Monitor.
 
 Rencana berikutnya (detail di [`Next.md`](Next.md)):
-- **Fase 3**: Smart Mascot 2.0, Privacy Dots, System Tray & Fullscreen Auto-Hide, Wi-Fi Peek, Low-Battery Nudge.
-- **Fase 4**: Jadwal Sholat & Pengingat Azan (lokasi *real-time*), Clipboard History, Audio Switcher, Cuaca, Camera Mirror, KDE Connect, Voice Note, Color Picker.
-- **Fase 5**: Halaman Pengaturan Terpadu & kustomisasi.
-- **Fase 6**: Dukungan Windows & installer `.exe`.
+- **Fase 3**: Polesan repo (GIF demo, badge, rilis `v0.1.0`), paket AUR & `install.sh`, path XDG, tes + CI (`ruff`), fallback hardware Intel/NVIDIA, dokumentasi & komunitas.
+- **Fase 4**: Smart Mascot 2.0, Privacy Dots, System Tray & Fullscreen Auto-Hide, Wi-Fi Peek, Low-Battery Nudge.
+- **Fase 5**: Jadwal Sholat & Pengingat Azan (*Sun Arc trajectory curve*, heads-up 10 menit sebelum waktu sholat, calm popup saat azan, kalkulasi offline metode Kemenag RI / koordinat, auto-pause musik), Clipboard History, Audio Switcher, Cuaca, Camera Mirror, KDE Connect, Voice Note, Color Picker.
+- **Fase 6**: Halaman Pengaturan Terpadu & kustomisasi.
+- **Fase 7**: Dukungan Windows & installer `.exe`.
 
 ---
 

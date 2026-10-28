@@ -1,5 +1,5 @@
 """
-Timer / Pomodoro Service (Nusa Focus Timer Style)
+Timer / Pomodoro Service (Focus Timer Style)
 Supports Focus Time (25:00), Short Break (05:00), circular ring progress ratio,
 and non-blocking soft chime audio notification when a session completes.
 """

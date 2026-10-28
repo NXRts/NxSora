@@ -66,7 +66,7 @@ Item {
         spacing: 12
 
         // =====================================================================
-        // 1. LEFT: NUSA NEON-GREEN CIRCULAR CONIC RING + LIGHTNING BOLT
+        // 1. LEFT: NEON-GREEN CIRCULAR CONIC RING + LIGHTNING BOLT
         // =====================================================================
         Item {
             Layout.preferredWidth: 40
@@ -148,7 +148,7 @@ Item {
         }
 
         // =====================================================================
-        // 2. CENTER: CHARGING TITLE + SUBTITLE (Nusa Style)
+        // 2. CENTER: CHARGING TITLE + SUBTITLE (Dynamic Notch Style)
         // =====================================================================
         ColumnLayout {
             Layout.fillWidth: true
@@ -177,7 +177,7 @@ Item {
         }
 
         // =====================================================================
-        // 3. RIGHT: LARGE PERCENTAGE READOUT (Nusa 22px Bold Style)
+        // 3. RIGHT: LARGE PERCENTAGE READOUT (22px Bold Style)
         // =====================================================================
         Text {
             text: IslandController.batteryPercent + "%"

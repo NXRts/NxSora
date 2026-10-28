@@ -1,5 +1,5 @@
 """
-Health & Wellness Service (Nusa & Poni Style)
+Health & Wellness Service (Dynamic Notch Style)
 Tracks daily water intake, hourly hydration histogram chart (09..16),
 customizable bottle/cup size & daily goal, and 20-20-20 eye rest intervals.
 Data is stored persistently in ~/.config/dynamic_island/health.json
@@ -144,7 +144,7 @@ class HealthService(QObject):
 
     @pyqtProperty(list, notify=waterChanged)
     def waterHourlyBars(self):
-        """Return 8 hourly bars for Nusa-style histogram chart."""
+        """Return 8 hourly bars for Dynamic-style histogram chart."""
         cur_idx = self._current_bucket_index()
         max_scale = 500.0
         bars = []

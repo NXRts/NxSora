@@ -4,7 +4,7 @@
 
 Dokumen ini berisi hasil bedah lengkap terhadap:
 
-1. **10 Fitur Utama di Preview Interaktif & Halaman Web [Nusa (`rama2555.github.io/nusa`)](https://rama2555.github.io/nusa/)** (sesuai gambar tab _Resting, Closed, Music, Lyrics, Focus timer, Water, Shelf, To-do, Headphones, Charging_ beserta fitur sistem tersembunyinya).
+1. **10 Modul Fitur Utama Dynamic Island** (sesuai spesifikasi tab _Resting, Closed, Music, Lyrics, Focus timer, Water, Shelf, To-do, Headphones, Charging_ beserta fitur sistem terintegrasi).
 2. **Ekosistem Aplikasi Notch & Dynamic Island Lintas Platform Lainnya**:
    - **Windows / Web**: **Poni (`poni.web.id`)**
    - **macOS**: **Boring.Notch**, **NotchNook**, **Alcove**, **MediaMate**, **DynamicLake**
@@ -14,13 +14,13 @@ Dokumen ini berisi hasil bedah lengkap terhadap:
 
 ---
 
-## 🔍 1. Analisis Mendalam 10 Tab Fitur Nusa (Berdasarkan Gambar & Bedah Kode Web)
+## 🔍 1. Analisis Mendalam 10 Modul Fitur Dynamic Island
 
-Berdasarkan gambar navigasi preview di web [Nusa](https://rama2555.github.io/nusa/) (`Resting | Closed | Music | Lyrics | Focus timer | Water | Shelf | To-do | Headphones | Charging`), berikut adalah spesifikasi desain, ukuran, dan perilaku asli dari masing-masing mode di Nusa:
+Berdasarkan arsitektur antarmuka Dynamic Island (`Resting | Closed | Music | Lyrics | Focus timer | Water | Shelf | To-do | Headphones | Charging`), berikut adalah spesifikasi desain, ukuran, dan perilaku dari masing-masing modul:
 
 ### 1. `Resting` (Mode Maskot Santai — `150x30px`)
 
-- **Cara Kerja di Nusa**: Saat tidak ada aktivitas atau musik berhenti, jam digital memudar dan berganti menjadi sepasang mata putih bersinar (`8.4x12.4px`) dengan pendaran _ambient glow_ biru-ungu di belakangnya.
+- **Perilaku & Spesifikasi Desain**: Saat tidak ada aktivitas atau musik berhenti, jam digital memudar dan berganti menjadi sepasang mata putih bersinar (`8.4x12.4px`) dengan pendaran _ambient glow_ biru-ungu di belakangnya.
 - **Detail Unik yang Belum Kita Miliki**:
   - **Doze Off (Mengantuk/Tidur)**: Setelah PC diam beberapa saat (_idle_), mata maskot perlahan menutup/mengantuk.
   - **Wave Hello (Menyapa Saat Kembali)**: Saat pengguna kembali menggerakkan mouse/keyboard, maskot bangun dan melakukan animasi menyapa (_wave/happy eyes_).
@@ -28,7 +28,7 @@ Berdasarkan gambar navigasi preview di web [Nusa](https://rama2555.github.io/nus
 
 ### 2. `Closed` (Kapsul Tertutup Aktif — `150x30px`)
 
-- **Cara Kerja di Nusa**: Tampilan kapsul ringkas dengan 3 elemen presisi:
+- **Perilaku & Spesifikasi Desain**: Tampilan kapsul ringkas dengan 3 elemen presisi:
   - **Kiri**: **Circular Battery Ring** (`conic-gradient` hijau `#33e07a`) tanpa angka yang memakan tempat.
   - **Tengah**: **Jam Digital** (`18:55`) dengan font tegas.
   - **Kanan**: **Live Sound Wave (5-Bar Equalizer)** yang langsung bergoyang di samping jam ketika ada musik diputar di latar belakang.
@@ -36,7 +36,7 @@ Berdasarkan gambar navigasi preview di web [Nusa](https://rama2555.github.io/nus
 
 ### 3. `Music` (Pemutar Musik — `420x140px`)
 
-- **Cara Kerja di Nusa**:
+- **Perilaku & Spesifikasi Desain**:
   - **Header Mini Terpadu**: Menampilkan cincin baterai, Tanggal lengkap + Jam (`Thu 15 Oct 2026 18:55`), serta equalizer mini di pojok kanan atas.
   - **Body**: Cover album `62x62px` di kiri, judul lagu & nama artis-album, tombol panah navigasi halaman `< >` mengambang di tepi kiri/kanan.
   - **Timeline**: Waktu berjalan di kiri (`03:13`), progress bar di tengah, dan **waktu tersisa negatif** di kanan (`-01:03`).
@@ -44,7 +44,7 @@ Berdasarkan gambar navigasi preview di web [Nusa](https://rama2555.github.io/nus
 
 ### 4. `Lyrics` (Mode Lirik Tersinkronisasi / Karaoke — Melebar ke `520x140px`)
 
-- **Cara Kerja di Nusa**:
+- **Perilaku & Spesifikasi Desain**:
   - Saat tombol lirik ditekan, Dynamic Island **melebar secara dinamis dari `420px` menjadi `520px`** dan terbelah dua (_Split View_) oleh garis vertikal tipis:
   - **Sisi Kiri (`252px`)**: Menyimpan cover album, judul lagu, seekbar ringkas, dan tombol kontrol media.
   - **Sisi Kanan (`234px`)**: Menampilkan daftar lirik lagu _real-time_ yang diambil otomatis dari API gratis **LRCLIB (`lrclib.net`)** berdasarkan _title_, _artist_, dan _duration_.
@@ -52,7 +52,7 @@ Berdasarkan gambar navigasi preview di web [Nusa](https://rama2555.github.io/nus
 
 ### 5. `Focus timer` (Pomodoro Fokus — `420x140px`)
 
-- **Cara Kerja di Nusa**:
+- **Perilaku & Spesifikasi Desain**:
   - **Kiri**: **Glowing Conic Ring** berwarna merah-koral (`#ff5a6e` -> `#ff3a3a`) berdiameter `64px` dengan pendaran cahaya (`pglow`) dan ikon stopwatch di tengahnya.
   - **Kanan Atas**: Angka waktu besar (`25:00`), tombol bundar _Reset_ di sebelahnya, dan label status (`Focus time` / `Short break`).
   - **Kanan Bawah**: 3 tombol kapsul (_pill_): tombol mode `Short Break` (ikon cangkir kopi), tombol utama `Play/Pause` merah menyala, dan tombol mode `Focus Time` (ikon target), ditambah **bunyi lonceng lembut (_soft chime_)** saat sesi selesai.
@@ -60,7 +60,7 @@ Berdasarkan gambar navigasi preview di web [Nusa](https://rama2555.github.io/nus
 
 ### 6. `Water` (Pengingat Minum & Grafik Jam-jaman — `420x140px`)
 
-- **Cara Kerja di Nusa**:
+- **Perilaku & Spesifikasi Desain**:
   - Tampilan terbelah dua (_Split View_):
   - **Sisi Kiri**: Angka besar `1.5 / 1.5 L`, sakelar toggle lonceng pengingat aktif, status `Today · 100% · Goal reached`, bar progres gradasi biru, tombol `Drink` dan tombol `Settings` (untuk mengatur ukuran gelas/botol & target harian).
   - **Sisi Kanan**: **Grafik Histogram Per Jam (Hourly Bar Chart)** dari pukul `09`, `12`, `15`, dst. dengan sumbu Y (`0 ml`, `200`, `400`) dan animasi batang tumbuh (_spring bar growth_).
@@ -68,20 +68,20 @@ Berdasarkan gambar navigasi preview di web [Nusa](https://rama2555.github.io/nus
 
 ### 7. `Shelf` (Rak Penyimpanan File Sementara Drag & Drop — `420x140px`)
 
-- **Cara Kerja di Nusa**:
+- **Perilaku & Spesifikasi Desain**:
   - Area garis putus-putus (`Drop files here` / `Release to add` / `Drag out anytime · click to open`).
   - **"Island Gulp" Animation**: Ketika pengguna menyeret (_drag_) file dari File Manager mendekati notch, island memancarkan cahaya gradasi biru-ungu dan sedikit "menelan/mengembang" (_swell/gulp_) saat file dilepas.
   - **Kartu File & Drag-Out**: Menampilkan kartu file beserta thumbnail (preview gambar atau ikon folder/dokumen), nama file, ukuran (`2.4 MB`), tombol `Clear`, klik untuk membuka, dan bisa **di-drag keluar lagi** ke aplikasi lain (chat, browser, email, folder) tanpa menyalin isi file ke RAM (hanya menyimpan referensi path).
 
 ### 8. `To-do` (Daftar Tugas dengan Pengingat Waktu — `420x140px`)
 
-- **Cara Kerja di Nusa**:
+- **Perilaku & Spesifikasi Desain**:
   - **Layout Split**: Sisi kiri menampilkan angka progres raksasa (`4/5 Task Done Today`) beserta tombol `Add Task` dan `Edit Task`. Sisi kanan menampilkan daftar tugas scrollable dengan checkbox hijau bundar dan teks dicoret (_strikethrough_).
   - **Fitur Kunci**: Tugas dapat diberi **jam tenggat waktu (_due time reminder_)**, sehingga Dynamic Island otomatis mencolek/memunculkan pop-up saat tugas jatuh tempo.
 
 ### 9. `Headphones` (Pop-up Earbuds / Bluetooth — `310x60px`)
 
-- **Cara Kerja di Nusa**:
+- **Perilaku & Spesifikasi Desain**:
   - Kapsul berukuran menengah (`310x60px`, lebih besar dari HUD biasa tetapi lebih ringkas dari Hub penuh).
   - **Kiri**: Cincin progres biru muda (`#5ec2ff`) dengan ikon Bluetooth di tengahnya.
   - **Tengah**: Nama perangkat (`AirBuds Pro`) dan status (`Connected · 70%`).
@@ -89,7 +89,7 @@ Berdasarkan gambar navigasi preview di web [Nusa](https://rama2555.github.io/nus
 
 ### 10. `Charging` (Pop-up Pengisian Daya — `310x60px`)
 
-- **Cara Kerja di Nusa**:
+- **Perilaku & Spesifikasi Desain**:
   - Kapsul `310x60px` yang muncul saat kabel charger dicolokkan.
   - **Kiri**: Cincin progres melingkar hijau neon (`#33e07a`) dengan ikon petir putih di dalamnya.
   - **Tengah**: Teks tebal `Charging` dan subteks `Charger connected`.
@@ -97,11 +97,11 @@ Berdasarkan gambar navigasi preview di web [Nusa](https://rama2555.github.io/nus
 
 ---
 
-## 🌐 2. Fitur Tambahan dari Web Nusa & Projek Notch Lainnya
+## 🌐 2. Fitur Tambahan & Ekosistem Aplikasi Notch Lainnya
 
-Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan aplikasi sejenis menghasilkan daftar fitur unggulan berikut:
+Selain 10 modul di atas, hasil analisis menyeluruh terhadap tren aplikasi notch dan utilitas desktop menghasilkan daftar fitur unggulan berikut:
 
-### A. Fitur Sistem Tambahan dari Web Nusa (`rama2555.github.io/nusa`)
+### A. Fitur Sistem Tambahan Dynamic Notch Desktop
 
 1. **Screen Brightness HUD Overlay**: Pop-up mulus saat mengatur kecerahan layar laptop.
 2. **Caps Lock & Keyboard Layout Nudge**: Pop-up kapsul singkat saat tombol `Caps Lock` ditekan (On/Off) atau saat layout keyboard berganti.
@@ -144,12 +144,13 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 | **Resting Mascot Eyes** | ⏳ Sebagian | Mata maskot berkedip (`MascotEyes.qml`) & toggle mode maskot di halaman Sistem. | **Cursor Eye-Tracking** (melirik kursor), animasi **Doze Off (Mengantuk/Tidur)**, & **Wave Hello**. |
 | **To-Do List Harian** | ⏳ Sebagian | Tambah tugas, centang selesai (*strikethrough*), hapus tugas, & penyimpanan JSON (`PageTodo.qml` + `services/todo.py`). | **Edit Task** inline & **Pengingat Jam Jatuh Tempo (Due Time Reminder)**. |
 | **Headphones / Bluetooth Peek** | ✅ Selesai | Kapsul pop-up `310x60px` (`HudBluetooth.qml` + `services/bluetooth.py`) via **BlueZ D-Bus (`org.bluez`)** dengan cincin baterai biru `#5ec2ff`, nama perangkat, persentase baterai, & lencana headphone bercahaya selama 3,5 detik. | — |
-| **Charging Peek (`310x60px`)** | ✅ Selesai | **Nusa Charging Peek (`310x60px` di `HudBattery.qml`)** dengan **Circular Conic Ring** hijau `#33e07a`, ikon petir, & teks `22px`, serta **Closed Battery Ring + Mini Sound Wave** di `CompactIdle.qml` (`150x28px`). | — |
+| **Charging Peek (`310x60px`)** | ✅ Selesai | **Charging Peek (`310x60px` di `HudBattery.qml`)** dengan **Circular Conic Ring** hijau `#33e07a`, ikon petir, & teks `22px`, serta **Closed Battery Ring + Mini Sound Wave** di `CompactIdle.qml` (`150x28px`). | — |
 | **Brightness, CapsLock & Mic HUD** | ✅ Selesai | **HUD Hardware (`250x36px` di `HudHardware.qml` + `services/hardware_hud.py`)** untuk **Screen Brightness** (`amdgpu_bl1` + KDE PowerManagement D-Bus), **Caps Lock Nudge** (`/sys/class/leds/input*::capslock`), & **Mic Mute HUD** (`wpctl`), plus slider kecerahan & tombol Mic di *Pintasan Cepat*. | — |
 | **Privacy Dots (Cam / Mic In-Use)** | ❌ Belum | — | Deteksi node PipeWire aktif untuk menampilkan titik hijau (kamera) & oranye (mikrofon) ala iOS/macOS. |
 | **System Tray & Fullscreen Hide** | ❌ Belum | Daemon systemd / background via `run.sh`. | **`QSystemTrayIcon`** (menu konfigurasi cepat) & **Fullscreen App Auto-Hide** (sembunyi saat main game/video fullscreen). |
 | **Hardware, Suhu & TDP Monitor** | ✅ Selesai | **Processor TDP (`W` via `hwmon PPT`)**, **Suhu CPU (`k10temp`), GPU (`amdgpu`), & NVMe (`°C`)**, **Clock CPU (`GHz`)**, **GPU Load & VRAM**, **Top Process**, **Overheat HUD Alert (`≥85°C`)**, & **1-Click Power Profile Switcher** (`PageHardware.qml` + `services/system.py`). | Statistik riwayat suhu & kecepatan kipas (`RPM` jika tersedia). |
-| **Jadwal Sholat & Pengingat Azan** | ❌ Belum | — | **Jadwal 5 Waktu + Imsak/Syuruq (Metode Kemenag RI)**, *Countdown* waktu sholat berikutnya, **Pop-Up HUD Azan (`HudPrayer.qml`)**, pengingat 10 menit sebelum azan, **Auto-Pause Musik saat Azan**, & *Tracker Checklist Sholat 5 Waktu*. |
+| **Pusat Notifikasi & Pembaca Penuh** | ✅ Selesai | **Split View 40 Riwayat Notifikasi** (`PageNotifications.qml`), kategori dinamis, tombol **📋 Salin OTP**, mode **🔕 Do Not Disturb**, & lencana unread. | — |
+| **Jadwal Sholat & Azan (Sun Arc Trajectory)** | ❌ Belum | — | **Sun Arc Trajectory Curve** (busur posisi matahari bergerak & glowing next prayer), **10-Min Pre-Adzan Heads-Up** (`🌙 Maghrib 10 min`), **At Prayer Time Calm Popup** (`🌙 Maghrib It's time to pray 17:52`), kalkulasi lokal Kemenag RI / koordinat GPS offline, auto-pause musik, checklist 5 waktu, & fine-tune minutes. |
 | **Clipboard, Cuaca & Kamera** | ❌ Belum | — | **Clipboard History Manager**, **Live Weather & Day Progress Bar**, serta **Camera Mirror**. |
 | **Portabilitas Windows & `.exe` Installer** | ⏳ Sebagian | Seluruh UI/Animasi QML, Lirik (`LRCLIB`), Timer, Water, To-Do, File Shelf (`QDrag`), & statistik dasar (`psutil`) sudah *cross-platform*. | Adapter backend Windows (`sys.platform == "win32"` untuk SMTC Media, `pycaw` Audio, Bluetooth, WMI Thermal/Brightness) + bundel **`DynamicIsland-Setup.exe`** (**PyInstaller + Inno Setup**). |
 
@@ -157,7 +158,7 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 
 ## 🚀 4. Rencana Implementasi Bertahap (Checklist Fitur Sudah vs Belum)
 
-### ✅ Fase 1: Fitur Core Visual & Produktivitas Utama Nusa (SUDAH DIIMPLEMENTASIKAN)
+### ✅ Fase 1: Fitur Core Visual & Produktivitas Utama (SUDAH DIIMPLEMENTASIKAN)
 
   - [x] **1. Mode Lirik Tersinkronisasi / Karaoke (`services/lyrics.py` + `qml/ExpandedHub.qml` + `qml/Island.qml`)**
   - [x] Integrasi API **LRCLIB (`lrclib.net`)** asynchronous + pembersih judul YouTube/Spotify otomatis & cache lokal `~/.cache/dynamic_island/lyrics/`.
@@ -194,7 +195,7 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
   - [x] Saat TWS/Headphone (`soundcore R50i`, `thinkplus-TH30`, dll.) tersambung atau terputus, munculkan kapsul `310x60px` berisi cincin baterai biru (`#5ec2ff`), nama perangkat, persentase baterai, dan **animasi interaktif lepas-pasang TWS (*Charging Case* membuka/menutup & Earbud `L`/`R` keluar/masuk *case*)** selama 4,2 detik.
   - [x] **Halaman Menu Bluetooth & Perangkat (`qml/PageBluetooth.qml`)**: Menampilkan status adapter Bluetooth (`Aktif/Mati`), daftar seluruh perangkat Bluetooth yang sedang terkoneksi maupun tersimpan (*paired*), indikator persentase baterai per perangkat (`🔋 XX%`), tombol **Sambung / Putuskan** 1-klik (`bluetoothctl`), tombol **🎬 Animasi TWS**, dan pintasan ke **Setelan Bluetooth KDE**.
 - [x] **2. Upgraded Charging Peek (`qml/HudBattery.qml` — `310x60px`) & Closed Battery Ring (`qml/CompactIdle.qml`)**
-  - [x] Perbarui `HudBattery.qml` menjadi gaya Nusa (`310x60px`) dengan cincin progres melingkar hijau neon (`#33e07a`), ikon petir di tengah cincin, label `Charging / Charger connected`, dan persentase baterai besar (`22px`) di sisi kanan.
+  - [x] Perbarui `HudBattery.qml` menjadi gaya modern (`310x60px`) dengan cincin progres melingkar hijau neon (`#33e07a`), ikon petir di tengah cincin, label `Charging / Charger connected`, dan persentase baterai besar (`22px`) di sisi kanan.
   - [x] Tambahkan **Circular Battery Conic Ring (`#33e07a`)** di sisi kiri dan **4-Bar Animated Mini Sound Wave** di sisi kanan pada mode kapsul tertutup (`CompactIdle.qml` — `150x28px`).
 - [x] **3. Screen Brightness, Mic Mute & Caps Lock HUD (`qml/HudHardware.qml` + `services/hardware_hud.py`)**
   - [x] Integrasikan pemantauan kecerahan layar (`/sys/class/backlight/amdgpu_bl1` + KDE PowerManagement D-Bus `BrightnessControl`) untuk menampilkan HUD Kecerahan Layar (`250x36px`) saat tombol `Fn + Brightness` ditekan atau diatur dari slider *Pintasan Cepat*.
@@ -205,7 +206,45 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 
 ---
 
-### ⏳ Fase 3: Interaktivitas Maskot Pintar, Privasi & Integrasi Desktop KDE (BELUM DIIMPLEMENTASIKAN)
+### ⏳ Fase 3: Polesan Repo, Kemudahan Instalasi, Stabilitas & Kualitas Kode — Masukan Review Claude (BELUM DIIMPLEMENTASIKAN)
+
+> Fase ini berasal dari saran review eksternal (Claude). Tujuannya membuat projek terasa seperti **produk matang** (tampilan repo, mudah dipasang, dipercaya, dan terawat) sebelum menambah fitur baru. Urutan kerja yang disarankan: **3.1 → 3.2 → (Fase 4 poin Fullscreen Auto-Hide & Tray) → (Fase 6 Pengaturan) → 3.3 (AUR) → 3.4 (CI & Tes) → 3.6 (fitur "wow")**.
+
+- [ ] **1. Tampilan Repo & Kesan Pertama GitHub**
+  - **GIF demo di paling atas `README.md`**: rekam Musik + Lirik, Charging Peek, Bluetooth TWS (animasi lepas-pasang), Notifikasi, dan File Shelf; lalu buat **galeri screenshot per halaman** (`docs/screenshots/`).
+  - **Badge** di bawah judul README: `KDE Plasma 6`, `Wayland`, `Python`, `PyQt6`, `License`, dan status CI.
+  - **Social preview image** di pengaturan repo GitHub, serta rapikan *Topics* & deskripsi repo.
+  - **Rilis bertag `v0.1.0`** dengan changelog (`CHANGELOG.md`) — saat ini halaman *Releases* masih kosong.
+- [ ] **2. Kemudahan Pemasangan (Installability)**
+  - **Paket AUR (`PKGBUILD`)**: agar pengguna Arch/CachyOS cukup menjalankan `yay -S dynamic-island` menggantikan `git clone` manual.
+  - **`install.sh` / `./run.sh --check`**: memeriksa dependensi (`PyQt6`, `layer-shell-qt`, `wpctl`, `bluetoothctl`, `powerprofilesctl`, `dbus-monitor`, `wl-copy`) dan sesi Wayland, lalu memberi pesan error yang jelas jika ada yang kurang.
+  - **Standarisasi path XDG**: pindahkan konfigurasi → `$XDG_CONFIG_HOME/dynamic-island/`, cache → `$XDG_CACHE_HOME/dynamic-island/`, state/log → `$XDG_STATE_HOME/dynamic-island/` (bukan `/tmp` atau path tetap).
+- [ ] **3. Fungsi Harian yang Paling Terasa (diprioritaskan dari fase lain)**
+  - **Fullscreen Auto-Hide + System Tray Icon** (lihat Fase 4 poin 3) — tanpa ini island mengganggu saat game/video.
+  - **Halaman Pengaturan + Global Hotkey** (lihat Fase 6) — toggle per-HUD, durasi, tema; membuat projek terasa seperti produk, bukan sekadar `config.py`.
+  - **Privacy Dots (kamera & mikrofon)** (lihat Fase 4 poin 2) — fitur mencolok dan mudah dipamerkan.
+  - **Deteksi hardware otomatis dengan *fallback*** agar jalan di **Intel / NVIDIA / AMD** (sysfs `hwmon`, `nvidia-smi`, `intel_gpu_top`, backlight generik, dll.) dan tidak crash di perangkat tanpa sensor tertentu.
+- [ ] **4. Kualitas Kode & Kepercayaan**
+  - **Unit test untuk `services/`** (`pytest`): parser lirik LRC, parser sysfs/hwmon, pembersih HTML notifikasi, klasifikasi perangkat Bluetooth, dan (nanti) perhitungan waktu sholat.
+  - **GitHub Actions**: lint dengan **`ruff`** + jalankan tes pada setiap *push/PR*; tampilkan badge CI hijau di README.
+  - **Ukur & dokumentasikan pemakaian sumber daya**: catat CPU/RAM saat *idle* & saat Hub terbuka, lalu tulis angkanya di README sebagai bukti klaim "berkinerja tinggi".
+  - **Privasi & keamanan data**: set izin file **`600`** untuk riwayat notifikasi (`notifications.json`) dan file pengguna lainnya; **jangan menyimpan** notifikasi/clipboard dari *password manager* (daftar aplikasi pengecualian: KeePassXC, Bitwarden, 1Password, dll.).
+- [ ] **5. Dokumentasi & Komunitas**
+  - File **`LICENSE`**, **`CONTRIBUTING.md`** singkat, dan **templat issue** (versi Plasma, GPU, log `dynamic_island_kde.log`).
+  - Bagian **Troubleshooting & FAQ** di README (layer-shell tidak termuat, Bluetooth tidak terdeteksi, sensor suhu kosong, dll.).
+  - Pecah `Next.md` → **`ROADMAP.md`** ringkas, dan pindahkan item fitur menjadi **GitHub Issues/Projects** dengan label `good first issue`.
+  - **README versi Inggris (atau bilingual)** agar menjangkau pengguna Linux global.
+- [ ] **6. Fitur "Wow" Usaha Kecil (diprioritaskan)**
+  - **Real Audio Visualizer (PipeWire / `cava`)** menggantikan animasi *loop* statis pada equalizer kapsul & halaman Musik (lihat Fase 5 poin 3).
+  - **Cursor Eye-Tracking** pada Mascot Eyes (lihat Fase 4 poin 1).
+  - **Low-Battery Nudge** dengan tombol "Aktifkan Mode Hemat Daya" (lihat Fase 4 poin 4).
+  - **Wi-Fi Peek** saat tersambung/terputus (lihat Fase 4 poin 4).
+- [ ] **7. Catatan Prioritas (Penundaan Fitur Tambahan)**
+  - Fitur **Jadwal Sholat, Camera Mirror, Voice Note, dan Color Picker** (Fase 5) **ditunda** sampai poin 3–4 Fase ini selesai, karena menambah beban perawatan, sedangkan Pengaturan, Auto-Hide, dan paket AUR yang membuat pengguna betah memakai aplikasi.
+
+---
+
+### ⏳ Fase 4: Interaktivitas Maskot Pintar, Privasi & Integrasi Desktop KDE (BELUM DIIMPLEMENTASIKAN)
 
 - [ ] **1. Smart Mascot 2.0 (`qml/MascotEyes.qml`)**
   - Tambahkan pelacakan kursor halus (*eye gaze* mengikuti posisi mouse), mode mengantuk (*sleeping eyes* saat idle > 5 menit), animasi menyapa (*happy blink / wave*) saat pengguna kembali aktif, dan reaksi ekspresi mata saat musik berdentum atau suhu CPU tinggi.
@@ -222,13 +261,31 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 
 ---
 
-### ⏳ Fase 4: Fitur Produktivitas Ekstra, Ibadah & Smart Utilities (BELUM DIIMPLEMENTASIKAN)
+### ⏳ Fase 5: Fitur Produktivitas Ekstra, Ibadah & Smart Utilities (BELUM DIIMPLEMENTASIKAN)
 
-- [ ] **1. Jadwal Sholat & Pengingat Azan Pintar Real-Time Lokasi (`services/prayer.py` + `qml/PagePrayer.qml` + `qml/HudPrayer.qml`)**:
-  - **Deteksi Lokasi & Koordinat Real-Time Otomatis (`Latitude` & `Longitude`)**: Mendeteksi posisi pengguna secara otomatis melalui layanan lokasi sistem (**GeoClue2 D-Bus** / Wi-Fi Triangulation) dan *Multi-Provider IP Geolocation* (`ipwho.is` / `ip-api.com`) setiap kali jaringan terhubung/berpindah, lalu menghitung waktu *Imsak, Subuh, Syuruq, Dzuhur, Ashar, Maghrib, dan Isya* tepat berdasarkan **titik koordinat lintang-bujur (`lat, lon`) pengguna** dengan standar **Kemenag RI (Method 20)** + *fallback* kalkulasi astronomi lokal.
-  - **Countdown & Pre-Adzan Nudge (10 Menit Sebelum Waktu Sholat)**: Menampilkan hitung mundur menuju waktu sholat berikutnya (`Maghrib dalam 14m`) dan pengingat halus 10 menit sebelum azan agar pengguna bisa menyimpan pekerjaan lebih dulu.
-  - **Pop-Up Kapsul Azan (`HudPrayer.qml`) & Auto-Pause Musik**: Saat waktu azan tiba, tampilkan kapsul berlencana kubah/bulan sabit hijau-emas (`#10b981` / `#f59e0b`), kumandang audio pengingat lembut, serta opsi **otomatis menjeda (*pause*) musik/Spotify saat Azan berkumandang**.
-  - **Checklist Tracker Sholat 5 Waktu**: Fitur centang ibadah harian di halaman Jadwal Sholat untuk membantu menjaga konsistensi sholat tepat waktu.
+- [ ] **1. Jadwal Sholat & Pengingat Azan Pintar — Sun Arc Day Trajectory (*Prayer times, right in the notch*) (`services/prayer.py` + `qml/PagePrayer.qml` + `qml/HudPrayer.qml`)**:
+  - **A. Open Page (Visual Busur Matahari / Sun Arc Trajectory Curve)**:
+    - Kurva lengkung busur matahari (*parabolic sun arc*) yang elegan melintasi Dynamic Island (`qml/PagePrayer.qml`).
+    - **Dynamic Glowing Sun**: Matahari bersinar dinamis bergerak sepanjang busur sesuai waktu siang/malam saat ini.
+    - **Adaptive Prayer Status**: Waktu sholat yang telah terlewat memudar redup (*past prayers fade*), sedangkan waktu sholat aktif/berikutnya menyala terang dengan pendaran cahaya (*glowing active prayer*).
+    - **Header & Gentle Countdown**: Teks nama sholat berikutnya tebal (`Maghrib`), jam pasti (`17:52`), dan hitung mundur lembut (*gentle countdown*, misal: `in 1 h 12 min`), disertai lokasi (`Jakarta`) dan tanggal.
+    - **Timeline 5 Waktu di Bawah Busur**: Titik penanda waktu *Subuh (04:03)*, *Dzuhur (11:38)*, *Ashar (14:46)*, *Maghrib (17:52)*, dan *Isya (19:03)*.
+  - **B. Ten Minutes Before (Quiet Heads-up Kapsul Tertutup — `310x36px`)**:
+    - Kapsul tertutup menampilkan heads-up hening dan tenang 10 menit sebelum waktu sholat tiba (`🌙 Maghrib    10 min`).
+    - Hanya muncul jika diaktifkan pengguna (*quiet heads-up, only if you turn it on*), memberi waktu untuk menyelesaikan coding/tugas sebelum ke masjid.
+  - **C. At Prayer Time (Short & Calm Popup — `360x42px`)**:
+    - Saat azan berkumandang, Dynamic Island menampilkan pop-up anggun: ikon bulan sabit bercahaya, nama sholat, pesan tenang `It's time to pray`, dan jam (`🌙 Maghrib  It's time to pray  17:52`).
+    - *No sound unless you choose it* (mode default tenang/senyap, dengan opsi mengaktifkan audio Azan merdu atau soft chime).
+    - Opsi cerdas: **Auto-Pause Musik/Spotify** otomatis saat waktu sholat tiba.
+  - **D. Kalkulasi Offline & Real-Time Koordinat (Metode Kemenag RI)**:
+    - Dihitung secara matematis langsung di PC pengguna (menggunakan algoritma astronomi posisi matahari / metode Kemenag RI / sudut Subuh 20° & Isya 18°), **100% offline tanpa ketergantungan API eksternal**.
+    - Mendukung deteksi lokasi koordinat pengguna (otomatis via GeoIP/portal atau input nama kota sekali).
+  - **E. Integrasi Halaman Pengaturan (Prayer Settings)**:
+    - *Show Prayer Page switch* (default mati, hidupkan untuk menampilkan tab Sholat).
+    - *City & Method selector* (Pilih kota / metode hisab).
+    - *Reminders toggle*: sakelar mandiri untuk *At prayer time* dan *10 minutes before*.
+    - *Fine-tune times*: fitur geser menit waktu sholat (+/- menit) jika ada selisih ihtiath dengan masjid di lingkungan pengguna.
+    - *Tracker Checklist Sholat 5 Waktu*: checklist ibadah harian untuk memantau sholat tepat waktu.
 - [ ] **2. Clipboard History & Quick Paste (`services/clipboard.py` + `qml/PageClipboard.qml`)**: Menyimpan 15 teks/kode/gambar terakhir yang disalin (`Ctrl+C`), mendukung *Pin* item penting, dan menempelkannya kembali dengan sekali klik.
 - [ ] **3. Audio Output & Input Device Switcher**: Pilih perangkat output/input audio aktif (Speaker Laptop ↔ TWS Bluetooth ↔ Monitor HDMI) dan lihat *Real-Time Audio Spectrum Visualizer* (`PipeWire` / `cava`) langsung dari halaman Musik.
 - [ ] **4. Live Weather & Day Progress Bar**: Widget cuaca lokal *real-time* (`Open-Meteo` tanpa API key) lengkap dengan prakiraan suhu per jam dan bar persentase waktu hari yang telah berlalu (`Day Progress`).
@@ -241,7 +298,7 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 
 ---
 
-### ⏳ Fase 5: Halaman Pengaturan Terpadu & Kustomisasi Dynamic Island (`qml/PageSettings.qml` + `config.py`) (BELUM DIIMPLEMENTASIKAN)
+### ⏳ Fase 6: Halaman Pengaturan Terpadu & Kustomisasi Dynamic Island (`qml/PageSettings.qml` + `config.py`) (BELUM DIIMPLEMENTASIKAN)
 
 - [ ] **1. Pengaturan Navigasi, Gestur & Perilaku Interaksi**
   - **Mode Geser Halaman**: Opsi mengaktifkan/mematikan *Mouse Scroll Wheel untuk Pindah Halaman* (default: **Mati**, hanya menggunakan **Swap/Drag** & *Touchpad 2-Finger Swipe* agar tidak mengganggu scroll daftar), serta toggle *Scroll di Kapsul Tertutup untuk Volume*.
@@ -260,7 +317,7 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 
 ---
 
-### ⏳ Fase 6 (Fase Terakhir): Dukungan Cross-Platform Windows (`win32`) & Packaging Installer `.exe` untuk Publik (BELUM DIIMPLEMENTASIKAN)
+### ⏳ Fase 7 (Fase Terakhir): Dukungan Cross-Platform Windows (`win32`) & Packaging Installer `.exe` untuk Publik (BELUM DIIMPLEMENTASIKAN)
 
 - [ ] **1. Hybrid Window Overlay (Wayland Layer-Shell + Windows Topmost Overlay)**
   - Deteksi sistem operasi otomatis di `main.py` (`sys.platform == "win32"`) untuk memuat window tanpa bingkai (`Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool`) dengan Win32 API `HWND_TOPMOST` & `WS_EX_TOOLWINDOW` agar menempel mulus di tengah atas layar Windows 10/11 tanpa muncul di *Taskbar* atau *Alt+Tab*.

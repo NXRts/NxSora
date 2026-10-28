@@ -195,7 +195,7 @@ Item {
         }
     }
 
-    // 1. Sleek Notch Shape with Nusa-Style Concave Ears & Rounded Bottom
+    // 1. Sleek Notch Shape with Modern Notch Concave Ears & Rounded Bottom
     Shape {
         id: notchShape
         x: -island.earRadius
@@ -301,7 +301,7 @@ Item {
         }
     }
 
-    // 2. Ambient Music Glow Layer (Poni & Nusa Inspired)
+    // 2. Ambient Music Glow Layer (Adaptive Ambient Glow Layer)
     Rectangle {
         id: ambientGlow
         anchors.fill: parent
@@ -326,7 +326,7 @@ Item {
         Behavior on opacity { NumberAnimation { duration: 400 } }
     }
 
-    // 2B. Nusa "Island Gulp" Shelf Drop Glow Layer (#19b8ff -> #2d5bff -> #7b4bff)
+    // 2B. Dynamic Island "Island Gulp" Shelf Drop Glow Layer (#19b8ff -> #2d5bff -> #7b4bff)
     Rectangle {
         id: shelfGulpGlow
         anchors.fill: parent
@@ -433,7 +433,7 @@ Item {
             Behavior on opacity { NumberAnimation { duration: 180 } }
         }
 
-        // 4. HUD Battery (Nusa 310x60px Charging Peek)
+        // 4. HUD Battery (310x60px Charging Peek)
         HudBattery {
             anchors.fill: parent
             visible: opacity > 0
@@ -441,7 +441,7 @@ Item {
             Behavior on opacity { NumberAnimation { duration: 180 } }
         }
 
-        // 4B. HUD Bluetooth Headphones Peek (Nusa 310x60px)
+        // 4B. HUD Bluetooth Headphones Peek (310x60px)
         HudBluetooth {
             anchors.fill: parent
             visible: opacity > 0

@@ -91,7 +91,7 @@ Item {
                 }
             }
 
-            // Clear Shelf Button (Nusa .sh-clear style)
+            // Clear Shelf Button (Clear style)
             Rectangle {
                 visible: IslandController.shelfCount > 0
                 height: 22
@@ -121,7 +121,7 @@ Item {
         }
 
         // =====================================================================
-        // DROP ZONE & STASHED FILE CARDS (NUSA .sh-zone & .sh-card STYLE)
+        // DROP ZONE & STASHED FILE CARDS (SHELF ZONE & CARD STYLE)
         // =====================================================================
         Item {
             id: shelfZoneContainer
@@ -218,7 +218,7 @@ Item {
                                 }
                             }
 
-                            // B. Folder Thumbnail (Nusa warm gold folder style)
+                            // B. Folder Thumbnail (Gold folder style)
                             Rectangle {
                                 anchors.fill: parent
                                 radius: 9
@@ -286,7 +286,7 @@ Item {
                             }
                         }
 
-                        // File Name (Nusa .sh-name)
+                        // File Name (.sh-name)
                         Text {
                             Layout.fillWidth: true
                             text: fileCard.modelData.name || ""
@@ -298,7 +298,7 @@ Item {
                             maximumLineCount: 1
                         }
 
-                        // File Size (Nusa .sh-size)
+                        // File Size (.sh-size)
                         Text {
                             Layout.fillWidth: true
                             text: fileCard.modelData.size || ""
@@ -389,7 +389,7 @@ Item {
                 }
             }
 
-            // 2. EMPTY / HOVER DROP OVERLAY (Nusa .sh-zone prompt)
+            // 2. EMPTY / HOVER DROP OVERLAY (Drop zone prompt)
             ColumnLayout {
                 anchors.centerIn: parent
                 spacing: 4
