@@ -14,6 +14,12 @@ Item {
         if (island.isShelfDragNear || island.gulpGlowOpacity > 0.05) {
             return "#2d5bff"
         }
+        if (IslandController.state === "hud-bluetooth") {
+            return IslandController.btDeviceConnected ? "#5ec2ff" : "#f43f5e"
+        }
+        if (IslandController.state === "hud-battery") {
+            return IslandController.isCharging ? "#33e07a" : "#38bdf8"
+        }
         if (IslandController.state === "music" || IslandController.isExpanded) {
             return IslandController.mediaAccentColor || "#38bdf8"
         }
@@ -24,6 +30,9 @@ Item {
         if (island.isShelfDragNear || island.gulpGlowOpacity > 0.05) {
             return "#38bdf8"
         }
+        if (IslandController.state === "hud-bluetooth" || IslandController.state === "hud-battery") {
+            return Qt.rgba(currentAccentColor.r, currentAccentColor.g, currentAccentColor.b, 0.65)
+        }
         if (islandMouse.containsMouse && !IslandController.isExpanded) {
             return currentAccentColor
         }
@@ -33,7 +42,7 @@ Item {
         return "#23232c"
     }
 
-    readonly property real islandBorderWidth: (IslandController.mediaIsPlaying && !IslandController.isExpanded) || island.isShelfDragNear ? 1.5 : 1.0
+    readonly property real islandBorderWidth: (IslandController.mediaIsPlaying && !IslandController.isExpanded) || island.isShelfDragNear || IslandController.state === "hud-bluetooth" || IslandController.state === "hud-battery" ? 1.5 : 1.0
 
     // "Island Gulp" animation when files are dropped onto the Shelf
     SequentialAnimation {
@@ -302,7 +311,12 @@ Item {
         bottomRightRadius: island.cornerRadius
         color: "transparent"
         z: 1
-        opacity: IslandController.mediaIsPlaying ? (IslandController.isExpanded ? 0.22 : 0.35) : 0.0
+        opacity: {
+            if (IslandController.state === "hud-bluetooth" || IslandController.state === "hud-battery") {
+                return 0.36
+            }
+            return IslandController.mediaIsPlaying ? (IslandController.isExpanded ? 0.22 : 0.35) : 0.0
+        }
         gradient: Gradient {
             orientation: Gradient.Vertical
             GradientStop { position: 0.0; color: "transparent" }

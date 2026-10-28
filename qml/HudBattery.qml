@@ -12,6 +12,53 @@ Item {
         return "#38bdf8";
     }
 
+    property real sweepRatio: Math.max(0.05, Math.min(1.0, IslandController.batteryPercent / 100.0))
+    property real rippleScale: 0.75
+    property real rippleOpacity: 0.0
+    property real boltScale: 1.0
+
+    onSweepRatioChanged: battRingCanvas.requestPaint()
+
+    function triggerChargeAnim() {
+        chargeAnim.stop()
+        sweepRatio = 0.0
+        chargeAnim.start()
+    }
+
+    Connections {
+        target: IslandController
+        function onStateChanged() {
+            if (IslandController.state === "hud-battery") {
+                root.triggerChargeAnim()
+            }
+        }
+        function onBatteryChanged() {
+            battRingCanvas.requestPaint()
+        }
+    }
+
+    ParallelAnimation {
+        id: chargeAnim
+        NumberAnimation {
+            target: root
+            property: "sweepRatio"
+            from: 0.0
+            to: Math.max(0.05, Math.min(1.0, IslandController.batteryPercent / 100.0))
+            duration: 640
+            easing.type: Easing.OutCubic
+        }
+        SequentialAnimation {
+            ParallelAnimation {
+                NumberAnimation { target: root; property: "rippleScale"; from: 0.75; to: 1.45; duration: 550; easing.type: Easing.OutCubic }
+                NumberAnimation { target: root; property: "rippleOpacity"; from: 0.7; to: 0.0; duration: 550; easing.type: Easing.OutQuad }
+            }
+        }
+        SequentialAnimation {
+            NumberAnimation { target: root; property: "boltScale"; from: 0.6; to: 1.25; duration: 220; easing.type: Easing.OutBack }
+            NumberAnimation { target: root; property: "boltScale"; to: 1.0; duration: 240; easing.type: Easing.OutElastic }
+        }
+    }
+
     RowLayout {
         anchors.fill: parent
         anchors.leftMargin: 14
@@ -24,6 +71,19 @@ Item {
         Item {
             Layout.preferredWidth: 40
             Layout.preferredHeight: 40
+
+            // Expanding electric ripple ring
+            Rectangle {
+                anchors.centerIn: parent
+                width: 38
+                height: 38
+                radius: 19
+                color: "transparent"
+                border.color: root.ringColor
+                border.width: 1.8
+                scale: root.rippleScale
+                opacity: root.rippleOpacity
+            }
 
             // Soft outer neon glow
             Rectangle {
@@ -60,8 +120,8 @@ Item {
                     ctx.strokeStyle = "#192622";
                     ctx.stroke();
 
-                    // Active progress arc
-                    var ratio = Math.max(0.05, Math.min(1.0, pct / 100.0));
+                    // Active animated progress arc
+                    var ratio = Math.max(0.03, Math.min(1.0, root.sweepRatio));
                     var startAngle = -Math.PI / 2;
                     var endAngle = startAngle + (Math.PI * 2 * ratio);
                     ctx.beginPath();
@@ -78,6 +138,7 @@ Item {
                 anchors.centerIn: parent
                 width: 15
                 height: 15
+                scale: root.boltScale
                 sourceSize.width: 15
                 sourceSize.height: 15
                 source: IslandController.isCharging
@@ -116,7 +177,7 @@ Item {
         }
 
         // =====================================================================
-        // 3. RIGHT: LARGE PERCENTAGE READOUT (Nusa 24px Bold Style)
+        // 3. RIGHT: LARGE PERCENTAGE READOUT (Nusa 22px Bold Style)
         // =====================================================================
         Text {
             text: IslandController.batteryPercent + "%"

@@ -213,7 +213,7 @@ class IslandController(QObject):
         self.bluetoothChanged.emit()
         if not self._is_expanded:
             self._set_state("hud-bluetooth")
-            self._hud_timer.start(3500)
+            self._hud_timer.start(4200)
 
     def _on_hardware_hud_triggered(self, hud_type, label, val, active):
         self.hardwareHudChanged.emit()
@@ -852,6 +852,14 @@ class IslandController(QObject):
     def btDeviceBattery(self):
         return max(0, min(100, int(self.bluetooth.device_battery))) if self.bluetooth.device_battery >= 0 else 100
 
+    @pyqtProperty(str, notify=bluetoothChanged)
+    def btDeviceType(self):
+        return getattr(self.bluetooth, "device_type", "tws")
+
+    @pyqtProperty(int, notify=bluetoothChanged)
+    def btAnimSerial(self):
+        return int(getattr(self.bluetooth, "anim_serial", 0))
+
     @pyqtProperty(int, notify=hardwareHudChanged)
     def brightnessPercent(self):
         return int(self.hw_hud.brightness_percent)
@@ -898,7 +906,11 @@ class IslandController(QObject):
         self.bluetooth.trigger_demo_peek()
 
     @pyqtSlot()
+    def toggleBluetoothPeekState(self):
+        self.bluetooth.trigger_demo_peek()
+
+    @pyqtSlot()
     def triggerTestChargingPeek(self):
         self.collapse()
         self._set_state("hud-battery")
-        self._hud_timer.start(3500)
+        self._hud_timer.start(3800)
