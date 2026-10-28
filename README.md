@@ -1,43 +1,58 @@
 # 🏝️ Dynamic Island untuk CachyOS (KDE Plasma 6 Wayland)
 
-Aplikasi **Dynamic Island** native, modern, dan berkinerja tinggi untuk **KDE Plasma 6 pada Wayland**, dibangun menggunakan **Python 3**, **PyQt6**, **QML (QtQuick)**, dan protokol **Wayland Layer-Shell** (`layer-shell-qt`).
+Aplikasi **Dynamic Island** native, modern, dan berkinerja tinggi untuk **KDE Plasma 6 pada Wayland**, dibangun menggunakan **Python 3**, **PyQt6**, **QML (QtQuick)**, dan protokol **Wayland Layer-Shell** (`layer-shell-qt`). Desain terinspirasi dari [Nusa](https://rama2555.github.io/nusa/) dan Dynamic Island iOS/macOS.
+
+> 📌 Roadmap lengkap fitur (yang sudah & belum diimplementasikan) ada di [`Next.md`](Next.md). Panduan penggunaan ada di [`Tutorial.md`](Tutorial.md).
 
 ---
 
-## ✨ Fitur-Fitur Utama ("Full Fungsi")
+## ✨ Fitur-Fitur Utama
 
-1. **Sleek Flush Notch Native Wayland Overlay (Layer-Shell)**:
-   - Menempel rapat (*flush margin 0*) tepat di bawah panel atas KDE Plasma tanpa celah mengambang yang menutupi tab aplikasi.
-   - Dilengkapi lekukan telinga halus (*concave ear curves*) ala Nusa & MacBook yang menyatu mulus dan organik dengan panel atas.
-   - Profil ultra-ramping (*idle height* hanya 28px) sehingga tab browser / text editor (VS Code) di bawahnya tidak lagi tertutupi.
-   - Menggunakan ukuran dinamis (`hitbox`), sehingga seluruh area layar lainnya tetap **100% tembus klik (click-through)** ke aplikasi di bawahnya.
-   - Animasi elastis (*spring & ease-in-out physics*) 60–144 FPS yang halus ala Apple Dynamic Island.
+### 🪟 1. Notch Native Wayland Overlay
+- Menempel rapat (*flush*) tepat di bawah panel atas KDE Plasma dengan lekukan telinga halus (*concave ears*) yang menyatu dengan panel.
+- Profil ultra-ramping (*idle* `150x28px`) sehingga tab browser/editor di bawahnya tidak tertutup.
+- Menggunakan ukuran dinamis (`hitbox`), sehingga area layar lainnya tetap **100% tembus klik (click-through)**.
+- Animasi elastis (*spring physics*) halus 60–144 FPS, efek **"Island Gulp"** saat file di-*drop*, dan *ambient glow* adaptif mengikuti warna sampul album / status HUD.
+- **Smart Auto-Collapse**: otomatis menutup saat kursor keluar, tombol **Pin 📌** untuk menahan terbuka, dan `Esc` untuk menutup.
 
-2. **🎵 Media Player Terintegrasi (MPRIS)**:
-   - Terhubung otomatis dengan Spotify, Firefox, Google Chrome, VLC, dsb.
-   - **Mode Kapsul (Compact)**: Menampilkan thumbnail album/ikon musik, judul lagu, dan 4 batang visualizer audio (*equalizer wave*) yang bergerak dinamis saat musik berputar.
-   - **Mode Ekspansi (Expanded Card)**: Klik kapsul untuk membuka card pemutar musik lengkap dengan cover album besar, slider durasi interaktif (bisa di-klik untuk *seek*), tombol Prev/Play/Pause/Next, serta pengatur volume langsung.
+### 🎵 2. Media Player & Lirik Karaoke Tersinkronisasi (MPRIS)
+- Terhubung otomatis dengan Spotify, Firefox, Chrome, VLC, dsb. Menampilkan sampul album, *seekbar* interaktif (`MM:SS` dan sisa waktu `-MM:SS`), serta kontrol *Prev / Play / Next* dan volume.
+- **Mode Lirik Karaoke (`520px` Split View)**: lirik tersinkronisasi dari **LRCLIB** (`lrclib.net`) dengan cache lokal, baris aktif menyala, *auto-scroll*, dan **klik baris lirik untuk *seek***.
+- Kapsul tertutup menampilkan **mini equalizer** saat musik diputar.
 
-3. **🔊 Volume & Brightness HUD Dinamis**:
-   - Terintegrasi dengan WirePlumber / PipeWire (`wpctl`).
-   - Saat volume diubah, kapsul membesar mulus menampilkan ikon speaker, indikator level, dan persentase numerik, lalu menyusut kembali otomatis setelah 2 detik.
-   - **Fitur Spesial**: Anda bisa mengarahkan kursor ke atas kapsul dan melakukan **scroll mouse wheel** untuk menaikkan/menurunkan volume secara instan!
+### 🔊 3. HUD Dinamis (Volume, Kecerahan, Mic, Caps Lock)
+- **Volume**: via PipeWire/WirePlumber (`wpctl`); *scroll* mouse di atas kapsul tertutup untuk mengatur volume.
+- **Kecerahan Layar, Caps Lock & Mic Mute** (`250x36px`): terdeteksi langsung dari sysfs (`/sys/class/backlight`, `/sys/class/leds`) dan PipeWire, plus slider kecerahan & tombol Mic di halaman *Pintasan Cepat*.
 
-4. **⚡ Status Baterai & Pengisian Daya**:
-   - Mendeteksi charger saat dicolokkan atau dicabut secara instan.
-   - Memunculkan kapsul hijau cerah *"Mengisi Daya 85%"* atau indikator status baterai.
+### ⚡ 4. Charging Peek & Closed Battery Ring
+- Kapsul pop-up `310x60px` bergaya Nusa saat charger dicolok/dicabut: **cincin konik hijau neon**, ikon petir, dan persentase besar.
+- Kapsul tertutup menampilkan **cincin baterai melingkar**, jam digital, dan indikator suhu CPU tinggi.
 
-5. **🔔 Notifikasi Desktop Interaktif**:
-   - Mencegat notifikasi sistem melalui DBus (`org.freedesktop.Notifications`).
-   - Notifikasi masuk ditampilkan langsung dari kapsul dengan animasi meluas, nama aplikasi, judul notifikasi, dan cuplikan pesan tanpa mengganggu jendela aktif.
+### 🎧 5. Bluetooth Peek & Halaman Bluetooth
+- Memantau **BlueZ D-Bus** (`org.bluez`): saat TWS/headphone tersambung atau terputus, muncul kapsul `310x60px` dengan **animasi lepas-pasang TWS** (*charging case* membuka/menutup, earbud `L`/`R` keluar/masuk) dan cincin baterai biru.
+- **Halaman Bluetooth & Perangkat**: status adapter, daftar perangkat terhubung/tersimpan beserta persentase baterai, tombol **Sambung/Putuskan** 1-klik, dan pintasan ke Setelan Bluetooth KDE.
 
-6. **⏱️ Quick Timer & Pomodoro**:
-   - Timer countdown cepat (preset 1m, 5m, 25m Pomodoro) langsung dari hub.
-   - Waktu mundur ditampilkan langsung di kapsul saat aktif.
+### 🔔 6. Pusat Notifikasi
+- Mencegat notifikasi sistem via DBus (`org.freedesktop.Notifications`) dan menyimpan **40 riwayat terakhir** (`~/.config/dynamic-island/notifications.json`).
+- **Split View**: daftar kotak masuk berkategori (💬 Chat, 🎵 Media, ⚡ Sistem, 🎯 Fokus, 🌐 Browser) + **pembaca pesan penuh** yang dapat di-*scroll*.
+- Tombol **📋 Salin** (cocok untuk OTP), **🔕 Do Not Disturb**, lencana *unread* di header & kapsul tertutup, dan klik pop-up (`Baca ▸`) untuk langsung membuka pesan lengkap.
 
-7. **📊 System Monitoring Hub**:
-   - Klik kapsul saat standby untuk membuka panel kontrol cepat.
-   - Indikator penggunaan CPU (%), RAM (GB & %), status baterai, tombol Mute cepat, dan timer.
+### 🖥️ 7. Hardware, Suhu & TDP Monitor
+- **Processor TDP** (`W` via `hwmon PPT`), suhu **CPU / GPU / NVMe**, clock CPU, GPU load & VRAM, deteksi proses terberat, dan **peringatan overheat** (`≥85°C`).
+- **Power Profile Switcher** 1-klik: 🍃 Hemat, ⚖️ Seimbang, 🚀 Performa (`powerprofilesctl`).
+
+### 📂 8. File Shelf (Drag & Drop)
+- Seret file ke kapsul atas untuk menyimpannya sementara di **Rak File**; tampil dengan *thumbnail* gambar, ikon folder, dan badge ekstensi.
+- Klik untuk membuka (`xdg-open`) dan **seret keluar** ke aplikasi lain (native Wayland `QDrag`).
+
+### ⏱️ 9. Pomodoro, Kesehatan & To-Do
+- **Pomodoro Focus Timer** dengan cincin konik bercahaya (*Focus 25m* / *Short Break 5m*), pergantian sesi otomatis, notifikasi, dan *soft chime*.
+- **Water Tracker** dengan **histogram per jam**, kustomisasi ukuran gelas & target harian, serta pengingat **Eye Break 20-20-20**.
+- **To-Do List** harian dengan penyimpanan JSON.
+
+### 🧭 10. Navigasi 9 Halaman
+- Karusel halaman: **Sistem & Pomodoro → Musik → Pintasan Cepat → Hardware → Bluetooth → Notifikasi → Kesehatan → To-Do → Shelf**.
+- Perpindahan dengan **swap/drag**, *touchpad 2-finger swipe*, tombol `< >`, titik indikator, atau tombol panah keyboard.
 
 ---
 
@@ -48,46 +63,29 @@ Masuk ke folder project:
 cd "/home/nxrts/Projek Dynamic Island"
 ```
 
-### 1. Menjalankan di Background (Rekomendasi)
-```bash
-./run.sh --daemon
-```
+| Perintah | Fungsi |
+| :--- | :--- |
+| `./run.sh --daemon` | Menjalankan di background (rekomendasi) |
+| `./run.sh` | Menjalankan di terminal (foreground / debugging) |
+| `./run.sh --stop` | Menghentikan aplikasi |
+| `./run.sh --restart` | Restart aplikasi |
+| `./run.sh --test-notif` | Uji coba notifikasi |
 
-### 2. Menjalankan di Terminal (Foreground / Debugging)
-```bash
-./run.sh
-```
+Log tersimpan di `/tmp/dynamic_island_kde.log`.
 
-### 3. Menghentikan Aplikasi
-```bash
-./run.sh --stop
-```
-
-### 4. Restart Aplikasi
-```bash
-./run.sh --restart
-```
-
-### 5. Uji Coba Notifikasi
-```bash
-./run.sh --test-notif
-```
+### 📦 Dependensi Utama
+- Python 3, **PyQt6** (+ `PyQt6.QtDBus`), `psutil`
+- `layer-shell-qt` (Wayland Layer-Shell untuk KDE Plasma 6)
+- `wpctl` (PipeWire/WirePlumber), `bluetoothctl` (BlueZ), `powerprofilesctl`, `dbus-monitor`, `wl-copy` (opsional, untuk fitur Salin)
 
 ---
 
 ## 🔄 Mengaktifkan Autostart (Otomatis Aktif Saat Login)
 
-Agar Dynamic Island otomatis berjalan setiap kali Anda login ke CachyOS KDE:
-
 ```bash
-# Mengaktifkan
-./autostart.sh --enable
-
-# Memeriksa status
-./autostart.sh --status
-
-# Menonaktifkan
-./autostart.sh --disable
+./autostart.sh --enable    # Mengaktifkan
+./autostart.sh --status    # Memeriksa status
+./autostart.sh --disable   # Menonaktifkan
 ```
 
 ---
@@ -96,14 +94,33 @@ Agar Dynamic Island otomatis berjalan setiap kali Anda login ke CachyOS KDE:
 
 | Aksi | Efek |
 | :--- | :--- |
-| **Klik Kiri Kapsul** | Membuka / menutup tampilan kartu penuh (*Expanded Card*) |
-| **Klik Kanan Kapsul** | Toggle cepat buka / tutup kartu |
-| **Scroll Mouse Wheel di atas Kapsul** | Mengatur volume suara sistem (naik / turun) |
-| **Klik Bar Garis Musik** | Melompat (*seek*) ke bagian menit lagu yang dipilih |
-| **Tombol ✕ di Card** | Menutup kembali ke bentuk kapsul minimalis |
+| **Klik Kiri Kapsul** | Membuka / menutup tampilan Hub penuh |
+| **Klik Kanan Kapsul** | Toggle cepat buka / tutup |
+| **Scroll Mouse di atas Kapsul Tertutup** | Mengatur volume sistem |
+| **Swap / Drag Mouse** atau **Touchpad 2-Finger Swipe** | Berpindah antar halaman |
+| **Tombol `<` `>` / Panah Keyboard / Titik Indikator** | Berpindah halaman |
+| **Tombol 🔔** (header) | Langsung ke Pusat Notifikasi |
+| **Tombol 📌** | Menahan Hub tetap terbuka (nonaktifkan auto-collapse) |
+| **Klik Bar Musik / Baris Lirik** | *Seek* ke posisi lagu yang dipilih |
+| **Seret file ke Kapsul** | Membuka Rak File dan menyimpan file |
+| **`Esc` / Tombol ✕** | Menutup kembali ke kapsul |
+
+> ℹ️ *Scroll* mouse di dalam Hub tidak lagi berpindah halaman, sehingga daftar (Notifikasi, Bluetooth, Lirik, To-Do, Shelf) dapat di-*scroll* dengan nyaman.
+
+---
+
+## 🗺️ Roadmap
+
+Fase yang sudah selesai: **Fase 1** (Lirik, Shelf, Pomodoro, Water), **Fase 2** (Bluetooth/Charging/Hardware HUD, Pusat Notifikasi), serta Hardware & TDP Monitor.
+
+Rencana berikutnya (detail di [`Next.md`](Next.md)):
+- **Fase 3**: Smart Mascot 2.0, Privacy Dots, System Tray & Fullscreen Auto-Hide, Wi-Fi Peek, Low-Battery Nudge.
+- **Fase 4**: Jadwal Sholat & Pengingat Azan (lokasi *real-time*), Clipboard History, Audio Switcher, Cuaca, Camera Mirror, KDE Connect, Voice Note, Color Picker.
+- **Fase 5**: Halaman Pengaturan Terpadu & kustomisasi.
+- **Fase 6**: Dukungan Windows & installer `.exe`.
 
 ---
 
 ## ⚙️ Kustomisasi (`config.py`)
 
-Anda dapat menyesuaikan ukuran, jarak dari tepi atas layar (*top margin*), durasi auto-collapse, dan warna tema dengan mengedit file [`config.py`](file:///home/nxrts/Projek%20Dynamic%20Island/config.py).
+Anda dapat menyesuaikan ukuran, jarak dari tepi atas layar (*top margin*), durasi auto-collapse, durasi HUD, dan warna tema dengan mengedit file [`config.py`](config.py).
