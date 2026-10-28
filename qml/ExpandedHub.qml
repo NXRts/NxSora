@@ -7,12 +7,13 @@ Item {
     implicitWidth: 420
     implicitHeight: 245
 
-    // Current page titles (7 pages)
+    // Current page titles (8 pages)
     readonly property var pageTitles: [
         "Sistem & Pomodoro Fokus",
         IslandController.lyricsModeActive ? "Musik & Lirik Karaoke" : "Pemutar Musik",
         "Pintasan Cepat",
         "Hardware, Suhu & TDP",
+        "Bluetooth & Perangkat",
         "Kesehatan & Air",
         "Daftar Tugas (To-Do)",
         "Rak File (Shelf)"
@@ -264,8 +265,8 @@ Item {
             clip: true
 
             property int currentIndex: IslandController.activeHubPage
-            readonly property int count: 7
-            readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageHealth, pageTodo, pageShelf]
+            readonly property int count: 8
+            readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageBluetooth, pageHealth, pageTodo, pageShelf]
             readonly property bool isChildSliderActive: seekMouseArea.pressed || seekMouseArea.isDragging || hubVolBarMouse.pressed || lyricsVolMouse.pressed || brightnessSliderMouse.pressed || pageShelf.isCardPressed
 
             // Allow keyboard Left/Right arrow navigation & Esc to close
@@ -1888,9 +1889,9 @@ Item {
                                 }
                                 ColumnLayout {
                                     spacing: 0
-                                    Text { text: "Peek TWS/Cas"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
+                                    Text { text: "Bluetooth"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
                                     Text {
-                                        text: IslandController.btDeviceConnected ? ("Tersambung · " + IslandController.btDeviceBattery + "%") : "Klik Kiri/Kanan"
+                                        text: IslandController.btDeviceConnected ? ("Aktif · " + IslandController.btDeviceBattery + "%") : "Menu / Klik Kanan"
                                         color: IslandController.btDeviceConnected ? "#5ec2ff" : "#64748b"
                                         font.pixelSize: 9
                                     }
@@ -1904,11 +1905,11 @@ Item {
                                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: (mouse) => {
-                                    IslandController.collapse()
                                     if (mouse.button === Qt.RightButton) {
-                                        IslandController.triggerTestChargingPeek()
-                                    } else {
+                                        IslandController.collapse()
                                         IslandController.triggerTestBluetoothPeek()
+                                    } else {
+                                        pageContainer.goTo(4, 1)
                                     }
                                 }
                             }
@@ -1922,6 +1923,16 @@ Item {
             // -----------------------------------------------------------------
             PageHardware {
                 id: pageNet
+                width: pageContainer.width
+                height: pageContainer.height
+                y: 0
+            }
+
+            // -----------------------------------------------------------------
+            // PAGE 4: BLUETOOTH & PERANGKAT TERKONEKSI
+            // -----------------------------------------------------------------
+            PageBluetooth {
+                id: pageBluetooth
                 width: pageContainer.width
                 height: pageContainer.height
                 y: 0
