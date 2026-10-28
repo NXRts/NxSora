@@ -16,10 +16,12 @@ Item {
 
         // Notification Icon circle
         Rectangle {
-            width: 32
-            height: 32
-            radius: 16
+            Layout.preferredWidth: 34
+            Layout.preferredHeight: 34
+            radius: 17
             color: "#1e1b4b"
+            border.color: "#4f46e5"
+            border.width: 1
             Layout.alignment: Qt.AlignVCenter
 
             Image {
@@ -35,43 +37,76 @@ Item {
         // Notification Texts
         ColumnLayout {
             Layout.fillWidth: true
+            Layout.preferredWidth: 1
+            Layout.minimumWidth: 0
             Layout.alignment: Qt.AlignVCenter
             spacing: 1
 
             RowLayout {
-                spacing: 6
+                Layout.fillWidth: true
+                spacing: 5
                 Text {
                     text: IslandController.notifApp || "Sistem"
                     color: "#818cf8"
                     font.pixelSize: 10
                     font.weight: Font.Bold
+                    elide: Text.ElideRight
                 }
                 Text {
-                    text: "• sekarang"
+                    text: "• Baru saja"
                     color: "#64748b"
-                    font.pixelSize: 10
+                    font.pixelSize: 9
                 }
             }
 
             Text {
                 Layout.fillWidth: true
+                Layout.minimumWidth: 0
                 text: IslandController.notifTitle
                 color: "#f8fafc"
-                font.pixelSize: 12
-                font.weight: Font.DemiBold
+                font.pixelSize: 11
+                font.weight: Font.Bold
                 elide: Text.ElideRight
                 maximumLineCount: 1
             }
 
             Text {
                 Layout.fillWidth: true
+                Layout.minimumWidth: 0
                 text: IslandController.notifBody
                 color: "#94a3b8"
-                font.pixelSize: 11
+                font.pixelSize: 10
                 elide: Text.ElideRight
                 maximumLineCount: 1
                 visible: text !== ""
             }
         }
+
+        // Right "Baca ▸" Pill Badge
+        Rectangle {
+            Layout.preferredWidth: readTxt.implicitWidth + 12
+            Layout.preferredHeight: 22
+            radius: 11
+            color: hudClickMouse.containsMouse ? "#312e81" : "#1e1b4b"
+            border.color: "#6366f1"
+            border.width: 1
+
+            Text {
+                id: readTxt
+                anchors.centerIn: parent
+                text: "Baca ▸"
+                color: "#c7d2fe"
+                font.pixelSize: 9
+                font.weight: Font.Bold
+            }
+        }
+    }
+
+    MouseArea {
+        id: hudClickMouse
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: IslandController.expandToNotifications()
     }
 }

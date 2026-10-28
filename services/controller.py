@@ -117,6 +117,7 @@ class IslandController(QObject):
         self.system.batteryChanged.connect(self._on_battery_updated)
         self.system.powerPluggedEvent.connect(self._on_power_plugged_event)
         self.notifications.notificationReceived.connect(self._on_notification_received)
+        self.notifications.historyChanged.connect(lambda: self.notificationChanged.emit())
 
         self.timer_service.timerTick.connect(self._on_timer_tick)
         self.timer_service.timerFinished.connect(self._on_timer_finished)
@@ -486,6 +487,30 @@ class IslandController(QObject):
     def notifBody(self):
         return self._notif_body
 
+    @pyqtProperty(list, notify=notificationChanged)
+    def notifHistory(self):
+        return list(self.notifications.history)
+
+    @pyqtProperty(int, notify=notificationChanged)
+    def notifUnreadCount(self):
+        return int(self.notifications.unread_count)
+
+    @pyqtProperty(int, notify=notificationChanged)
+    def notifTotalCount(self):
+        return len(self.notifications.history)
+
+    @pyqtProperty(bool, notify=notificationChanged)
+    def notifDndEnabled(self):
+        return bool(self.notifications.dnd_enabled)
+
+    @pyqtProperty(int, notify=notificationChanged)
+    def notifSelectedIndex(self):
+        return int(self.notifications.selected_index)
+
+    @pyqtProperty("QVariantMap", notify=notificationChanged)
+    def selectedNotif(self):
+        return dict(self.notifications.selected_item)
+
     # Timer / Pomodoro Properties
     @pyqtProperty(int, notify=timerChanged)
     def timerRemaining(self):
@@ -551,9 +576,11 @@ class IslandController(QObject):
 
     @pyqtSlot(int)
     def setActiveHubPage(self, page_index):
-        clamped = max(0, min(int(page_index), 7))
+        clamped = max(0, min(int(page_index), 8))
         if self._active_hub_page != clamped:
             self._active_hub_page = clamped
+            if clamped == 5:
+                self.notifications.select_notification(self.notifications.selected_index)
             self.activeHubPageChanged.emit(self._active_hub_page)
 
     @pyqtSlot()
@@ -564,6 +591,9 @@ class IslandController(QObject):
         else:
             if self._state == "hud-bluetooth":
                 self._active_hub_page = 4  # Bluetooth & Perangkat page
+            elif self._state == "hud-notification":
+                self._active_hub_page = 5  # Pusat Notifikasi page
+                self.notifications.select_notification(0)
             elif self.mediaHasTrack:
                 self._active_hub_page = 1  # Music page
             else:
@@ -599,15 +629,25 @@ class IslandController(QObject):
         self._set_state("expanded-hub")
 
     @pyqtSlot()
+    def expandToNotifications(self):
+        """Open Page 5 (Pusat Notifikasi) and select the latest notification."""
+        self.notifications.select_notification(0)
+        self._active_hub_page = 5
+        self.activeHubPageChanged.emit(5)
+        self._set_state("expanded-hub")
+
+    @pyqtSlot()
     def expandToShelf(self):
-        """Automatically expand to Page 7 (File Shelf) when a file is dragged over the notch."""
-        self._active_hub_page = 7
-        self.activeHubPageChanged.emit(7)
+        """Automatically expand to Page 8 (File Shelf) when a file is dragged over the notch."""
+        self._active_hub_page = 8
+        self.activeHubPageChanged.emit(8)
         self._set_state("expanded-hub")
 
     @pyqtSlot(int)
     def openHubPage(self, page_index):
-        self._active_hub_page = max(0, min(page_index, 7))
+        self._active_hub_page = max(0, min(page_index, 8))
+        if self._active_hub_page == 5:
+            self.notifications.select_notification(self.notifications.selected_index)
         self.activeHubPageChanged.emit(self._active_hub_page)
         self._set_state("expanded-hub")
 
@@ -948,3 +988,28 @@ class IslandController(QObject):
         self.collapse()
         self._set_state("hud-battery")
         self._hud_timer.start(3800)
+
+    # --- Notification Center Slots ---
+    @pyqtSlot(int)
+    def selectNotification(self, index):
+        self.notifications.select_notification(int(index))
+
+    @pyqtSlot(int)
+    def removeNotification(self, index):
+        self.notifications.remove_notification(int(index))
+
+    @pyqtSlot()
+    def clearNotifications(self):
+        self.notifications.clear_all()
+
+    @pyqtSlot()
+    def markAllNotificationsRead(self):
+        self.notifications.mark_all_read()
+
+    @pyqtSlot()
+    def toggleNotifDnd(self):
+        self.notifications.toggle_dnd()
+
+    @pyqtSlot(result=bool)
+    def copySelectedNotification(self):
+        return self.notifications.copy_selected()
