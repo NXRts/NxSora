@@ -146,8 +146,37 @@ Item {
             }
         }
 
+        // Unread Notification Badge on Closed Capsule
+        Rectangle {
+            visible: !IslandController.mediaIsPlaying && !IslandController.timerRunning && IslandController.notifUnreadCount > 0
+            width: unreadIdleRow.implicitWidth + 8
+            height: 15
+            radius: 7.5
+            color: "#231d47"
+            border.color: "#818cf8"
+            border.width: 1
+
+            RowLayout {
+                id: unreadIdleRow
+                anchors.centerIn: parent
+                spacing: 2
+                Rectangle {
+                    width: 4
+                    height: 4
+                    radius: 2
+                    color: "#818cf8"
+                }
+                Text {
+                    text: String(IslandController.notifUnreadCount)
+                    color: "#c7d2fe"
+                    font.pixelSize: 9
+                    font.weight: Font.Bold
+                }
+            }
+        }
+
         Text {
-            visible: !IslandController.mediaIsPlaying && !IslandController.timerRunning && (IslandController.hasBattery || IslandController.cpuTemp >= 78)
+            visible: !IslandController.mediaIsPlaying && !IslandController.timerRunning && IslandController.notifUnreadCount === 0 && (IslandController.hasBattery || IslandController.cpuTemp >= 78)
             text: IslandController.cpuTemp >= 78
                   ? (IslandController.cpuTemp + "°C")
                   : (IslandController.batteryPercent + "%")

@@ -7,13 +7,14 @@ Item {
     implicitWidth: 420
     implicitHeight: 245
 
-    // Current page titles (8 pages)
+    // Current page titles (9 pages)
     readonly property var pageTitles: [
         "Sistem & Pomodoro Fokus",
         IslandController.lyricsModeActive ? "Musik & Lirik Karaoke" : "Pemutar Musik",
         "Pintasan Cepat",
         "Hardware, Suhu & TDP",
         "Bluetooth & Perangkat",
+        "Pusat Notifikasi",
         "Kesehatan & Air",
         "Daftar Tugas (To-Do)",
         "Rak File (Shelf)"
@@ -198,9 +199,68 @@ Item {
 
             Item { Layout.fillWidth: true }
 
-            // Action Buttons: [Pin 📌] and [Close ✕]
+            // Action Buttons: [Notifikasi 🔔], [Pin 📌] and [Close ✕]
             RowLayout {
                 spacing: 6
+
+                // Notification Center Shortcut Button (🔔 with Unread Badge)
+                Rectangle {
+                    width: 28
+                    height: 28
+                    radius: 14
+                    color: pageContainer.currentIndex === 5
+                           ? "#251e4a"
+                           : (bellHdrMouse.containsMouse ? "#2d2d3a" : "#181a24")
+                    border.color: pageContainer.currentIndex === 5 || IslandController.notifUnreadCount > 0
+                                  ? "#818cf8"
+                                  : (bellHdrMouse.containsMouse ? "#3b3b4a" : "#282a36")
+                    border.width: pageContainer.currentIndex === 5 || IslandController.notifUnreadCount > 0 ? 1.5 : 1
+
+                    Image {
+                        anchors.centerIn: parent
+                        width: 12
+                        height: 12
+                        sourceSize: Qt.size(12, 12)
+                        source: "file://" + AppConfig.assetsDir + "/bell.svg"
+                        opacity: pageContainer.currentIndex === 5 || IslandController.notifUnreadCount > 0 ? 1.0 : 0.7
+                    }
+
+                    // Unread Dot / Count Badge
+                    Rectangle {
+                        visible: IslandController.notifUnreadCount > 0
+                        width: 13
+                        height: 13
+                        radius: 6.5
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.rightMargin: -2
+                        anchors.topMargin: -2
+                        color: "#6366f1"
+                        border.color: "#09090d"
+                        border.width: 1.5
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: IslandController.notifUnreadCount > 9 ? "9+" : String(IslandController.notifUnreadCount)
+                            color: "#ffffff"
+                            font.pixelSize: 7
+                            font.weight: Font.Black
+                        }
+                    }
+
+                    MouseArea {
+                        id: bellHdrMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (pageContainer.currentIndex !== 5) {
+                                var dir = (5 > pageContainer.currentIndex) ? 1 : -1;
+                                pageContainer.goTo(5, dir);
+                            }
+                        }
+                    }
+                }
 
                 // Pin Button (📌 toggle auto-collapse)
                 Rectangle {
@@ -265,8 +325,8 @@ Item {
             clip: true
 
             property int currentIndex: IslandController.activeHubPage
-            readonly property int count: 8
-            readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageBluetooth, pageHealth, pageTodo, pageShelf]
+            readonly property int count: 9
+            readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageBluetooth, pageNotifications, pageHealth, pageTodo, pageShelf]
             readonly property bool isChildSliderActive: seekMouseArea.pressed || seekMouseArea.isDragging || hubVolBarMouse.pressed || lyricsVolMouse.pressed || brightnessSliderMouse.pressed || pageShelf.isCardPressed
 
             // Allow keyboard Left/Right arrow navigation & Esc to close
@@ -1933,6 +1993,16 @@ Item {
             // -----------------------------------------------------------------
             PageBluetooth {
                 id: pageBluetooth
+                width: pageContainer.width
+                height: pageContainer.height
+                y: 0
+            }
+
+            // -----------------------------------------------------------------
+            // PAGE 5: PUSAT NOTIFIKASI (NOTIFICATION CENTER & READER)
+            // -----------------------------------------------------------------
+            PageNotifications {
+                id: pageNotifications
                 width: pageContainer.width
                 height: pageContainer.height
                 y: 0

@@ -150,6 +150,7 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 | **System Tray & Fullscreen Hide** | ❌ Belum | Daemon systemd / background via `run.sh`. | **`QSystemTrayIcon`** (menu konfigurasi cepat) & **Fullscreen App Auto-Hide** (sembunyi saat main game/video fullscreen). |
 | **Hardware, Suhu & TDP Monitor** | ✅ Selesai | **Processor TDP (`W` via `hwmon PPT`)**, **Suhu CPU (`k10temp`), GPU (`amdgpu`), & NVMe (`°C`)**, **Clock CPU (`GHz`)**, **GPU Load & VRAM**, **Top Process**, **Overheat HUD Alert (`≥85°C`)**, & **1-Click Power Profile Switcher** (`PageHardware.qml` + `services/system.py`). | Statistik riwayat suhu & kecepatan kipas (`RPM` jika tersedia). |
 | **Clipboard, Cuaca & Kamera** | ❌ Belum | — | **Clipboard History Manager**, **Live Weather & Day Progress Bar**, serta **Camera Mirror**. |
+| **Portabilitas Windows & `.exe` Installer** | ⏳ Sebagian | Seluruh UI/Animasi QML, Lirik (`LRCLIB`), Timer, Water, To-Do, File Shelf (`QDrag`), & statistik dasar (`psutil`) sudah *cross-platform*. | Adapter backend Windows (`sys.platform == "win32"` untuk SMTC Media, `pycaw` Audio, Bluetooth, WMI Thermal/Brightness) + bundel **`DynamicIsland-Setup.exe`** (**PyInstaller + Inno Setup**). |
 
 ---
 
@@ -197,6 +198,9 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 - [x] **3. Screen Brightness, Mic Mute & Caps Lock HUD (`qml/HudHardware.qml` + `services/hardware_hud.py`)**
   - [x] Integrasikan pemantauan kecerahan layar (`/sys/class/backlight/amdgpu_bl1` + KDE PowerManagement D-Bus `BrightnessControl`) untuk menampilkan HUD Kecerahan Layar (`250x36px`) saat tombol `Fn + Brightness` ditekan atau diatur dari slider *Pintasan Cepat*.
   - [x] Tambahkan HUD kapsul otomatis (`250x36px`) saat tombol **Caps Lock** (`/sys/class/leds/input*::capslock/brightness`) atau **Microphone Mute** (`wpctl`) ditekan, lengkap dengan tombol *toggle* Mikrofon dan tombol uji *Peek TWS/Cas* di halaman *Pintasan Cepat*.
+- [x] **4. Pusat Notifikasi & Pembaca Pesan Penuh (`qml/PageNotifications.qml` + `qml/HudNotification.qml` + `services/notifications.py`)**
+  - [x] **Split-View Notification Center**: Sisi kiri menampilkan daftar riwayat 40 notifikasi terakhir dengan lencana kategori otomatis (`💬 Chat`, `🎵 Media`, `⚡ Sistem/Suhu`, `🎯 Fokus`, `🌐 Browser`) dan indikator belum dibaca (*unread strip*); sisi kanan menampilkan **isi pesan penuh multi-baris** yang dapat di-*scroll*.
+  - [x] **1-Click Copy (`📋 Salin`), Do Not Disturb (`🔕 DND`), & Unread Badge**: Menyalin isi notifikasi/OTP ke *Clipboard* (`wl-copy`), sakelar *Jangan Ganggu (DND)* agar notifikasi masuk tetap tersimpan tanpa memunculkan pop-up, tombol pintasan lonceng `🔔` ber-lencana di header Hub & kapsul tertutup, serta klik langsung pada pop-up `HudNotification` (`Baca ▸`) untuk membuka isi pesan penuh.
 
 ---
 
@@ -220,3 +224,18 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 - [ ] **4. Camera Mirror & KDE Connect Quick Share**: Pratinjau cermin webcam cepat sebelum rapat online dan tombol kirim file dari *Shelf* langsung ke smartphone via KDE Connect.
 - [ ] **5. To-Do Edit & Due Time Reminder**: Tambahkan fitur edit teks tugas dan opsi jam pengingat (`HH:MM`) pada setiap tugas di halaman To-Do yang otomatis memicu HUD Notifikasi saat jatuh tempo.
 - [ ] **6. Guided Breathing (Relaksasi Pernapasan)**: Animasi lingkaran pernapasan *Inhale (4s) — Hold (4s) — Exhale (4s)* di halaman Kesehatan.
+
+---
+
+### ⏳ Fase 5 (Fase Terakhir): Dukungan Cross-Platform Windows (`win32`) & Packaging Installer `.exe` untuk Publik (BELUM DIIMPLEMENTASIKAN)
+
+- [ ] **1. Hybrid Window Overlay (Wayland Layer-Shell + Windows Topmost Overlay)**
+  - Deteksi sistem operasi otomatis di `main.py` (`sys.platform == "win32"`) untuk memuat window tanpa bingkai (`Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool`) dengan Win32 API `HWND_TOPMOST` & `WS_EX_TOOLWINDOW` agar menempel mulus di tengah atas layar Windows 10/11 tanpa muncul di *Taskbar* atau *Alt+Tab*.
+- [ ] **2. Adapter Backend Windows (`services/*` Cross-Platform Layer)**
+  - **Media Player (`services/mpris.py`)**: Integrasi **Windows System Media Transport Controls (`SMTC` via `winsdk`)** untuk membaca lagu, sampul album, dan *seekbar* dari Spotify, Chrome, Edge, dan aplikasi media Windows.
+  - **Audio, Mic Mute, Brightness & Caps Lock (`services/volume.py` & `services/hardware_hud.py`)**: Integrasi **`pycaw`** (Windows Core Audio API) untuk speaker/mikrofon, WMI / `screen-brightness-control` untuk kecerahan layar, dan `ctypes.windll.user32.GetKeyState(0x14)` untuk indikator Caps Lock.
+  - **Bluetooth & TWS (`services/bluetooth.py`)**: Integrasi **`winsdk.windows.devices.bluetooth`** & PnP Device Properties untuk deteksi lepas-pasang TWS dan persentase baterai di Windows.
+  - **Hardware, Suhu, TDP & Power Plan (`services/system.py`)**: Pembacaan suhu/daya via **WMI / LibreHardwareMonitor** serta pergantian mode daya via `powercfg /setactive` (*Power Saver / Balanced / High Performance*).
+- [ ] **3. Bundling `.exe` Mandiri & Installer Resmi (`DynamicIsland-Setup.exe`)**
+  - Buat konfigurasi **`DynamicIsland.spec` (PyInstaller / Nuitka)** yang membungkus Python, PyQt6, seluruh QML, dan aset SVG ke dalam aplikasi `.exe` mandiri tanpa konsol (`--noconsole`) dan tanpa mengharuskan pengguna menginstal Python.
+  - Buat skrip **Inno Setup (`installer/setup.iss`)** & GitHub Actions workflow untuk menghasilkan file installer **`DynamicIsland-Setup.exe`** siap sebar lengkap dengan shortcut Desktop/Start Menu, opsi *Run on Windows Startup*, dan menu *Uninstall* resmi.

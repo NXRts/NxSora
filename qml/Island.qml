@@ -349,7 +349,7 @@ Item {
     DropArea {
         anchors.fill: parent
         z: 15
-        enabled: !IslandController.isExpanded || IslandController.activeHubPage !== 7
+        enabled: !IslandController.isExpanded || IslandController.activeHubPage !== 8
 
         onEntered: (drag) => {
             if (drag.hasUrls || drag.hasText) {
