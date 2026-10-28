@@ -266,7 +266,7 @@ Item {
             property int currentIndex: IslandController.activeHubPage
             readonly property int count: 7
             readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageHealth, pageTodo, pageShelf]
-            readonly property bool isChildSliderActive: seekMouseArea.pressed || seekMouseArea.isDragging || hubVolBarMouse.pressed || lyricsVolMouse.pressed || pageShelf.isCardPressed
+            readonly property bool isChildSliderActive: seekMouseArea.pressed || seekMouseArea.isDragging || hubVolBarMouse.pressed || lyricsVolMouse.pressed || brightnessSliderMouse.pressed || pageShelf.isCardPressed
 
             // Allow keyboard Left/Right arrow navigation & Esc to close
             focus: true
@@ -1569,7 +1569,7 @@ Item {
             }
 
             // -----------------------------------------------------------------
-            // PAGE 2: PINTASAN CEPAT (QUICK TOOLS)
+            // PAGE 2: PINTASAN CEPAT (QUICK TOOLS + BRIGHTNESS & MIC CONTROL)
             // -----------------------------------------------------------------
             Item {
                 id: pageTools
@@ -1577,222 +1577,340 @@ Item {
                 height: pageContainer.height
                 y: 0
 
-                GridLayout {
+                ColumnLayout {
                     anchors.fill: parent
-                    columns: 3
-                    rowSpacing: 8
-                    columnSpacing: 8
+                    spacing: 6
 
-                    // 1. Screenshot Tool
+                    // Top Bar: Interactive Screen Brightness Slider
                     Rectangle {
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: 34
                         radius: 10
-                        color: ssMouse.containsMouse ? "#20202c" : "#121217"
+                        color: "#121217"
                         border.color: "#22222a"
                         border.width: 1
 
                         RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 8
-                            Image {
-                                width: 18
-                                height: 18
-                                source: "file://" + AppConfig.assetsDir + "/camera.svg"
-                            }
-                            ColumnLayout {
-                                spacing: 0
-                                Text { text: "Screenshot"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
-                                Text { text: "Area Layar"; color: "#64748b"; font.pixelSize: 9 }
-                            }
-                        }
-
-                        MouseArea {
-                            id: ssMouse
                             anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                IslandController.collapse()
-                                IslandController.takeScreenshot()
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
+                            spacing: 8
+
+                            Text {
+                                text: "☀"
+                                color: "#facc15"
+                                font.pixelSize: 13
+                                font.weight: Font.Bold
+                            }
+
+                            Text {
+                                text: "Kecerahan"
+                                color: "#cbd5e1"
+                                font.pixelSize: 10
+                                font.weight: Font.DemiBold
+                            }
+
+                            Item {
+                                id: brightnessSliderWrap
+                                Layout.fillWidth: true
+                                height: 18
+
+                                Rectangle {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: parent.width
+                                    height: 6
+                                    radius: 3
+                                    color: "#272732"
+
+                                    Rectangle {
+                                        width: parent.width * Math.min(1.0, Math.max(0.05, IslandController.brightnessPercent / 100.0))
+                                        height: parent.height
+                                        radius: 3
+                                        color: "#facc15"
+
+                                        Behavior on width {
+                                            NumberAnimation { duration: 100; easing.type: Easing.OutQuad }
+                                        }
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: brightnessSliderMouse
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onPressed: (mouse) => {
+                                        var r = Math.max(0.05, Math.min(1.0, mouse.x / width))
+                                        IslandController.setBrightness(r)
+                                    }
+                                    onPositionChanged: (mouse) => {
+                                        if (pressed) {
+                                            var r = Math.max(0.05, Math.min(1.0, mouse.x / width))
+                                            IslandController.setBrightness(r)
+                                        }
+                                    }
+                                }
+                            }
+
+                            Text {
+                                text: IslandController.brightnessPercent + "%"
+                                color: "#facc15"
+                                font.pixelSize: 10
+                                font.weight: Font.Bold
+                                Layout.preferredWidth: 30
+                                horizontalAlignment: Text.AlignRight
                             }
                         }
                     }
 
-                    // 2. Night Light Toggle
-                    Rectangle {
+                    // Bottom Grid: 6 Proportional Quick Tools (3x2)
+                    GridLayout {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: 10
-                        color: nlMouse.containsMouse ? "#20202c" : "#121217"
-                        border.color: IslandController.nightLightActive ? "#818cf8" : "#22222a"
-                        border.width: 1
+                        columns: 3
+                        rowSpacing: 6
+                        columnSpacing: 6
 
-                        RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 8
-                            Image {
-                                width: 18
-                                height: 18
-                                source: "file://" + AppConfig.assetsDir + "/moon.svg"
+                        // 1. Screenshot Tool
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.preferredWidth: 1
+                            Layout.preferredHeight: 1
+                            radius: 10
+                            clip: true
+                            color: ssMouse.containsMouse ? "#20202c" : "#121217"
+                            border.color: "#22222a"
+                            border.width: 1
+
+                            RowLayout {
+                                anchors.centerIn: parent
+                                spacing: 7
+                                Image {
+                                    Layout.preferredWidth: 16
+                                    Layout.preferredHeight: 16
+                                    sourceSize: Qt.size(16, 16)
+                                    source: "file://" + AppConfig.assetsDir + "/camera.svg"
+                                }
+                                ColumnLayout {
+                                    spacing: 0
+                                    Text { text: "Screenshot"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
+                                    Text { text: "Area Layar"; color: "#64748b"; font.pixelSize: 9 }
+                                }
                             }
-                            ColumnLayout {
-                                spacing: 0
-                                Text { text: "Night Light"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
-                                Text {
-                                    text: IslandController.nightLightActive ? "Aktif" : "Mati"
-                                    color: IslandController.nightLightActive ? "#818cf8" : "#64748b"
-                                    font.pixelSize: 9
+
+                            MouseArea {
+                                id: ssMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    IslandController.collapse()
+                                    IslandController.takeScreenshot()
                                 }
                             }
                         }
 
-                        MouseArea {
-                            id: nlMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: IslandController.toggleNightLight()
-                        }
-                    }
+                        // 2. Night Light Toggle
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.preferredWidth: 1
+                            Layout.preferredHeight: 1
+                            radius: 10
+                            clip: true
+                            color: nlMouse.containsMouse ? "#20202c" : "#121217"
+                            border.color: IslandController.nightLightActive ? "#818cf8" : "#22222a"
+                            border.width: 1
 
-                    // 3. Lock Screen
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        radius: 10
-                        color: lockMouse.containsMouse ? "#20202c" : "#121217"
-                        border.color: "#22222a"
-                        border.width: 1
-
-                        RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 8
-                            Image {
-                                width: 18
-                                height: 18
-                                source: "file://" + AppConfig.assetsDir + "/lock.svg"
+                            RowLayout {
+                                anchors.centerIn: parent
+                                spacing: 7
+                                Image {
+                                    Layout.preferredWidth: 16
+                                    Layout.preferredHeight: 16
+                                    sourceSize: Qt.size(16, 16)
+                                    source: "file://" + AppConfig.assetsDir + "/moon.svg"
+                                }
+                                ColumnLayout {
+                                    spacing: 0
+                                    Text { text: "Night Light"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
+                                    Text {
+                                        text: IslandController.nightLightActive ? "Aktif" : "Mati"
+                                        color: IslandController.nightLightActive ? "#818cf8" : "#64748b"
+                                        font.pixelSize: 9
+                                    }
+                                }
                             }
-                            ColumnLayout {
-                                spacing: 0
-                                Text { text: "Kunci Layar"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
-                                Text { text: "Lock Session"; color: "#64748b"; font.pixelSize: 9 }
-                            }
-                        }
 
-                        MouseArea {
-                            id: lockMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: IslandController.lockScreen()
-                        }
-                    }
-
-                    // 4. Konsole Terminal
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        radius: 10
-                        color: termMouse.containsMouse ? "#20202c" : "#121217"
-                        border.color: "#22222a"
-                        border.width: 1
-
-                        RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 8
-                            Image {
-                                width: 18
-                                height: 18
-                                source: "file://" + AppConfig.assetsDir + "/terminal.svg"
-                            }
-                            ColumnLayout {
-                                spacing: 0
-                                Text { text: "Konsole"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
-                                Text { text: "Terminal KDE"; color: "#64748b"; font.pixelSize: 9 }
+                            MouseArea {
+                                id: nlMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: IslandController.toggleNightLight()
                             }
                         }
 
-                        MouseArea {
-                            id: termMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                IslandController.collapse()
-                                IslandController.openTerminal()
-                            }
-                        }
-                    }
+                        // 3. Microphone Mute Toggle
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.preferredWidth: 1
+                            Layout.preferredHeight: 1
+                            radius: 10
+                            clip: true
+                            color: micMouse.containsMouse ? "#20202c" : "#121217"
+                            border.color: IslandController.micMuted ? "#f43f5e" : "#22222a"
+                            border.width: 1
 
-                    // 5. System Settings
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        radius: 10
-                        color: setMouse.containsMouse ? "#20202c" : "#121217"
-                        border.color: "#22222a"
-                        border.width: 1
-
-                        RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 8
-                            Image {
-                                width: 18
-                                height: 18
-                                source: "file://" + AppConfig.assetsDir + "/settings.svg"
+                            RowLayout {
+                                anchors.centerIn: parent
+                                spacing: 7
+                                Text {
+                                    text: "🎙"
+                                    font.pixelSize: 14
+                                }
+                                ColumnLayout {
+                                    spacing: 0
+                                    Text { text: "Mikrofon"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
+                                    Text {
+                                        text: IslandController.micMuted ? "Dibisukan" : ("Aktif · " + IslandController.micPercent + "%")
+                                        color: IslandController.micMuted ? "#f43f5e" : "#34d399"
+                                        font.pixelSize: 9
+                                    }
+                                }
                             }
-                            ColumnLayout {
-                                spacing: 0
-                                Text { text: "Pengaturan"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
-                                Text { text: "KDE Settings"; color: "#64748b"; font.pixelSize: 9 }
-                            }
-                        }
 
-                        MouseArea {
-                            id: setMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                IslandController.collapse()
-                                IslandController.openSettings()
-                            }
-                        }
-                    }
-
-                    // 6. Test Notification
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        radius: 10
-                        color: notifMouse.containsMouse ? "#20202c" : "#121217"
-                        border.color: "#22222a"
-                        border.width: 1
-
-                        RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 8
-                            Image {
-                                width: 18
-                                height: 18
-                                source: "file://" + AppConfig.assetsDir + "/bell.svg"
-                            }
-                            ColumnLayout {
-                                spacing: 0
-                                Text { text: "Notifikasi"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
-                                Text { text: "Tes Pop-up"; color: "#64748b"; font.pixelSize: 9 }
+                            MouseArea {
+                                id: micMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: IslandController.toggleMicMute()
                             }
                         }
 
-                        MouseArea {
-                            id: notifMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                IslandController.collapse()
-                                IslandController.triggerTestNotification()
+                        // 4. Lock Screen
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.preferredWidth: 1
+                            Layout.preferredHeight: 1
+                            radius: 10
+                            clip: true
+                            color: lockMouse.containsMouse ? "#20202c" : "#121217"
+                            border.color: "#22222a"
+                            border.width: 1
+
+                            RowLayout {
+                                anchors.centerIn: parent
+                                spacing: 7
+                                Image {
+                                    Layout.preferredWidth: 16
+                                    Layout.preferredHeight: 16
+                                    sourceSize: Qt.size(16, 16)
+                                    source: "file://" + AppConfig.assetsDir + "/lock.svg"
+                                }
+                                ColumnLayout {
+                                    spacing: 0
+                                    Text { text: "Kunci Layar"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
+                                    Text { text: "Lock Session"; color: "#64748b"; font.pixelSize: 9 }
+                                }
+                            }
+
+                            MouseArea {
+                                id: lockMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: IslandController.lockScreen()
+                            }
+                        }
+
+                        // 5. System Settings
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.preferredWidth: 1
+                            Layout.preferredHeight: 1
+                            radius: 10
+                            clip: true
+                            color: setMouse.containsMouse ? "#20202c" : "#121217"
+                            border.color: "#22222a"
+                            border.width: 1
+
+                            RowLayout {
+                                anchors.centerIn: parent
+                                spacing: 7
+                                Image {
+                                    Layout.preferredWidth: 16
+                                    Layout.preferredHeight: 16
+                                    sourceSize: Qt.size(16, 16)
+                                    source: "file://" + AppConfig.assetsDir + "/settings.svg"
+                                }
+                                ColumnLayout {
+                                    spacing: 0
+                                    Text { text: "Pengaturan"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
+                                    Text { text: "KDE Settings"; color: "#64748b"; font.pixelSize: 9 }
+                                }
+                            }
+
+                            MouseArea {
+                                id: setMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    IslandController.collapse()
+                                    IslandController.openSettings()
+                                }
+                            }
+                        }
+
+                        // 6. Bluetooth / Charging Peek Demo (Left-click: TWS Peek, Right-click: Charging Peek)
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.preferredWidth: 1
+                            Layout.preferredHeight: 1
+                            radius: 10
+                            clip: true
+                            color: peekMouse.containsMouse ? "#20202c" : "#121217"
+                            border.color: IslandController.btDeviceConnected ? "#5ec2ff" : "#22222a"
+                            border.width: 1
+
+                            RowLayout {
+                                anchors.centerIn: parent
+                                spacing: 7
+                                Text {
+                                    text: "🎧"
+                                    font.pixelSize: 14
+                                }
+                                ColumnLayout {
+                                    spacing: 0
+                                    Text { text: "Peek TWS/Cas"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
+                                    Text {
+                                        text: IslandController.btDeviceConnected ? ("Tersambung · " + IslandController.btDeviceBattery + "%") : "Klik Kiri/Kanan"
+                                        color: IslandController.btDeviceConnected ? "#5ec2ff" : "#64748b"
+                                        font.pixelSize: 9
+                                    }
+                                }
+                            }
+
+                            MouseArea {
+                                id: peekMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: (mouse) => {
+                                    IslandController.collapse()
+                                    if (mouse.button === Qt.RightButton) {
+                                        IslandController.triggerTestChargingPeek()
+                                    } else {
+                                        IslandController.triggerTestBluetoothPeek()
+                                    }
+                                }
                             }
                         }
                     }
