@@ -3,49 +3,127 @@ import QtQuick.Layouts
 
 Item {
     id: root
-    implicitWidth: 230
-    implicitHeight: 32
+    implicitWidth: 310
+    implicitHeight: 60
+
+    readonly property color ringColor: {
+        if (IslandController.isCharging) return "#33e07a";
+        if (IslandController.batteryPercent < 20) return "#ef4444";
+        return "#38bdf8";
+    }
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 12
-        anchors.rightMargin: 12
-        spacing: 10
+        anchors.leftMargin: 14
+        anchors.rightMargin: 16
+        spacing: 12
 
-        // Lightning / Battery Icon
-        Image {
-            width: 16
-            height: 16
-            source: IslandController.isCharging 
-                    ? "file://" + AppConfig.assetsDir + "/bolt.svg"
-                    : "file://" + AppConfig.assetsDir + "/battery.svg"
-            sourceSize.width: 16
-            sourceSize.height: 16
-        }
-
-        // Status Text
-        Text {
-            Layout.fillWidth: true
-            text: IslandController.batteryStatusText
-            color: IslandController.isCharging ? "#22c55e" : "#f1f5f9"
-            font.pixelSize: 11
-            font.weight: Font.DemiBold
-            elide: Text.ElideRight
-        }
-
-        // Battery level bar
-        Rectangle {
+        // =====================================================================
+        // 1. LEFT: NUSA NEON-GREEN CIRCULAR CONIC RING + LIGHTNING BOLT
+        // =====================================================================
+        Item {
             Layout.preferredWidth: 40
-            height: 5
-            radius: 2.5
-            color: "#27272a"
+            Layout.preferredHeight: 40
 
+            // Soft outer neon glow
             Rectangle {
-                width: parent.width * (IslandController.batteryPercent / 100.0)
-                height: parent.height
-                radius: parent.radius
-                color: IslandController.isCharging ? "#22c55e" : (IslandController.batteryPercent < 20 ? "#ef4444" : "#38bdf8")
+                anchors.centerIn: parent
+                width: 38
+                height: 38
+                radius: 19
+                color: IslandController.isCharging
+                       ? Qt.rgba(0.20, 0.88, 0.48, 0.16)
+                       : Qt.rgba(0.22, 0.74, 0.97, 0.10)
             }
+
+            Canvas {
+                id: battRingCanvas
+                anchors.fill: parent
+                antialiasing: true
+
+                property int pct: IslandController.batteryPercent
+                property bool charging: IslandController.isCharging
+                onPctChanged: requestPaint()
+                onChargingChanged: requestPaint()
+
+                onPaint: {
+                    var ctx = getContext("2d");
+                    ctx.reset();
+                    var cx = width / 2;
+                    var cy = height / 2;
+                    var r = (Math.min(width, height) / 2) - 3;
+
+                    // Dark track circle
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                    ctx.lineWidth = 3.4;
+                    ctx.strokeStyle = "#192622";
+                    ctx.stroke();
+
+                    // Active progress arc
+                    var ratio = Math.max(0.05, Math.min(1.0, pct / 100.0));
+                    var startAngle = -Math.PI / 2;
+                    var endAngle = startAngle + (Math.PI * 2 * ratio);
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, r, startAngle, endAngle, false);
+                    ctx.lineWidth = 3.4;
+                    ctx.lineCap = "round";
+                    ctx.strokeStyle = charging ? "#33e07a" : (pct < 20 ? "#ef4444" : "#38bdf8");
+                    ctx.stroke();
+                }
+            }
+
+            // Lightning Bolt / Battery Icon Centered Inside Ring
+            Image {
+                anchors.centerIn: parent
+                width: 15
+                height: 15
+                sourceSize.width: 15
+                sourceSize.height: 15
+                source: IslandController.isCharging
+                        ? "file://" + AppConfig.assetsDir + "/bolt.svg"
+                        : "file://" + AppConfig.assetsDir + "/battery.svg"
+            }
+        }
+
+        // =====================================================================
+        // 2. CENTER: CHARGING TITLE + SUBTITLE (Nusa Style)
+        // =====================================================================
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
+            spacing: 2
+
+            Text {
+                Layout.fillWidth: true
+                text: IslandController.isCharging ? "Charging" : "Mode Baterai"
+                color: "#ffffff"
+                font.pixelSize: 13
+                font.weight: Font.Bold
+                elide: Text.ElideRight
+            }
+
+            Text {
+                Layout.fillWidth: true
+                text: IslandController.isCharging
+                      ? "Charger connected · Fast Power"
+                      : "Charger dilepas · Menggunakan baterai"
+                color: IslandController.isCharging ? "#33e07a" : "#94a3b8"
+                font.pixelSize: 10
+                font.weight: Font.DemiBold
+                elide: Text.ElideRight
+            }
+        }
+
+        // =====================================================================
+        // 3. RIGHT: LARGE PERCENTAGE READOUT (Nusa 24px Bold Style)
+        // =====================================================================
+        Text {
+            text: IslandController.batteryPercent + "%"
+            color: IslandController.isCharging ? "#33e07a" : "#f8fafc"
+            font.pixelSize: 22
+            font.weight: Font.ExtraBold
+            Layout.alignment: Qt.AlignVCenter
         }
     }
 }

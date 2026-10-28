@@ -143,9 +143,9 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 | **Water Tracker & Eye Break** | ✅ Selesai | **Split View (`qml/PageHealth.qml` + `services/health.py`)**, **Grafik Histogram Per Jam (`09..16`)**, tombol kustomisasi ukuran gelas (`150–500ml`) & target harian (`1.5–3.0L`), serta pengingat **Eye Break 20-20-20**. | Animasi **Guided Breathing (Pernapasan 4-4-4)** di halaman Kesehatan. |
 | **Resting Mascot Eyes** | ⏳ Sebagian | Mata maskot berkedip (`MascotEyes.qml`) & toggle mode maskot di halaman Sistem. | **Cursor Eye-Tracking** (melirik kursor), animasi **Doze Off (Mengantuk/Tidur)**, & **Wave Hello**. |
 | **To-Do List Harian** | ⏳ Sebagian | Tambah tugas, centang selesai (*strikethrough*), hapus tugas, & penyimpanan JSON (`PageTodo.qml` + `services/todo.py`). | **Edit Task** inline & **Pengingat Jam Jatuh Tempo (Due Time Reminder)**. |
-| **Headphones / Bluetooth Peek** | ❌ Belum | — | **Prioritas Fase 2**: Kapsul pop-up `310x60px` via **BlueZ / UPower D-Bus** saat TWS/Headphone tersambung. |
-| **Charging Peek (`310x60px`)** | ⏳ Sebagian | Sudah ada HUD baterai dasar (`230x32px` di `HudBattery.qml`). | Upgrade ke **Nusa Charging Peek (`310x60px`)** dengan **Circular Conic Ring** hijau `#33e07a` & teks `24px`, plus **Closed Battery Ring** di kapsul tertutup. |
-| **Brightness, CapsLock & Mic HUD** | ❌ Belum | Sudah ada HUD Volume (`HudVolume.qml`, hanya aktif via scroll saat *collapsed*). | Integrasi D-Bus PowerDevil (**Screen Brightness HUD**), **Mic Mute HUD**, & **Caps Lock Nudge**. |
+| **Headphones / Bluetooth Peek** | ✅ Selesai | Kapsul pop-up `310x60px` (`HudBluetooth.qml` + `services/bluetooth.py`) via **BlueZ D-Bus (`org.bluez`)** dengan cincin baterai biru `#5ec2ff`, nama perangkat, persentase baterai, & lencana headphone bercahaya selama 3,5 detik. | — |
+| **Charging Peek (`310x60px`)** | ✅ Selesai | **Nusa Charging Peek (`310x60px` di `HudBattery.qml`)** dengan **Circular Conic Ring** hijau `#33e07a`, ikon petir, & teks `22px`, serta **Closed Battery Ring + Mini Sound Wave** di `CompactIdle.qml` (`150x28px`). | — |
+| **Brightness, CapsLock & Mic HUD** | ✅ Selesai | **HUD Hardware (`250x36px` di `HudHardware.qml` + `services/hardware_hud.py`)** untuk **Screen Brightness** (`amdgpu_bl1` + KDE PowerManagement D-Bus), **Caps Lock Nudge** (`/sys/class/leds/input*::capslock`), & **Mic Mute HUD** (`wpctl`), plus slider kecerahan & tombol Mic di *Pintasan Cepat*. | — |
 | **Privacy Dots (Cam / Mic In-Use)** | ❌ Belum | — | Deteksi node PipeWire aktif untuk menampilkan titik hijau (kamera) & oranye (mikrofon) ala iOS/macOS. |
 | **System Tray & Fullscreen Hide** | ❌ Belum | Daemon systemd / background via `run.sh`. | **`QSystemTrayIcon`** (menu konfigurasi cepat) & **Fullscreen App Auto-Hide** (sembunyi saat main game/video fullscreen). |
 | **Hardware, Suhu & TDP Monitor** | ✅ Selesai | **Processor TDP (`W` via `hwmon PPT`)**, **Suhu CPU (`k10temp`), GPU (`amdgpu`), & NVMe (`°C`)**, **Clock CPU (`GHz`)**, **GPU Load & VRAM**, **Top Process**, **Overheat HUD Alert (`≥85°C`)**, & **1-Click Power Profile Switcher** (`PageHardware.qml` + `services/system.py`). | Statistik riwayat suhu & kecepatan kipas (`RPM` jika tersedia). |
@@ -185,17 +185,17 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 
 ---
 
-### ⏳ Fase 2: Smart Peek Overlays (`310x60px`) & Indikator Hardware KDE (BELUM DIIMPLEMENTASIKAN)
+### ✅ Fase 2: Smart Peek Overlays (`310x60px`) & Indikator Hardware KDE (SUDAH DIIMPLEMENTASIKAN)
 
-- [ ] **1. Headphones / Bluetooth Auto-Peek (`qml/HudBluetooth.qml` + `services/bluetooth.py`)**
-  - Pantau koneksi perangkat audio Bluetooth melalui D-Bus `org.bluez` dan `org.freedesktop.UPower`.
-  - Saat TWS/Headphone tersambung atau terputus, munculkan kapsul `310x60px` berisi cincin baterai biru (`#5ec2ff`), nama perangkat, persentase baterai, dan ikon headphone bercahaya selama 3,5 detik.
-- [ ] **2. Upgraded Charging Peek (`qml/HudBattery.qml` — `310x60px`) & Closed Battery Ring**
-  - Perbarui `HudBattery.qml` menjadi gaya Nusa (`310x60px`) dengan cincin progres melingkar hijau neon (`#33e07a`), ikon petir di tengah cincin, dan persentase baterai besar (`24px`) di sisi kanan.
-  - Tambahkan cincin baterai melingkar dan indikator gelombang suara mini pada mode kapsul tertutup (`CompactIdle.qml`).
-- [ ] **3. Screen Brightness, Mic Mute & Caps Lock HUD**
-  - Integrasikan sinyal D-Bus KDE `org.kde.Solid.PowerManagement.Actions.BrightnessControl` untuk menampilkan HUD Kecerahan Layar saat tombol `Fn + Brightness` ditekan.
-  - Tambahkan HUD singkat saat tombol *Microphone Mute* atau *Caps Lock* ditekan.
+- [x] **1. Headphones / Bluetooth Auto-Peek (`qml/HudBluetooth.qml` + `services/bluetooth.py`)**
+  - [x] Pantau koneksi perangkat audio Bluetooth secara *real-time* melalui sistem D-Bus `org.bluez` (`GetManagedObjects` + `org.bluez.Battery1`).
+  - [x] Saat TWS/Headphone (`soundcore R50i`, `thinkplus-TH30`, dll.) tersambung atau terputus, munculkan kapsul `310x60px` berisi cincin baterai biru (`#5ec2ff`), nama perangkat, persentase baterai, dan lencana headphone bercahaya selama 3,5 detik.
+- [x] **2. Upgraded Charging Peek (`qml/HudBattery.qml` — `310x60px`) & Closed Battery Ring (`qml/CompactIdle.qml`)**
+  - [x] Perbarui `HudBattery.qml` menjadi gaya Nusa (`310x60px`) dengan cincin progres melingkar hijau neon (`#33e07a`), ikon petir di tengah cincin, label `Charging / Charger connected`, dan persentase baterai besar (`22px`) di sisi kanan.
+  - [x] Tambahkan **Circular Battery Conic Ring (`#33e07a`)** di sisi kiri dan **4-Bar Animated Mini Sound Wave** di sisi kanan pada mode kapsul tertutup (`CompactIdle.qml` — `150x28px`).
+- [x] **3. Screen Brightness, Mic Mute & Caps Lock HUD (`qml/HudHardware.qml` + `services/hardware_hud.py`)**
+  - [x] Integrasikan pemantauan kecerahan layar (`/sys/class/backlight/amdgpu_bl1` + KDE PowerManagement D-Bus `BrightnessControl`) untuk menampilkan HUD Kecerahan Layar (`250x36px`) saat tombol `Fn + Brightness` ditekan atau diatur dari slider *Pintasan Cepat*.
+  - [x] Tambahkan HUD kapsul otomatis (`250x36px`) saat tombol **Caps Lock** (`/sys/class/leds/input*::capslock/brightness`) atau **Microphone Mute** (`wpctl`) ditekan, lengkap dengan tombol *toggle* Mikrofon dan tombol uji *Peek TWS/Cas* di halaman *Pintasan Cepat*.
 
 ---
 

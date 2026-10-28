@@ -113,10 +113,12 @@ Item {
     // Dimensions driven by IslandController.state (+ 520px wide split view in Synced Lyrics mode)
     readonly property real targetWidth: {
         switch (IslandController.state) {
-            case "idle": return 140;
+            case "idle": return 150;
             case "music": return 230;
             case "hud-volume": return 230;
-            case "hud-battery": return 230;
+            case "hud-hardware": return 250;
+            case "hud-battery": return 310;
+            case "hud-bluetooth": return 310;
             case "hud-notification": return 330;
             case "expanded-music":
                 return IslandController.lyricsModeActive ? 520 : 420;
@@ -125,7 +127,7 @@ Item {
                     return 520;
                 }
                 return 420;
-            default: return 140;
+            default: return 150;
         }
     }
 
@@ -134,7 +136,9 @@ Item {
             case "idle": return 28;
             case "music": return 30;
             case "hud-volume": return 32;
-            case "hud-battery": return 32;
+            case "hud-hardware": return 36;
+            case "hud-battery": return 60;
+            case "hud-bluetooth": return 60;
             case "hud-notification": return 56;
             case "expanded-music": return 245;
             case "expanded-hub": return 245;
@@ -143,7 +147,10 @@ Item {
     }
 
     readonly property real targetRadius: {
-        if (IslandController.isExpanded || IslandController.state === "hud-notification") {
+        if (IslandController.isExpanded
+                || IslandController.state === "hud-notification"
+                || IslandController.state === "hud-battery"
+                || IslandController.state === "hud-bluetooth") {
             return 20;
         }
         return targetHeight / 2;
@@ -412,11 +419,27 @@ Item {
             Behavior on opacity { NumberAnimation { duration: 180 } }
         }
 
-        // 4. HUD Battery
+        // 4. HUD Battery (Nusa 310x60px Charging Peek)
         HudBattery {
             anchors.fill: parent
             visible: opacity > 0
             opacity: IslandController.state === "hud-battery" ? 1.0 : 0.0
+            Behavior on opacity { NumberAnimation { duration: 180 } }
+        }
+
+        // 4B. HUD Bluetooth Headphones Peek (Nusa 310x60px)
+        HudBluetooth {
+            anchors.fill: parent
+            visible: opacity > 0
+            opacity: IslandController.state === "hud-bluetooth" ? 1.0 : 0.0
+            Behavior on opacity { NumberAnimation { duration: 180 } }
+        }
+
+        // 4C. HUD Hardware (Brightness, Caps Lock, Mic Mute - 250x36px)
+        HudHardware {
+            anchors.fill: parent
+            visible: opacity > 0
+            opacity: IslandController.state === "hud-hardware" ? 1.0 : 0.0
             Behavior on opacity { NumberAnimation { duration: 180 } }
         }
 

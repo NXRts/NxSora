@@ -13,6 +13,8 @@ from services.health import HealthService
 from services.todo import TodoService
 from services.lyrics import LyricsService
 from services.shelf import ShelfService
+from services.bluetooth import BluetoothService
+from services.hardware_hud import HardwareHudService
 import config
 
 
@@ -58,6 +60,10 @@ class IslandController(QObject):
     shelfChanged = pyqtSignal()
     shelfGulpTriggered = pyqtSignal()
 
+    # Bluetooth & Hardware HUD signals (Fase 2)
+    bluetoothChanged = pyqtSignal()
+    hardwareHudChanged = pyqtSignal()
+
     # Mascot & Pin mode
     mascotModeChanged = pyqtSignal(bool)
     isPinnedChanged = pyqtSignal(bool)
@@ -75,13 +81,15 @@ class IslandController(QObject):
         self.health = HealthService(self)
         self.todo = TodoService(self)
         self.shelf = ShelfService(self)
+        self.bluetooth = BluetoothService(self)
+        self.hw_hud = HardwareHudService(self)
 
         # Mascot mode toggle (Resting Eyes vs Digital Clock)
         self._mascot_mode = False
         self._is_pinned = False
 
         # Island UI State:
-        # "idle", "music", "hud-volume", "hud-battery", "hud-notification", "expanded-hub"
+        # "idle", "music", "hud-volume", "hud-battery", "hud-bluetooth", "hud-hardware", "hud-notification", "expanded-hub"
         self._state = "idle"
         self._is_expanded = False
         self._previous_compact_state = "idle"
@@ -125,6 +133,14 @@ class IslandController(QObject):
 
         self.shelf.shelfChanged.connect(lambda: self.shelfChanged.emit())
         self.shelf.shelfGulpTriggered.connect(lambda: self.shelfGulpTriggered.emit())
+
+        self.bluetooth.bluetoothChanged.connect(lambda: self.bluetoothChanged.emit())
+        self.bluetooth.bluetoothPeekTriggered.connect(self._on_bluetooth_peek)
+
+        self.hw_hud.brightnessChanged.connect(lambda _: self.hardwareHudChanged.emit())
+        self.hw_hud.capsLockChanged.connect(lambda _: self.hardwareHudChanged.emit())
+        self.hw_hud.micMuteChanged.connect(lambda m, v: self.hardwareHudChanged.emit())
+        self.hw_hud.hardwareHudTriggered.connect(self._on_hardware_hud_triggered)
 
         # Initial state setup
         if self.mpris.status in ("Playing", "Paused") and self.mpris.title:
@@ -191,7 +207,20 @@ class IslandController(QObject):
         self.batteryChanged.emit()
         if not self._is_expanded:
             self._set_state("hud-battery")
-            self._hud_timer.start(config.CONFIG.get("hud_battery_timeout", 3000))
+            self._hud_timer.start(config.CONFIG.get("hud_battery_timeout", 3500))
+
+    def _on_bluetooth_peek(self, name, connected, battery):
+        self.bluetoothChanged.emit()
+        if not self._is_expanded:
+            self._set_state("hud-bluetooth")
+            self._hud_timer.start(3500)
+
+    def _on_hardware_hud_triggered(self, hud_type, label, val, active):
+        self.hardwareHudChanged.emit()
+        if not self._is_expanded:
+            self._set_state("hud-hardware")
+            timeout = 1800 if hud_type == "capslock" else 2200
+            self._hud_timer.start(timeout)
 
     def _on_notification_received(self, app_name, summary, body):
         self._notif_app = app_name
@@ -809,3 +838,67 @@ class IslandController(QObject):
     @pyqtSlot()
     def startShelfDragAll(self):
         self.shelf.startDragAll()
+
+    # --- Fase 2: Bluetooth Headphones Peek & Hardware HUD Properties / Slots ---
+    @pyqtProperty(str, notify=bluetoothChanged)
+    def btDeviceName(self):
+        return self.bluetooth.device_name
+
+    @pyqtProperty(bool, notify=bluetoothChanged)
+    def btDeviceConnected(self):
+        return bool(self.bluetooth.device_connected)
+
+    @pyqtProperty(int, notify=bluetoothChanged)
+    def btDeviceBattery(self):
+        return max(0, min(100, int(self.bluetooth.device_battery))) if self.bluetooth.device_battery >= 0 else 100
+
+    @pyqtProperty(int, notify=hardwareHudChanged)
+    def brightnessPercent(self):
+        return int(self.hw_hud.brightness_percent)
+
+    @pyqtProperty(bool, notify=hardwareHudChanged)
+    def capsLockOn(self):
+        return bool(self.hw_hud.caps_lock_on)
+
+    @pyqtProperty(bool, notify=hardwareHudChanged)
+    def micMuted(self):
+        return bool(self.hw_hud.mic_muted)
+
+    @pyqtProperty(int, notify=hardwareHudChanged)
+    def micPercent(self):
+        return int(self.hw_hud.mic_percent)
+
+    @pyqtProperty(str, notify=hardwareHudChanged)
+    def hwHudType(self):
+        return self.hw_hud.hud_type
+
+    @pyqtProperty(str, notify=hardwareHudChanged)
+    def hwHudLabel(self):
+        return self.hw_hud.hud_label
+
+    @pyqtProperty(int, notify=hardwareHudChanged)
+    def hwHudValue(self):
+        return int(self.hw_hud.hud_value)
+
+    @pyqtProperty(bool, notify=hardwareHudChanged)
+    def hwHudActive(self):
+        return bool(self.hw_hud.hud_active)
+
+    @pyqtSlot(float)
+    def setBrightness(self, ratio):
+        self.hw_hud.set_brightness(ratio)
+
+    @pyqtSlot()
+    def toggleMicMute(self):
+        self.hw_hud.toggle_mic_mute()
+
+    @pyqtSlot()
+    def triggerTestBluetoothPeek(self):
+        self.collapse()
+        self.bluetooth.trigger_demo_peek()
+
+    @pyqtSlot()
+    def triggerTestChargingPeek(self):
+        self.collapse()
+        self._set_state("hud-battery")
+        self._hud_timer.start(3500)
