@@ -187,9 +187,10 @@ Selain 10 tab di atas, hasil analisis menyeluruh terhadap dokumentasi Nusa dan a
 
 ### ✅ Fase 2: Smart Peek Overlays (`310x60px`) & Indikator Hardware KDE (SUDAH DIIMPLEMENTASIKAN)
 
-- [x] **1. Headphones / Bluetooth Auto-Peek (`qml/HudBluetooth.qml` + `services/bluetooth.py`)**
+- [x] **1. Headphones / Bluetooth Auto-Peek & Halaman Menu Bluetooth (`qml/HudBluetooth.qml` + `qml/PageBluetooth.qml` + `services/bluetooth.py`)**
   - [x] Pantau koneksi perangkat audio Bluetooth secara *real-time* melalui sistem D-Bus `org.bluez` (`GetManagedObjects` + `org.bluez.Battery1`).
-  - [x] Saat TWS/Headphone (`soundcore R50i`, `thinkplus-TH30`, dll.) tersambung atau terputus, munculkan kapsul `310x60px` berisi cincin baterai biru (`#5ec2ff`), nama perangkat, persentase baterai, dan lencana headphone bercahaya selama 3,5 detik.
+  - [x] Saat TWS/Headphone (`soundcore R50i`, `thinkplus-TH30`, dll.) tersambung atau terputus, munculkan kapsul `310x60px` berisi cincin baterai biru (`#5ec2ff`), nama perangkat, persentase baterai, dan **animasi interaktif lepas-pasang TWS (*Charging Case* membuka/menutup & Earbud `L`/`R` keluar/masuk *case*)** selama 4,2 detik.
+  - [x] **Halaman Menu Bluetooth & Perangkat (`qml/PageBluetooth.qml`)**: Menampilkan status adapter Bluetooth (`Aktif/Mati`), daftar seluruh perangkat Bluetooth yang sedang terkoneksi maupun tersimpan (*paired*), indikator persentase baterai per perangkat (`🔋 XX%`), tombol **Sambung / Putuskan** 1-klik (`bluetoothctl`), tombol **🎬 Animasi TWS**, dan pintasan ke **Setelan Bluetooth KDE**.
 - [x] **2. Upgraded Charging Peek (`qml/HudBattery.qml` — `310x60px`) & Closed Battery Ring (`qml/CompactIdle.qml`)**
   - [x] Perbarui `HudBattery.qml` menjadi gaya Nusa (`310x60px`) dengan cincin progres melingkar hijau neon (`#33e07a`), ikon petir di tengah cincin, label `Charging / Charger connected`, dan persentase baterai besar (`22px`) di sisi kanan.
   - [x] Tambahkan **Circular Battery Conic Ring (`#33e07a`)** di sisi kiri dan **4-Bar Animated Mini Sound Wave** di sisi kanan pada mode kapsul tertutup (`CompactIdle.qml` — `150x28px`).

@@ -551,7 +551,7 @@ class IslandController(QObject):
 
     @pyqtSlot(int)
     def setActiveHubPage(self, page_index):
-        clamped = max(0, min(int(page_index), 6))
+        clamped = max(0, min(int(page_index), 7))
         if self._active_hub_page != clamped:
             self._active_hub_page = clamped
             self.activeHubPageChanged.emit(self._active_hub_page)
@@ -562,7 +562,9 @@ class IslandController(QObject):
         if self._is_expanded:
             self.collapse()
         else:
-            if self.mediaHasTrack:
+            if self._state == "hud-bluetooth":
+                self._active_hub_page = 4  # Bluetooth & Perangkat page
+            elif self.mediaHasTrack:
                 self._active_hub_page = 1  # Music page
             else:
                 self._active_hub_page = 0  # System page
@@ -590,15 +592,22 @@ class IslandController(QObject):
         self._set_state("expanded-hub")
 
     @pyqtSlot()
+    def expandToBluetooth(self):
+        """Open Page 4 (Bluetooth & Perangkat)."""
+        self._active_hub_page = 4
+        self.activeHubPageChanged.emit(4)
+        self._set_state("expanded-hub")
+
+    @pyqtSlot()
     def expandToShelf(self):
-        """Automatically expand to Page 6 (File Shelf) when a file is dragged over the notch."""
-        self._active_hub_page = 6
-        self.activeHubPageChanged.emit(6)
+        """Automatically expand to Page 7 (File Shelf) when a file is dragged over the notch."""
+        self._active_hub_page = 7
+        self.activeHubPageChanged.emit(7)
         self._set_state("expanded-hub")
 
     @pyqtSlot(int)
     def openHubPage(self, page_index):
-        self._active_hub_page = max(0, min(page_index, 6))
+        self._active_hub_page = max(0, min(page_index, 7))
         self.activeHubPageChanged.emit(self._active_hub_page)
         self._set_state("expanded-hub")
 
@@ -840,6 +849,18 @@ class IslandController(QObject):
         self.shelf.startDragAll()
 
     # --- Fase 2: Bluetooth Headphones Peek & Hardware HUD Properties / Slots ---
+    @pyqtProperty(bool, notify=bluetoothChanged)
+    def btAdapterPowered(self):
+        return bool(getattr(self.bluetooth, "adapter_powered", True))
+
+    @pyqtProperty(list, notify=bluetoothChanged)
+    def btDevicesList(self):
+        return list(getattr(self.bluetooth, "devices_list", []))
+
+    @pyqtProperty(int, notify=bluetoothChanged)
+    def btConnectedCount(self):
+        return int(getattr(self.bluetooth, "connected_count", 0))
+
     @pyqtProperty(str, notify=bluetoothChanged)
     def btDeviceName(self):
         return self.bluetooth.device_name
@@ -859,6 +880,19 @@ class IslandController(QObject):
     @pyqtProperty(int, notify=bluetoothChanged)
     def btAnimSerial(self):
         return int(getattr(self.bluetooth, "anim_serial", 0))
+
+    @pyqtSlot(str)
+    def toggleBluetoothDevice(self, address):
+        self.bluetooth.toggle_device_connection(address)
+
+    @pyqtSlot()
+    def toggleBluetoothAdapter(self):
+        self.bluetooth.toggle_adapter_power()
+
+    @pyqtSlot()
+    def openBluetoothSettings(self):
+        self.collapse()
+        self.bluetooth.open_bluetooth_settings()
 
     @pyqtProperty(int, notify=hardwareHudChanged)
     def brightnessPercent(self):
