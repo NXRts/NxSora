@@ -30,3 +30,4 @@
 ---
 
 Untuk rencana teknis mendalam dan analisis perbandingan aplikasi Dynamic Island lainnya, lihat [Next.md](Next.md).
+

@@ -82,3 +82,4 @@ echo "• Mulai Otomatis:     Aktif saat login ke desktop"
 echo ""
 echo "Jalankan sekarang dengan:"
 echo "  $BIN_DIR/nxsora --restart"
+

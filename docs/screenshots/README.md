@@ -18,3 +18,4 @@ Gunakan utilitas `spectacle`:
 # Ambil area jendela notch aktif
 spectacle -a -b -o docs/screenshots/01-compact-idle.png
 ```
+

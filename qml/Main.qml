@@ -3,12 +3,9 @@ import org.kde.layershell as LayerShell
 
 Window {
     id: rootWindow
-    opacity: IslandController.fullscreenActive ? 0.0 : 1.0
-    visible: opacity > 0.0
+    visible: true
     color: "transparent"
     flags: Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint
-
-    Behavior on opacity { NumberAnimation { duration: 250 } }
 
     // Wayland Layer-Shell Configuration
     LayerShell.Window.layer: LayerShell.Window.LayerOverlay

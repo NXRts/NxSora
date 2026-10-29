@@ -29,3 +29,4 @@ Jelaskan apa yang seharusnya terjadi.
 ```text
 Tempelkan log dari /tmp/dynamic_island_kde.log atau $XDG_STATE_HOME/nxsora/nxsora.log di sini
 ```
+

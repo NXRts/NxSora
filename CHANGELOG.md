@@ -29,3 +29,4 @@ Semua perubahan dan catatan rilis pada projek **NxSora** didokumentasikan di sin
 - **Skrip Pemasangan (`install.sh`)**: Pengecekan dependensi dan pendaftaran desktop entry / autostart.
 - **Unit Tests Suite (`tests/`)**: Tes otomatis untuk parser lirik, notifikasi, bluetooth, dan sistem telemetri.
 - **GitHub Actions CI**: Alur otomatisasi pengujian sintaks (`ruff`) dan fungsionalitas (`pytest`) pada Python 3.11 dan 3.12.
+

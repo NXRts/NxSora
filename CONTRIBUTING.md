@@ -61,3 +61,4 @@ ruff check .
 ## 💬 4. Pertanyaan & Diskusi
 
 Jika Anda memiliki ide atau ingin berdiskusi mengenai desain fitur baru, silakan buka diskusi atau issue baru di [GitHub Issues](https://github.com/NXRts/NxSora/issues).
+

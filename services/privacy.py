@@ -99,7 +99,7 @@ class PrivacyService(QObject):
                         for item in inhibitions:
                             if isinstance(item, (list, tuple)) and len(item) >= 3:
                                 reason = str(item[2]).lower()
-                                if any(k in reason for k in ("video", "fullscreen", "game", "playing video")):
+                                if any(k in reason for k in ("fullscreen", "full screen", "in full screen", "is fullscreen")):
                                     has_fs = True
                                     break
             except Exception:
@@ -108,3 +108,4 @@ class PrivacyService(QObject):
         if has_fs != self._fullscreen_active:
             self._fullscreen_active = has_fs
             self.fullscreenActiveChanged.emit(self._fullscreen_active)
+
