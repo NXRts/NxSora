@@ -148,7 +148,7 @@ Item {
         }
 
         // =====================================================================
-        // 2. CENTER: CHARGING TITLE + SUBTITLE (Dynamic Notch Style)
+        // 2. CENTER: CHARGING TITLE + SUBTITLE / LOW BATTERY NUDGE
         // =====================================================================
         ColumnLayout {
             Layout.fillWidth: true
@@ -157,8 +157,12 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                text: IslandController.isCharging ? "Charging" : "Mode Baterai"
-                color: "#ffffff"
+                text: IslandController.isCharging
+                      ? "Charging"
+                      : (IslandController.batteryPercent <= 20 ? "Baterai Lemah" : "Mode Baterai")
+                color: IslandController.isCharging
+                       ? "#ffffff"
+                       : (IslandController.batteryPercent <= 20 ? "#f87171" : "#ffffff")
                 font.pixelSize: 13
                 font.weight: Font.Bold
                 elide: Text.ElideRight
@@ -168,11 +172,58 @@ Item {
                 Layout.fillWidth: true
                 text: IslandController.isCharging
                       ? "Charger connected · Fast Power"
-                      : "Charger dilepas · Menggunakan baterai"
-                color: IslandController.isCharging ? "#33e07a" : "#94a3b8"
+                      : (IslandController.batteryPercent <= 20
+                         ? "Daya hampir habis · Segera isi daya"
+                         : "Charger dilepas · Menggunakan baterai")
+                color: IslandController.isCharging
+                       ? "#33e07a"
+                       : (IslandController.batteryPercent <= 20 ? "#fca5a5" : "#94a3b8")
                 font.pixelSize: 10
                 font.weight: Font.DemiBold
                 elide: Text.ElideRight
+            }
+        }
+
+        // 1-Click Action to activate Power Saver Profile (Visible during low battery nudge)
+        Rectangle {
+            visible: !IslandController.isCharging && IslandController.batteryPercent <= 20
+            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredHeight: 26
+            Layout.preferredWidth: pwrBtnRow.implicitWidth + 14
+            radius: 13
+            color: pwrBtnMouse.containsMouse ? "#2d4a22" : "#1a3818"
+            border.color: "#34d399"
+            border.width: 1
+
+            RowLayout {
+                id: pwrBtnRow
+                anchors.centerIn: parent
+                spacing: 4
+
+                Image {
+                    width: 11
+                    height: 11
+                    sourceSize: Qt.size(11, 11)
+                    source: "file://" + AppConfig.assetsDir + "/leaf.svg"
+                }
+
+                Text {
+                    text: "Hemat Daya"
+                    color: "#34d399"
+                    font.pixelSize: 10
+                    font.weight: Font.Bold
+                }
+            }
+
+            MouseArea {
+                id: pwrBtnMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: {
+                    IslandController.setPowerProfile("power-saver")
+                    IslandController.collapse()
+                }
             }
         }
 
@@ -180,6 +231,7 @@ Item {
         // 3. RIGHT: LARGE PERCENTAGE READOUT (22px Bold Style)
         // =====================================================================
         Text {
+            visible: IslandController.isCharging || IslandController.batteryPercent > 20
             text: IslandController.batteryPercent + "%"
             color: IslandController.isCharging ? "#33e07a" : "#f8fafc"
             font.pixelSize: 22

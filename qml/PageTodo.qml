@@ -21,12 +21,12 @@ Item {
                 height: 24
                 radius: 6
                 color: "#16a34a"
-                Text {
+                Image {
                     anchors.centerIn: parent
-                    text: "✓"
-                    color: "#ffffff"
-                    font.pixelSize: 13
-                    font.weight: Font.Bold
+                    width: 14
+                    height: 14
+                    sourceSize: Qt.size(14, 14)
+                    source: "file://" + AppConfig.assetsDir + "/check.svg"
                 }
             }
 
@@ -196,12 +196,12 @@ Item {
                             border.color: modelData.done ? "#22c55e" : "#64748b"
                             border.width: 1.5
 
-                            Text {
+                            Image {
                                 anchors.centerIn: parent
-                                text: "✓"
-                                color: "#ffffff"
-                                font.pixelSize: 10
-                                font.weight: Font.Bold
+                                width: 10
+                                height: 10
+                                sourceSize: Qt.size(10, 10)
+                                source: "file://" + AppConfig.assetsDir + "/check.svg"
                                 visible: modelData.done
                             }
 
@@ -222,13 +222,21 @@ Item {
                             elide: Text.ElideRight
                         }
 
-                        // Delete button (✕)
-                        Text {
-                            text: "✕"
-                            color: delMouse.containsMouse ? "#ef4444" : "#64748b"
-                            font.pixelSize: 10
-                            font.weight: Font.Bold
-                            padding: 4
+                        // Delete button
+                        Rectangle {
+                            width: 18
+                            height: 18
+                            radius: 4
+                            color: delMouse.containsMouse ? "#2f151c" : "transparent"
+
+                            Image {
+                                anchors.centerIn: parent
+                                width: 9
+                                height: 9
+                                sourceSize: Qt.size(9, 9)
+                                source: "file://" + AppConfig.assetsDir + "/close.svg"
+                                opacity: delMouse.containsMouse ? 1.0 : 0.6
+                            }
 
                             MouseArea {
                                 id: delMouse

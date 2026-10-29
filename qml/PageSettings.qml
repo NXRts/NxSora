@@ -11,6 +11,7 @@ Item {
     property bool btHudEnabled: IslandController ? (IslandController.getSetting("hud_bluetooth_enabled") !== false) : true
     property bool hwHudEnabled: IslandController ? (IslandController.getSetting("hud_hardware_enabled") !== false) : true
     property bool notifHudEnabled: IslandController ? (IslandController.getSetting("hud_notification_enabled") !== false) : true
+    property bool netHudEnabled: IslandController ? (IslandController.getSetting("hud_network_enabled") !== false) : true
     property bool fsAutoHide: IslandController ? (IslandController.getSetting("fullscreen_autohide_enabled") !== false) : true
     property bool privacyDots: IslandController ? (IslandController.getSetting("privacy_dots_enabled") !== false) : true
     property bool eyeTracking: IslandController ? (IslandController.getSetting("eye_tracking_enabled") !== false) : true
@@ -24,6 +25,7 @@ Item {
             root.btHudEnabled = IslandController.getSetting("hud_bluetooth_enabled") !== false;
             root.hwHudEnabled = IslandController.getSetting("hud_hardware_enabled") !== false;
             root.notifHudEnabled = IslandController.getSetting("hud_notification_enabled") !== false;
+            root.netHudEnabled = IslandController.getSetting("hud_network_enabled") !== false;
             root.fsAutoHide = IslandController.getSetting("fullscreen_autohide_enabled") !== false;
             root.privacyDots = IslandController.getSetting("privacy_dots_enabled") !== false;
             root.eyeTracking = IslandController.getSetting("eye_tracking_enabled") !== false;
@@ -73,11 +75,20 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
-                        Text {
+                        RowLayout {
                             Layout.fillWidth: true
-                            text: "🔊 Volume HUD"
-                            color: "#e2e8f0"
-                            font.pixelSize: 11
+                            spacing: 6
+                            Image {
+                                width: 11
+                                height: 11
+                                sourceSize: Qt.size(11, 11)
+                                source: "file://" + AppConfig.assetsDir + "/volume-high.svg"
+                            }
+                            Text {
+                                text: "Volume HUD"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                            }
                         }
                         Switch {
                             checked: root.volHudEnabled
@@ -89,11 +100,20 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
-                        Text {
+                        RowLayout {
                             Layout.fillWidth: true
-                            text: "⚡ Cas & Baterai HUD"
-                            color: "#e2e8f0"
-                            font.pixelSize: 11
+                            spacing: 6
+                            Image {
+                                width: 11
+                                height: 11
+                                sourceSize: Qt.size(11, 11)
+                                source: "file://" + AppConfig.assetsDir + "/battery.svg"
+                            }
+                            Text {
+                                text: "Cas & Baterai HUD"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                            }
                         }
                         Switch {
                             checked: root.battHudEnabled
@@ -105,11 +125,20 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
-                        Text {
+                        RowLayout {
                             Layout.fillWidth: true
-                            text: "🎧 Bluetooth & TWS"
-                            color: "#e2e8f0"
-                            font.pixelSize: 11
+                            spacing: 6
+                            Image {
+                                width: 11
+                                height: 11
+                                sourceSize: Qt.size(11, 11)
+                                source: "file://" + AppConfig.assetsDir + "/headphones.svg"
+                            }
+                            Text {
+                                text: "Bluetooth & TWS"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                            }
                         }
                         Switch {
                             checked: root.btHudEnabled
@@ -121,11 +150,20 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
-                        Text {
+                        RowLayout {
                             Layout.fillWidth: true
-                            text: "🔆 Caps & Kecerahan"
-                            color: "#e2e8f0"
-                            font.pixelSize: 11
+                            spacing: 6
+                            Image {
+                                width: 11
+                                height: 11
+                                sourceSize: Qt.size(11, 11)
+                                source: "file://" + AppConfig.assetsDir + "/sun.svg"
+                            }
+                            Text {
+                                text: "Caps & Kecerahan"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                            }
                         }
                         Switch {
                             checked: root.hwHudEnabled
@@ -137,15 +175,49 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
-                        Text {
+                        RowLayout {
                             Layout.fillWidth: true
-                            text: "🔔 Notifikasi Pop-up"
-                            color: "#e2e8f0"
-                            font.pixelSize: 11
+                            spacing: 6
+                            Image {
+                                width: 11
+                                height: 11
+                                sourceSize: Qt.size(11, 11)
+                                source: "file://" + AppConfig.assetsDir + "/bell.svg"
+                            }
+                            Text {
+                                text: "Notifikasi Pop-up"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                            }
                         }
                         Switch {
                             checked: root.notifHudEnabled
                             onToggled: IslandController.setSetting("hud_notification_enabled", checked)
+                        }
+                    }
+
+                    // 6. Network / Wi-Fi HUD
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 6
+                            Image {
+                                width: 11
+                                height: 11
+                                sourceSize: Qt.size(11, 11)
+                                source: "file://" + AppConfig.assetsDir + "/network.svg"
+                            }
+                            Text {
+                                text: "Wi-Fi & Jaringan HUD"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                            }
+                        }
+                        Switch {
+                            checked: root.netHudEnabled
+                            onToggled: IslandController.setSetting("hud_network_enabled", checked)
                         }
                     }
                 }
@@ -183,11 +255,20 @@ Item {
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 1
-                            Text {
-                                text: "🎮 Fullscreen Auto-Hide"
-                                color: "#e2e8f0"
-                                font.pixelSize: 11
-                                font.weight: Font.Bold
+                            RowLayout {
+                                spacing: 5
+                                Image {
+                                    width: 12
+                                    height: 12
+                                    sourceSize: Qt.size(12, 12)
+                                    source: "file://" + AppConfig.assetsDir + "/gamepad.svg"
+                                }
+                                Text {
+                                    text: "Fullscreen Auto-Hide"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
                             }
                             Text {
                                 text: "Otomatis sembunyikan notch saat game atau video fullscreen berjalan"
@@ -210,11 +291,20 @@ Item {
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 1
-                            Text {
-                                text: "🟢 Privacy Dots (Kamera & Mikrofon)"
-                                color: "#e2e8f0"
-                                font.pixelSize: 11
-                                font.weight: Font.Bold
+                            RowLayout {
+                                spacing: 5
+                                Image {
+                                    width: 12
+                                    height: 12
+                                    sourceSize: Qt.size(12, 12)
+                                    source: "file://" + AppConfig.assetsDir + "/shield.svg"
+                                }
+                                Text {
+                                    text: "Privacy Dots (Kamera & Mikrofon)"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
                             }
                             Text {
                                 text: "Tampilkan titik oranye (mic) & hijau (kamera) saat PipeWire aktif merekam"
@@ -237,11 +327,20 @@ Item {
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 1
-                            Text {
-                                text: "👁️ Mascot Eye-Tracking"
-                                color: "#e2e8f0"
-                                font.pixelSize: 11
-                                font.weight: Font.Bold
+                            RowLayout {
+                                spacing: 5
+                                Image {
+                                    width: 12
+                                    height: 12
+                                    sourceSize: Qt.size(12, 12)
+                                    source: "file://" + AppConfig.assetsDir + "/eye.svg"
+                                }
+                                Text {
+                                    text: "Mascot Eye-Tracking"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
                             }
                             Text {
                                 text: "Mata maskot melirik halus mengikuti arah kursor mouse di sekitar notch"
@@ -258,8 +357,84 @@ Item {
             }
 
             // =================================================================
-            // SECTION 3: AKSI & KONFIGURASI FILE
+            // SECTION 3: PENGUJIAN PEEK OVERLAYS & RESET
             // =================================================================
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                // Tombol Uji Wi-Fi Peek
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 28
+                    radius: 6
+                    color: wifiTestMouse.containsMouse ? "#202d3e" : "#161b28"
+                    border.color: wifiTestMouse.containsMouse ? "#38bdf8" : "#283348"
+                    border.width: 1
+
+                    RowLayout {
+                        anchors.centerIn: parent
+                        spacing: 5
+                        Image {
+                            width: 11
+                            height: 11
+                            sourceSize: Qt.size(11, 11)
+                            source: "file://" + AppConfig.assetsDir + "/network.svg"
+                        }
+                        Text {
+                            text: "Uji Wi-Fi Peek"
+                            color: "#38bdf8"
+                            font.pixelSize: 10
+                            font.weight: Font.Bold
+                        }
+                    }
+
+                    MouseArea {
+                        id: wifiTestMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: IslandController.triggerWifiPeekDemo()
+                    }
+                }
+
+                // Tombol Uji Baterai Lemah
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 28
+                    radius: 6
+                    color: battTestMouse.containsMouse ? "#3a221a" : "#221918"
+                    border.color: battTestMouse.containsMouse ? "#f59e0b" : "#3c2824"
+                    border.width: 1
+
+                    RowLayout {
+                        anchors.centerIn: parent
+                        spacing: 5
+                        Image {
+                            width: 11
+                            height: 11
+                            sourceSize: Qt.size(11, 11)
+                            source: "file://" + AppConfig.assetsDir + "/battery.svg"
+                        }
+                        Text {
+                            text: "Uji Baterai Lemah"
+                            color: "#f59e0b"
+                            font.pixelSize: 10
+                            font.weight: Font.Bold
+                        }
+                    }
+
+                    MouseArea {
+                        id: battTestMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: IslandController.triggerLowBatteryDemo()
+                    }
+                }
+            }
+
+            // SECTION 3B: AKSI & KONFIGURASI FILE
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 8
@@ -276,8 +451,14 @@ Item {
                     RowLayout {
                         anchors.centerIn: parent
                         spacing: 6
+                        Image {
+                            width: 11
+                            height: 11
+                            sourceSize: Qt.size(11, 11)
+                            source: "file://" + AppConfig.assetsDir + "/file-text.svg"
+                        }
                         Text {
-                            text: "📝 Buka config.json"
+                            text: "Buka config.json"
                             color: "#38bdf8"
                             font.pixelSize: 10
                             font.weight: Font.Bold
@@ -305,8 +486,14 @@ Item {
                     RowLayout {
                         anchors.centerIn: parent
                         spacing: 6
+                        Image {
+                            width: 11
+                            height: 11
+                            sourceSize: Qt.size(11, 11)
+                            source: "file://" + AppConfig.assetsDir + "/refresh.svg"
+                        }
                         Text {
-                            text: "↺ Reset ke Default"
+                            text: "Reset ke Default"
                             color: rstBtnMouse.containsMouse ? "#f43f5e" : "#cbd5e1"
                             font.pixelSize: 10
                             font.weight: Font.Bold

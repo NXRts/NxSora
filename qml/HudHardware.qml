@@ -34,21 +34,16 @@ Item {
             }
             border.width: 1
 
-            Text {
+            Image {
                 anchors.centerIn: parent
-                text: {
-                    if (IslandController.hwHudType === "brightness") return "☀";
-                    if (IslandController.hwHudType === "capslock") return "⇪";
-                    return "🎙";
+                width: 13
+                height: 13
+                sourceSize: Qt.size(13, 13)
+                source: {
+                    if (IslandController.hwHudType === "brightness") return "file://" + AppConfig.assetsDir + "/sun.svg";
+                    if (IslandController.hwHudType === "capslock") return "file://" + AppConfig.assetsDir + "/capslock.svg";
+                    return "file://" + AppConfig.assetsDir + (IslandController.hwHudActive ? "/mic.svg" : "/mic-off.svg");
                 }
-                color: {
-                    if (IslandController.hwHudType === "brightness") return "#facc15";
-                    if (IslandController.hwHudType === "capslock")
-                        return IslandController.hwHudActive ? "#4ade80" : "#94a3b8";
-                    return IslandController.hwHudActive ? "#4ade80" : "#f87171";
-                }
-                font.pixelSize: 12
-                font.weight: Font.Bold
             }
         }
 

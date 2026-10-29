@@ -9,10 +9,11 @@ import os
 import signal
 from pathlib import Path
 
-from PyQt6.QtCore import QUrl, QObject, pyqtProperty, QTimer, QLockFile, QDir
+from PyQt6.QtCore import QUrl, QObject, pyqtProperty, pyqtSlot, QTimer, QLockFile, QDir
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu
 from PyQt6.QtQml import QQmlApplicationEngine
+from PyQt6.QtDBus import QDBusConnection, QDBusInterface
 
 import config
 from services.controller import IslandController
@@ -48,6 +49,56 @@ class AppConfig(QObject):
         return self._auto_collapse_timeout
 
 
+class IslandDBusService(QObject):
+    """Exposes global D-Bus interface org.nxsora.Island at /Island."""
+
+    def __init__(self, controller, parent=None):
+        super().__init__(parent)
+        self.c = controller
+
+    @pyqtSlot()
+    def toggle(self):
+        self.c.toggleExpand()
+
+    @pyqtSlot()
+    def expand(self):
+        self.c.expandHub()
+
+    @pyqtSlot()
+    def collapse(self):
+        self.c.collapse()
+
+    @pyqtSlot()
+    def settings(self):
+        self.c.openSettingsView()
+
+    @pyqtSlot()
+    def next(self):
+        next_idx = (self.c._active_hub_page + 1) % 9
+        self.c.openHubPage(next_idx)
+
+    @pyqtSlot()
+    def prev(self):
+        prev_idx = (self.c._active_hub_page - 1) % 9
+        self.c.openHubPage(prev_idx)
+
+    @pyqtSlot()
+    def mascot(self):
+        self.c.toggleMascotMode()
+
+    @pyqtSlot()
+    def dnd(self):
+        self.c.toggleNotifDnd()
+
+    @pyqtSlot()
+    def wifiPeek(self):
+        self.c.triggerWifiPeekDemo()
+
+    @pyqtSlot()
+    def lowBatteryPeek(self):
+        self.c.triggerLowBatteryDemo()
+
+
 def main():
     # Graceful exit on Ctrl+C in terminal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -61,6 +112,20 @@ def main():
     app.setApplicationName("NxSora")
     app.setApplicationDisplayName("NxSora (Nx空)")
     app.setOrganizationName("NXRts")
+
+    # CLI Forwarding to running instance via D-Bus
+    cli_flags = {"--toggle", "--settings", "--expand", "--collapse", "--next", "--prev", "--dnd", "--mascot"}
+    invoked = [arg for arg in sys.argv[1:] if arg in cli_flags]
+    if invoked:
+        probe_bus = QDBusConnection.sessionBus()
+        if probe_bus.isConnected():
+            iface = QDBusInterface("org.nxsora.Island", "/Island", "", probe_bus)
+            if iface.isValid():
+                for flag in invoked:
+                    method_name = flag.lstrip("-")
+                    iface.call(method_name)
+                print(f"[NxSora CLI] Forwarded action(s) {invoked} to active instance.")
+                sys.exit(0)
 
     # Set Window Icon
     logo_path = config.ASSETS_DIR / "logo.svg"
@@ -116,6 +181,19 @@ def main():
         print(f"Error: Failed to load QML from {main_qml_path}")
         sys.exit(1)
 
+    # Register Global D-Bus service org.nxsora.Island at /Island
+    session_bus = QDBusConnection.sessionBus()
+    dbus_service = IslandDBusService(controller, app)
+    app._dbus_service = dbus_service
+    session_bus.registerService("org.nxsora.Island")
+    session_bus.registerObject("/Island", dbus_service, QDBusConnection.RegisterOption.ExportAllSlots)
+
+    # Initial CLI action trigger
+    if "--settings" in sys.argv:
+        controller.openSettingsView()
+    elif "--expand" in sys.argv or "--toggle" in sys.argv:
+        controller.expandHub()
+
     # Setup System Tray Icon
     if QSystemTrayIcon.isSystemTrayAvailable():
         tray = QSystemTrayIcon(app)
@@ -154,8 +232,7 @@ def main():
         menu.addSeparator()
 
         def open_settings_page():
-            controller.openPage(9)
-            controller.expand()
+            controller.openSettingsView()
 
         settings_act = menu.addAction("⚙️ Pengaturan...")
         settings_act.triggered.connect(open_settings_page)

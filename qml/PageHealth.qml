@@ -41,10 +41,12 @@ Item {
                             height: 20
                             radius: 6
                             color: "#0369a1"
-                            Text {
+                            Image {
                                 anchors.centerIn: parent
-                                text: "💧"
-                                font.pixelSize: 10
+                                width: 11
+                                height: 11
+                                sourceSize: Qt.size(11, 11)
+                                source: "file://" + AppConfig.assetsDir + "/droplet.svg"
                             }
                         }
 
@@ -150,9 +152,11 @@ Item {
                                 id: drinkRow
                                 anchors.centerIn: parent
                                 spacing: 4
-                                Text {
-                                    text: "💧"
-                                    font.pixelSize: 9
+                                Image {
+                                    width: 10
+                                    height: 10
+                                    sourceSize: Qt.size(10, 10)
+                                    source: "file://" + AppConfig.assetsDir + "/droplet.svg"
                                 }
                                 Text {
                                     text: "Drink +" + IslandController.waterCupSize + "ml"
@@ -175,18 +179,29 @@ Item {
                         Rectangle {
                             height: 24
                             radius: 12
-                            implicitWidth: cupSetTxt.implicitWidth + 14
+                            implicitWidth: cupSetRow.implicitWidth + 14
                             color: cupSetMouse.containsMouse ? "#283248" : "#1c2233"
                             border.color: "#334155"
                             border.width: 1
 
-                            Text {
-                                id: cupSetTxt
+                            RowLayout {
+                                id: cupSetRow
                                 anchors.centerIn: parent
-                                text: "⚙ Gelas/Target"
-                                color: "#cbd5e1"
-                                font.pixelSize: 9
-                                font.weight: Font.DemiBold
+                                spacing: 4
+
+                                Image {
+                                    width: 10
+                                    height: 10
+                                    sourceSize: Qt.size(10, 10)
+                                    source: "file://" + AppConfig.assetsDir + "/settings.svg"
+                                }
+
+                                Text {
+                                    text: "Gelas/Target"
+                                    color: "#cbd5e1"
+                                    font.pixelSize: 9
+                                    font.weight: Font.DemiBold
+                                }
                             }
 
                             MouseArea {
@@ -214,12 +229,13 @@ Item {
                             border.color: "#334155"
                             border.width: 1
 
-                            Text {
+                            Image {
                                 anchors.centerIn: parent
-                                text: "↺"
-                                color: resetMouse.containsMouse ? "#f8fafc" : "#94a3b8"
-                                font.pixelSize: 11
-                                font.weight: Font.Bold
+                                width: 11
+                                height: 11
+                                sourceSize: Qt.size(11, 11)
+                                source: "file://" + AppConfig.assetsDir + "/refresh.svg"
+                                opacity: resetMouse.containsMouse ? 1.0 : 0.7
                             }
 
                             MouseArea {
@@ -404,10 +420,12 @@ Item {
                         color: "#065f46"
                         border.color: "#059669"
                         border.width: 1
-                        Text {
+                        Image {
                             anchors.centerIn: parent
-                            text: "👁️"
-                            font.pixelSize: 11
+                            width: 13
+                            height: 13
+                            sourceSize: Qt.size(13, 13)
+                            source: "file://" + AppConfig.assetsDir + "/eye.svg"
                         }
                     }
 
@@ -439,12 +457,13 @@ Item {
                         border.color: "#059669"
                         border.width: 1
 
-                        Text {
+                        Image {
                             anchors.centerIn: parent
-                            text: "↺"
-                            color: "#a7f3d0"
-                            font.pixelSize: 11
-                            font.weight: Font.Bold
+                            width: 11
+                            height: 11
+                            sourceSize: Qt.size(11, 11)
+                            source: "file://" + AppConfig.assetsDir + "/refresh.svg"
+                            opacity: eyeResetMouse.containsMouse ? 1.0 : 0.7
                         }
 
                         MouseArea {
@@ -477,10 +496,12 @@ Item {
                         color: IslandController.mascotMode ? "#075985" : "#1e293b"
                         border.color: IslandController.mascotMode ? "#38bdf8" : "#334155"
                         border.width: 1
-                        Text {
+                        Image {
                             anchors.centerIn: parent
-                            text: "👀"
-                            font.pixelSize: 11
+                            width: 13
+                            height: 13
+                            sourceSize: Qt.size(13, 13)
+                            source: "file://" + AppConfig.assetsDir + "/eye.svg"
                         }
                     }
 
