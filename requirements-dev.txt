@@ -1,0 +1,4 @@
+# Development and CI testing dependencies for NxSora
+-r requirements.txt
+pytest>=8.0.0
+ruff>=0.3.0
