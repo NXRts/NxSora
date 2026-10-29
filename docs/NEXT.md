@@ -208,7 +208,7 @@ Selain 10 modul di atas, hasil analisis menyeluruh terhadap tren aplikasi notch 
       - Masuk hari ini ➜ Tampil jam saja (`07:15`).
       - Masuk kemarin ➜ Tampil label relasional (`Kemarin, 21:30`).
       - Masuk hari-hari sebelumnya ➜ Tampil tanggal singkat (misal `27 Okt, 14:10`).
-    - [x] **Pembersihan Otomatis Saat Boot / Restart (Auto-Expire > 24–48 Jam)**:
+    - [x] **Pembersihan Otomatis Saat Boot / Restart (Auto-Expire > 48 Jam)**:
       - Menghapus otomatis riwayat yang berumur lebih dari batas kedaluwarsa saat aplikasi dijalankan, sehingga ketika PC dinyalakan ulang (**Autostart saat booting Linux maupun Windows di masa depan**), daftar notifikasi tidak dipenuhi sampah basi dari hari-hari yang lalu.
       - Opsi konfigurasi di `config.py` (`"notification_auto_expire_hours": 48`, `"persist_notifications": true`).
 
@@ -221,21 +221,21 @@ Selain 10 modul di atas, hasil analisis menyeluruh terhadap tren aplikasi notch 
 - [x] **1. Tampilan Repo & Kesan Pertama GitHub**
   - **GIF demo & struktur tangkapan layar**: panduan dan direktori terstruktur di `docs/screenshots/` (`README.md`).
   - **Badge** di bawah judul README: `KDE Plasma 6`, `Wayland`, `Python 3.11+`, `PyQt6 & QML`, `License GPL-3.0`, `CI Passing`, dan `AUR Package`.
-  - **Identitas NxSora**: Panduan identitas lengkap di `NXSORA.md` dan logo resmi di `assets/logo.svg`.
+  - **Identitas NxSora**: Panduan identitas lengkap di `docs/NXSORA.md` dan logo resmi di `assets/logo.svg`.
   - **Rilis bertag `v0.1.0`** dengan changelog (`CHANGELOG.md`) dan roadmap ringkas publik (`ROADMAP.md`).
 - [x] **2. Kemudahan Pemasangan (Installability)**
-  - **Paket AUR (`PKGBUILD`)**: direktori `packaging/aur/PKGBUILD` agar pengguna Arch/CachyOS cukup menjalankan `yay -S nxsora-git`.
+  - **Paket AUR (`PKGBUILD`)**: direktori `packaging/aur/PKGBUILD` agar pengguna Arch/CachyOS cukup menjalankan `yay -S nxsora-git` (atau `makepkg -si`).
   - **`install.sh` & `./run.sh --check`**: memeriksa dependensi (`PyQt6`, `layer-shell-qt`, `wpctl`, `bluetoothctl`, `powerprofilesctl`, `dbus-monitor`, `wl-copy`) dan sesi Wayland, mendaftarkan desktop entry dan autostart.
   - **Standarisasi path XDG**: konfigurasi → `$XDG_CONFIG_HOME/nxsora/`, cache → `$XDG_CACHE_HOME/nxsora/`, state/log → `$XDG_STATE_HOME/nxsora/`, dan runtime lock di `$XDG_RUNTIME_DIR/nxsora/`, disertai migrasi otomatis dari folder lama.
 - [x] **3. Fungsi Harian yang Paling Terasa (diprioritaskan dari fase lain)**
   - **Fullscreen Auto-Hide + System Tray Icon (`QSystemTrayIcon`)**: tray menu status di panel KDE Plasma dan auto-hide otomatis saat game/video fullscreen aktif.
   - **Halaman Pengaturan (`qml/PageSettings.qml`)**: Halaman ke-10 di Hub untuk sakelar per-HUD (Volume, Cas, Bluetooth, Caps Lock, Notifikasi), Fullscreen auto-hide, Privacy dots, dan Eye-tracking.
   - **Privacy Dots (kamera & mikrofon)**: titik indikator hijau (kamera) & oranye (mikrofon) saat PipeWire aktif merekam (`CompactIdle.qml` + `services/privacy.py`).
-  - **Deteksi hardware otomatis dengan fallback**: dukungan multi-sensor untuk Intel, AMD, dan NVIDIA (`nvidia-smi`), serta fallback aman tanpa crash jika sensor tidak ditemukan.
+  - **Deteksi hardware otomatis dengan fallback**: dukungan multi-sensor untuk Intel, AMD, dan NVIDIA (`nvidia-smi`), serta fallback aman bertanda `~` jika sensor tidak ditemukan.
 - [x] **4. Kualitas Kode & Kepercayaan**
   - **Unit test suite (`tests/`)**: 18 test otomatis mencakup parser lirik LRCLIB, pembersih HTML & normalisasi notifikasi, klasifikasi bluetooth, dan sistem telemetri.
-  - **GitHub Actions (`.github/workflows/ci.yml`)**: lint dengan **`ruff`** + jalankan tes otomatis pada setiap *push/PR* dengan Python 3.11 dan 3.12.
-  - **Ukur & dokumentasikan pemakaian sumber daya**: **0.0% CPU idle** dan **~85 MB RAM** didokumentasikan di `README.md`.
+  - **GitHub Actions (`.github/workflows/ci.yml`)**: lint dengan **`ruff`** + jalankan tes otomatis pada setiap *push/PR* dengan Python 3.11, 3.12, dan 3.13.
+  - **Ukur & dokumentasikan pemakaian sumber daya**: **<0.5% CPU idle** dan **~85 MB RAM** didokumentasikan di `README.md`.
   - **Privasi & keamanan data**: izin file **`0600`** (`-rw-------`) untuk semua data riwayat pengguna (`notifications.json`, `tasks.json`, dll.), serta **proteksi anti-simpan untuk Password Manager** (*KeePassXC, Bitwarden, 1Password, Proton Pass, Enpass*).
 - [x] **5. Dokumentasi & Komunitas**
   - File **`LICENSE`** (GPL-3.0), **`CONTRIBUTING.md`**, dan **templat issue GitHub** (`.github/ISSUE_TEMPLATE/`).
