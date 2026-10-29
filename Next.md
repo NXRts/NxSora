@@ -149,7 +149,7 @@ Selain 10 modul di atas, hasil analisis menyeluruh terhadap tren aplikasi notch 
 | **Privacy Dots (Cam / Mic In-Use)** | ❌ Belum | — | Deteksi node PipeWire aktif untuk menampilkan titik hijau (kamera) & oranye (mikrofon) ala iOS/macOS. |
 | **System Tray & Fullscreen Hide** | ❌ Belum | Daemon systemd / background via `run.sh`. | **`QSystemTrayIcon`** (menu konfigurasi cepat) & **Fullscreen App Auto-Hide** (sembunyi saat main game/video fullscreen). |
 | **Hardware, Suhu & TDP Monitor** | ✅ Selesai | **Processor TDP (`W` via `hwmon PPT`)**, **Suhu CPU (`k10temp`), GPU (`amdgpu`), & NVMe (`°C`)**, **Clock CPU (`GHz`)**, **GPU Load & VRAM**, **Top Process**, **Overheat HUD Alert (`≥85°C`)**, & **1-Click Power Profile Switcher** (`PageHardware.qml` + `services/system.py`). | Statistik riwayat suhu & kecepatan kipas (`RPM` jika tersedia). |
-| **Pusat Notifikasi & Pembaca Penuh** | ✅ Selesai | **Split View 40 Riwayat Notifikasi** (`PageNotifications.qml`), kategori dinamis, tombol **📋 Salin OTP**, mode **🔕 Do Not Disturb**, & lencana unread. | — |
+| **Pusat Notifikasi & Pembaca Penuh** | ✅ Selesai | **Split View 40 Riwayat Notifikasi** (`PageNotifications.qml`), kategori dinamis, tombol **📋 Salin OTP**, mode **🔕 Do Not Disturb**, lencana unread, **Smart Timestamp** (Hari ini / Kemarin), & **Auto-Expire (Pembersihan Sampah Basi >48 Jam)** saat PC boot/restart. | — |
 | **Jadwal Sholat & Azan (Sun Arc Trajectory)** | ❌ Belum | — | **Sun Arc Trajectory Curve** (busur posisi matahari bergerak & glowing next prayer), **10-Min Pre-Adzan Heads-Up** (`🌙 Maghrib 10 min`), **At Prayer Time Calm Popup** (`🌙 Maghrib It's time to pray 17:52`), kalkulasi lokal Kemenag RI / koordinat GPS offline, auto-pause musik, checklist 5 waktu, & fine-tune minutes. |
 | **Clipboard, Cuaca & Kamera** | ❌ Belum | — | **Clipboard History Manager**, **Live Weather & Day Progress Bar**, serta **Camera Mirror**. |
 | **Portabilitas Windows & `.exe` Installer** | ⏳ Sebagian | Seluruh UI/Animasi QML, Lirik (`LRCLIB`), Timer, Water, To-Do, File Shelf (`QDrag`), & statistik dasar (`psutil`) sudah *cross-platform*. | Adapter backend Windows (`sys.platform == "win32"` untuk SMTC Media, `pycaw` Audio, Bluetooth, WMI Thermal/Brightness) + bundel **`DynamicIsland-Setup.exe`** (**PyInstaller + Inno Setup**). |
@@ -203,6 +203,14 @@ Selain 10 modul di atas, hasil analisis menyeluruh terhadap tren aplikasi notch 
 - [x] **4. Pusat Notifikasi & Pembaca Pesan Penuh (`qml/PageNotifications.qml` + `qml/HudNotification.qml` + `services/notifications.py`)**
   - [x] **Split-View Notification Center**: Sisi kiri menampilkan daftar riwayat 40 notifikasi terakhir dengan lencana kategori otomatis (`💬 Chat`, `🎵 Media`, `⚡ Sistem/Suhu`, `🎯 Fokus`, `🌐 Browser`) dan indikator belum dibaca (*unread strip*); sisi kanan menampilkan **isi pesan penuh multi-baris** yang dapat di-*scroll*.
   - [x] **1-Click Copy (`📋 Salin`), Do Not Disturb (`🔕 DND`), & Unread Badge**: Menyalin isi notifikasi/OTP ke *Clipboard* (`wl-copy`), sakelar *Jangan Ganggu (DND)* agar notifikasi masuk tetap tersimpan tanpa memunculkan pop-up, tombol pintasan lonceng `🔔` ber-lencana di header Hub & kapsul tertutup, serta klik langsung pada pop-up `HudNotification` (`Baca ▸`) untuk membuka isi pesan penuh.
+  - [x] **Smart Notification Lifecycle & Auto-Expire (Sistem Pintar Notifikasi)**:
+    - [x] **Pencatatan Waktu Cerdas (Smart Timestamp)**: Simpan timestamp UNIX penuh (`timestamp`). Saat dirender di UI:
+      - Masuk hari ini ➜ Tampil jam saja (`07:15`).
+      - Masuk kemarin ➜ Tampil label relasional (`Kemarin, 21:30`).
+      - Masuk hari-hari sebelumnya ➜ Tampil tanggal singkat (misal `27 Okt, 14:10`).
+    - [x] **Pembersihan Otomatis Saat Boot / Restart (Auto-Expire > 24–48 Jam)**:
+      - Menghapus otomatis riwayat yang berumur lebih dari batas kedaluwarsa saat aplikasi dijalankan, sehingga ketika PC dinyalakan ulang (**Autostart saat booting Linux maupun Windows di masa depan**), daftar notifikasi tidak dipenuhi sampah basi dari hari-hari yang lalu.
+      - Opsi konfigurasi di `config.py` (`"notification_auto_expire_hours": 48`, `"persist_notifications": true`).
 
 ---
 
@@ -326,6 +334,7 @@ Selain 10 modul di atas, hasil analisis menyeluruh terhadap tren aplikasi notch 
   - **Audio, Mic Mute, Brightness & Caps Lock (`services/volume.py` & `services/hardware_hud.py`)**: Integrasi **`pycaw`** (Windows Core Audio API) untuk speaker/mikrofon, WMI / `screen-brightness-control` untuk kecerahan layar, dan `ctypes.windll.user32.GetKeyState(0x14)` untuk indikator Caps Lock.
   - **Bluetooth & TWS (`services/bluetooth.py`)**: Integrasi **`winsdk.windows.devices.bluetooth`** & PnP Device Properties untuk deteksi lepas-pasang TWS dan persentase baterai di Windows.
   - **Hardware, Suhu, TDP & Power Plan (`services/system.py`)**: Pembacaan suhu/daya via **WMI / LibreHardwareMonitor** serta pergantian mode daya via `powercfg /setactive` (*Power Saver / Balanced / High Performance*).
+  - **Pusat Notifikasi Windows (`services/notifications.py`)**: Integrasi **`Windows.UI.Notifications` (`UserNotificationListener` via `winsdk`)** untuk menangkap notifikasi Action Center Windows, pembersihan berkala, serta registrasi **Autostart saat Boot Windows** via Registry `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` atau folder `shell:startup`.
 - [ ] **3. Bundling `.exe` Mandiri & Installer Resmi (`DynamicIsland-Setup.exe`)**
   - Buat konfigurasi **`DynamicIsland.spec` (PyInstaller / Nuitka)** yang membungkus Python, PyQt6, seluruh QML, dan aset SVG ke dalam aplikasi `.exe` mandiri tanpa konsol (`--noconsole`) dan tanpa mengharuskan pengguna menginstal Python.
   - Buat skrip **Inno Setup (`installer/setup.iss`)** & GitHub Actions workflow untuk menghasilkan file installer **`DynamicIsland-Setup.exe`** siap sebar lengkap dengan shortcut Desktop/Start Menu, opsi *Run on Windows Startup*, dan menu *Uninstall* resmi.

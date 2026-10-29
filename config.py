@@ -40,6 +40,10 @@ CONFIG = {
     "auto_collapse_on_leave": True,          # Auto-close expanded hub when mouse leaves
     "auto_collapse_leave_timeout": 3500,     # Delay (ms) before closing after mouse leaves
     
+    # Notification Lifecycle & Storage
+    "persist_notifications": True,            # Simpan riwayat notifikasi ke disk
+    "notification_auto_expire_hours": 48,      # Otomatis hapus notifikasi lebih dari 48 jam (0 = nonaktif)
+    
     # Theme colors
     "bg_color": "#07070a",
     "border_color": "#26262e",

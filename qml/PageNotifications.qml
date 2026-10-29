@@ -49,13 +49,13 @@ Item {
 
     function previewTextFor(item) {
         if (!item) return "";
-        var appStr = String(item.app || "").trim();
-        var titleStr = String(item.title || "").trim();
         var bodyStr = String(item.body || "").trim().replace(/\n+/g, " ");
-        if (titleStr === "" || titleStr.toLowerCase() === appStr.toLowerCase()) {
-            return bodyStr !== "" ? bodyStr : titleStr;
+        var titleStr = String(item.title || "").trim();
+        // Selalu prioritaskan isi pesan asli agar pengguna bisa membaca pesan langsung di daftar
+        if (bodyStr !== "" && bodyStr.toLowerCase() !== titleStr.toLowerCase()) {
+            return bodyStr;
         }
-        return titleStr;
+        return titleStr !== "" ? titleStr : (bodyStr !== "" ? bodyStr : "Pesan baru");
     }
 
     RowLayout {
@@ -252,7 +252,14 @@ Item {
                                 Text {
                                     Layout.fillWidth: true
                                     Layout.minimumWidth: 0
-                                    text: String(modelData.app || "Sistem")
+                                    text: {
+                                        var a = String(modelData.app || "Sistem");
+                                        var t = String(modelData.title || "").trim();
+                                        if (t !== "" && t.toLowerCase() !== a.toLowerCase()) {
+                                            return a + " • " + t;
+                                        }
+                                        return a;
+                                    }
                                     color: catClr
                                     font.pixelSize: 9
                                     font.weight: Font.Bold
@@ -367,7 +374,15 @@ Item {
                         Text {
                             Layout.fillWidth: true
                             Layout.minimumWidth: 0
-                            text: root.hasItems ? String(root.currentItem.app || "Sistem") : "Pusat Notifikasi"
+                            text: {
+                                if (!root.hasItems) return "Pusat Notifikasi";
+                                var a = String(root.currentItem.app || "Sistem");
+                                var t = String(root.currentItem.title || "").trim();
+                                if (t !== "" && t.toLowerCase() !== a.toLowerCase()) {
+                                    return a + " — " + t;
+                                }
+                                return a;
+                            }
                             color: "#f8fafc"
                             font.pixelSize: 11
                             font.weight: Font.Bold
@@ -380,7 +395,11 @@ Item {
                             Layout.minimumWidth: 0
                             text: root.isDnd
                                   ? "🔕 Mode Jangan Ganggu Aktif"
-                                  : (root.hasItems ? ("Pukul " + String(root.currentItem.time || "--:--")) : "Tidak ada pesan")
+                                  : (root.hasItems 
+                                     ? (String(root.currentItem.time || "").indexOf(":") !== -1 && String(root.currentItem.time || "").indexOf(" ") === -1
+                                        ? ("Pukul " + String(root.currentItem.time))
+                                        : String(root.currentItem.time || "--:--"))
+                                     : "Tidak ada pesan")
                             color: root.isDnd ? "#f59e0b" : root.categoryColor(root.currentItem.category)
                             font.pixelSize: 9
                             font.weight: Font.DemiBold
@@ -507,13 +526,16 @@ Item {
                                     }
                                     var b = String(root.currentItem.body || "").trim();
                                     var t = String(root.currentItem.title || "").trim();
-                                    return b !== "" ? b : t;
+                                    if (b !== "" && b.toLowerCase() !== t.toLowerCase()) {
+                                        return b;
+                                    }
+                                    return b !== "" ? b : (t !== "" ? t : "Tidak ada pesan tambahan.");
                                 }
                                 color: "#f1f5f9"
                                 font.pixelSize: 11
-                                font.weight: root.hasDistinctTitle ? Font.Normal : Font.DemiBold
+                                font.weight: Font.Normal
                                 wrapMode: Text.WordWrap
-                                lineHeight: 1.28
+                                lineHeight: 1.34
                             }
                         }
 

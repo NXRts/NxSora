@@ -94,6 +94,7 @@ class IslandController(QObject):
         self._is_expanded = False
         self._previous_compact_state = "idle"
         self._active_hub_page = 0
+        self._test_notif_counter = 0
 
         # Notification data
         self._notif_app = ""
@@ -631,6 +632,7 @@ class IslandController(QObject):
     @pyqtSlot()
     def expandToNotifications(self):
         """Open Page 5 (Pusat Notifikasi) and select the latest notification."""
+        self.notifications.refresh_relative_times()
         self.notifications.select_notification(0)
         self._active_hub_page = 5
         self.activeHubPageChanged.emit(5)
@@ -647,6 +649,7 @@ class IslandController(QObject):
     def openHubPage(self, page_index):
         self._active_hub_page = max(0, min(page_index, 8))
         if self._active_hub_page == 5:
+            self.notifications.refresh_relative_times()
             self.notifications.select_notification(self.notifications.selected_index)
         self.activeHubPageChanged.emit(self._active_hub_page)
         self._set_state("expanded-hub")
@@ -708,10 +711,31 @@ class IslandController(QObject):
     # Test helpers
     @pyqtSlot()
     def triggerTestNotification(self):
-        self.notifications.trigger_test(
-            "Dynamic Island Aktif!",
-            "Semua sistem KDE Plasma 6 Wayland berfungsi normal."
-        )
+        samples = [
+            (
+                "WhatsApp",
+                "Budi Santoso",
+                "Halo bro! Dokumen laporan dan draft desain sudah saya kirim ya.\nTolong dicek dan kabari kalau ada revisi 🙏",
+            ),
+            (
+                "WhatsApp",
+                "Kode Keamanan",
+                "Kode verifikasi WhatsApp Anda: 492-817. Jangan bagikan kode ini kepada siapa pun demi keamanan akun.",
+            ),
+            (
+                "Telegram",
+                "Linux Dev Community",
+                "Rilis kernel 6.13 kini telah tersedia dengan optimasi scheduler BORE dan gaming latency ultra-rendah.",
+            ),
+            (
+                "NxSora",
+                "Sistem Siap 🚀",
+                "Pusat Notifikasi Cerdas aktif. Semua modul KDE Plasma 6 Wayland berfungsi normal.",
+            ),
+        ]
+        app_name, title, body = samples[self._test_notif_counter % len(samples)]
+        self._test_notif_counter += 1
+        self.notifications.trigger_test(title=title, body=body, app_name=app_name)
 
     # Quick System Utilities
     @pyqtSlot()
