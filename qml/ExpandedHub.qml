@@ -69,11 +69,11 @@ Item {
             Layout.fillWidth: true
             spacing: 10
 
-            // Top Left Action Capsule (Always fixed at 62px so the Title position NEVER shifts!)
+            // Top Left Action Capsule (Smoothly adapts between 62px [ < | > ] and 76px [ ‹ Kembali ])
             Rectangle {
                 id: navCapsule
-                width: 62
-                height: 28
+                Layout.preferredWidth: root.isSettingsOpen ? 76 : 62
+                Layout.preferredHeight: 28
                 radius: 14
                 color: (root.isSettingsOpen && backMouse.containsMouse)
                        ? "#282a3d"
@@ -82,6 +82,10 @@ Item {
                               ? "#38bdf8"
                               : "#282b3d"
                 border.width: 1
+
+                Behavior on Layout.preferredWidth {
+                    NumberAnimation { duration: 150; easing.type: Easing.OutQuad }
+                }
 
                 // 1. Navigation Arrows (< >) when Settings is closed
                 RowLayout {
@@ -141,21 +145,23 @@ Item {
                     }
                 }
 
-                // 2. [ ‹ Kembali ] Button when Settings is open (Fixed at 62px, 0 shift!)
+                // 2. [ ‹ Kembali ] Button when Settings is open (Well-padded, zero cramped text!)
                 RowLayout {
                     anchors.centerIn: parent
-                    spacing: 3
+                    spacing: 4
                     visible: root.isSettingsOpen
 
                     Image {
-                        width: 11
-                        height: 11
+                        width: 10
+                        height: 10
+                        sourceSize: Qt.size(10, 10)
                         source: "file://" + AppConfig.assetsDir + "/chevron-left.svg"
+                        opacity: backMouse.containsMouse ? 1.0 : 0.8
                     }
 
                     Text {
                         text: "Kembali"
-                        color: "#f8fafc"
+                        color: backMouse.containsMouse ? "#38bdf8" : "#f8fafc"
                         font.pixelSize: 10
                         font.weight: Font.DemiBold
                     }
@@ -171,10 +177,10 @@ Item {
                 }
             }
 
-            // Title & Indicator Dots (Starts at exact same horizontal position as main menu!)
+            // Title & Indicator Dots / Subtitle (Rock solid baseline, perfectly aligned)
             ColumnLayout {
                 Layout.alignment: Qt.AlignVCenter
-                spacing: 3
+                spacing: 2
 
                 Text {
                     text: root.isSettingsOpen ? "Pengaturan" : (root.pageTitles[pageContainer.currentIndex] || "Control Hub")
@@ -217,22 +223,13 @@ Item {
                     }
                 }
 
-                // Subtitle badge when in Settings (Compact & perfectly balanced)
-                RowLayout {
+                // Clean, elegant subtitle when in Settings (No jarring bullet dots or neon text!)
+                Text {
                     visible: root.isSettingsOpen
-                    spacing: 4
-                    Rectangle {
-                        width: 4
-                        height: 4
-                        radius: 2
-                        color: "#38bdf8"
-                    }
-                    Text {
-                        text: "Preferensi Island"
-                        color: "#38bdf8"
-                        font.pixelSize: 9
-                        font.weight: Font.DemiBold
-                    }
+                    text: "Preferensi Island"
+                    color: "#64748b"
+                    font.pixelSize: 9
+                    font.weight: Font.Normal
                 }
             }
 
