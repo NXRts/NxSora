@@ -16,6 +16,8 @@ CUP_PRESETS = [150, 200, 250, 350, 500]
 GOAL_PRESETS = [1500, 2000, 2500, 3000]
 
 
+import config
+
 class HealthService(QObject):
     waterChanged = pyqtSignal()
     eyeBreakChanged = pyqtSignal()
@@ -24,9 +26,7 @@ class HealthService(QObject):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self._config_dir = os.path.expanduser("~/.config/dynamic_island")
-        self._config_file = os.path.join(self._config_dir, "health.json")
-        os.makedirs(self._config_dir, exist_ok=True)
+        self._config_file = str(config.CONFIG_DIR / "health.json")
 
         self._water_intake = 1250
         self._water_goal = 2000
@@ -78,18 +78,14 @@ class HealthService(QObject):
                 print(f"[HealthService] Error loading health.json: {e}")
 
     def _save_data(self):
-        try:
-            payload = {
-                "date": str(date.today()),
-                "water_intake": self._water_intake,
-                "water_goal": self._water_goal,
-                "water_cup_size": self._water_cup_size,
-                "hourly_history": self._hourly_history,
-            }
-            with open(self._config_file, "w", encoding="utf-8") as f:
-                json.dump(payload, f, indent=2)
-        except Exception as e:
-            print(f"[HealthService] Error saving health.json: {e}")
+        payload = {
+            "date": str(date.today()),
+            "water_intake": self._water_intake,
+            "water_goal": self._water_goal,
+            "water_cup_size": self._water_cup_size,
+            "hourly_history": self._hourly_history,
+        }
+        config.safe_write_private_json(self._config_file, payload)
 
     def _current_bucket_index(self) -> int:
         hour = datetime.now().hour

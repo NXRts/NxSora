@@ -112,6 +112,45 @@ Item {
             font.family: "Inter, Noto Sans, sans-serif"
         }
 
+        // Privacy Indicators (Fase 3): Green Dot (Camera), Orange Dot (Microphone)
+        Row {
+            spacing: 3
+            Layout.alignment: Qt.AlignVCenter
+            visible: (IslandController.camInUse || IslandController.micInUse)
+
+            // Green Dot: Camera In-Use
+            Rectangle {
+                width: 5
+                height: 5
+                radius: 2.5
+                color: "#22c55e"
+                visible: IslandController.camInUse
+
+                SequentialAnimation on opacity {
+                    running: IslandController.camInUse
+                    loops: Animation.Infinite
+                    NumberAnimation { from: 1.0; to: 0.4; duration: 600 }
+                    NumberAnimation { from: 0.4; to: 1.0; duration: 600 }
+                }
+            }
+
+            // Orange Dot: Microphone In-Use
+            Rectangle {
+                width: 5
+                height: 5
+                radius: 2.5
+                color: "#f97316"
+                visible: IslandController.micInUse
+
+                SequentialAnimation on opacity {
+                    running: IslandController.micInUse
+                    loops: Animation.Infinite
+                    NumberAnimation { from: 1.0; to: 0.4; duration: 600 }
+                    NumberAnimation { from: 0.4; to: 1.0; duration: 600 }
+                }
+            }
+        }
+
         // RIGHT: Mini Sound Wave (when music/timer active) OR Battery % / High Temp
         Row {
             spacing: 2

@@ -91,9 +91,14 @@ class NotificationService(QObject):
 
     MAX_HISTORY = 40
 
+    PASSWORD_MANAGER_APPS = (
+        "keepassxc", "keepass", "bitwarden", "1password", "proton pass",
+        "protonpass", "enpass", "authpass", "lastpass", "dashlane", "nordpass"
+    )
+
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._storage_path = os.path.expanduser("~/.config/dynamic-island/notifications.json")
+        self._storage_path = str(config.CONFIG_DIR / "notifications.json")
         self.history = []
         self.dnd_enabled = False
         self.selected_index = 0
@@ -140,7 +145,7 @@ class NotificationService(QObject):
 
         # WhatsApp detection (from Chrome/Firefox web, Electron apps, or KDE Connect)
         if "whatsapp" in combined_header or "whatsapp" in msg[:40].lower():
-            if any(b in app.lower() for b in ("chrome", "firefox", "brave", "chromium", "zen", "edge", "kde connect", "kdeconnect")):
+            if "whatsapp" in app.lower() or any(b in app.lower() for b in ("chrome", "firefox", "brave", "chromium", "zen", "edge", "kde connect", "kdeconnect")):
                 app = "WhatsApp"
 
             # Clean title: e.g. "WhatsApp • Budi Santoso" -> "Budi Santoso"
@@ -277,20 +282,11 @@ class NotificationService(QObject):
             self._save_history()
 
     def _save_history(self):
-        try:
-            os.makedirs(os.path.dirname(self._storage_path), exist_ok=True)
-            with open(self._storage_path, "w", encoding="utf-8") as f:
-                json.dump(
-                    {
-                        "dnd_enabled": self.dnd_enabled,
-                        "items": self.history[: self.MAX_HISTORY],
-                    },
-                    f,
-                    ensure_ascii=False,
-                    indent=2,
-                )
-        except Exception as e:
-            print(f"[Notifications] Save history warning: {e}")
+        payload = {
+            "dnd_enabled": self.dnd_enabled,
+            "items": self.history[: self.MAX_HISTORY],
+        }
+        config.safe_write_private_json(self._storage_path, payload)
 
     @property
     def unread_count(self) -> int:
@@ -320,6 +316,12 @@ class NotificationService(QObject):
         clean_app, clean_title, clean_body = self._normalize_chat_notification(
             clean_app, clean_title, clean_body
         )
+
+        # Privacy & Data Security: Do not store or process credentials/tokens from password managers
+        lowered_source = f"{clean_app} {clean_title}".lower()
+        if any(pm in lowered_source for pm in self.PASSWORD_MANAGER_APPS):
+            print(f"[Notifications] Privacy guard: Ignored notification from password manager ({clean_app})")
+            return
 
         # Deduplicate identical notifications within 1.5 seconds
         now_ts = datetime.now().timestamp()
