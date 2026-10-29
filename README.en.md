@@ -22,10 +22,6 @@
   <a href="README.md"><strong>Bahasa Indonesia</strong></a> | <a href="README.en.md"><strong>English</strong></a>
 </p>
 
-<p align="center">
-  <img src="docs/screenshots/01-expanded-hub.png" alt="NxSora Expanded Hub Preview" width="620" />
-</p>
-
 ---
 
 ## 🧭 Document Navigation
