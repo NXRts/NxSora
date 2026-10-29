@@ -29,7 +29,6 @@
 - 📜 **Catatan Rilis**: [`CHANGELOG.md`](CHANGELOG.md) — Riwayat versi dan perubahan rilis `v0.1.0`.
 - 🤝 **Panduan Kontribusi**: [`CONTRIBUTING.md`](CONTRIBUTING.md) — Standar kontribusi, testing, dan pull request.
 - 🌌 **Spesifikasi & Filosofi**: [`docs/NXSORA.md`](docs/NXSORA.md) — Asal-usul nama, bahasa desain Neo-Sora, dan palet warna.
-- 🔬 **Master Plan Detail**: [`docs/NEXT.md`](docs/NEXT.md) — Analisis arsitektur dan komparasi ekosistem dynamic island.
 - 📖 **Panduan Penggunaan**: [`docs/TUTORIAL.md`](docs/TUTORIAL.md) — Navigasi gestur, klik, dan pintasan keyboard.
 
 ---

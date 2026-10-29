@@ -29,7 +29,6 @@
 - 📜 **Changelog**: [`CHANGELOG.md`](CHANGELOG.md) — Release notes and version history for `v0.1.0`.
 - 🤝 **Contributing**: [`CONTRIBUTING.md`](CONTRIBUTING.md) — Development guidelines, tests, and pull request workflow.
 - 🌌 **Design & Philosophy**: [`docs/NXSORA.md`](docs/NXSORA.md) — Identity origin, Neo-Sora design language, and color palette.
-- 🔬 **Master Plan & Architecture**: [`docs/NEXT.md`](docs/NEXT.md) — In-depth architectural analysis and dynamic island ecosystem comparison.
 - 📖 **User Tutorial**: [`docs/TUTORIAL.md`](docs/TUTORIAL.md) — Gestures, navigation, and keyboard shortcuts.
 
 ---
