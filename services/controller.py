@@ -16,6 +16,7 @@ from services.shelf import ShelfService
 from services.bluetooth import BluetoothService
 from services.hardware_hud import HardwareHudService
 from services.privacy import PrivacyService
+from services.network import NetworkService
 from PyQt6.QtCore import QVariant
 import config
 
@@ -70,6 +71,7 @@ class IslandController(QObject):
     privacyChanged = pyqtSignal()
     fullscreenChanged = pyqtSignal(bool)
     settingsChanged = pyqtSignal()
+    isSettingsViewOpenChanged = pyqtSignal(bool)
 
     # Mascot & Pin mode
     mascotModeChanged = pyqtSignal(bool)
@@ -91,10 +93,12 @@ class IslandController(QObject):
         self.bluetooth = BluetoothService(self)
         self.hw_hud = HardwareHudService(self)
         self.privacy = PrivacyService(self)
+        self.network = NetworkService(self)
 
         # Mascot mode toggle (Resting Eyes vs Digital Clock)
         self._mascot_mode = False
         self._is_pinned = False
+        self._is_settings_view_open = False
         self._low_battery_nudged = False
 
         # Island UI State:
@@ -156,6 +160,9 @@ class IslandController(QObject):
         self.privacy.micInUseChanged.connect(lambda _: self.privacyChanged.emit())
         self.privacy.camInUseChanged.connect(lambda _: self.privacyChanged.emit())
         self.privacy.fullscreenActiveChanged.connect(self._on_fullscreen_changed)
+
+        self.network.networkChanged.connect(lambda: self.networkChanged.emit())
+        self.network.networkPeekTriggered.connect(self._on_network_peek)
 
         # Initial state setup
         if self.mpris.status in ("Playing", "Paused") and self.mpris.title:
@@ -220,11 +227,20 @@ class IslandController(QObject):
         if not plugged and pct <= 20 and not self._low_battery_nudged:
             self._low_battery_nudged = True
             self.notifications.trigger_test(
-                f"🔋 Baterai Lemah ({int(round(pct))}%)",
-                "Daya baterai laptop hampir habis. Anda dapat mengaktifkan Mode Hemat Daya di Pengaturan."
+                f"Baterai Lemah ({int(round(pct))}%)",
+                "Daya baterai laptop hampir habis. Segera sambungkan charger atau aktifkan Mode Hemat Daya."
             )
+            if not self._is_expanded and config.CONFIG.get("hud_battery_enabled", True):
+                self._set_state("hud-battery")
+                self._hud_timer.start(5000)
         elif plugged or pct > 25:
             self._low_battery_nudged = False
+
+    def _on_network_peek(self, ssid, connected, signal_pct, net_type):
+        self.networkChanged.emit()
+        if not self._is_expanded and config.CONFIG.get("hud_network_enabled", True):
+            self._set_state("hud-network")
+            self._hud_timer.start(3500)
 
     def _on_power_plugged_event(self, plugged, pct):
         self.batteryChanged.emit()
@@ -637,6 +653,9 @@ class IslandController(QObject):
     @pyqtSlot()
     def collapse(self):
         self._hud_timer.stop()
+        if self._is_settings_view_open:
+            self._is_settings_view_open = False
+            self.isSettingsViewOpenChanged.emit(False)
         if self.mpris.status == "Playing" or (self.mpris.title and self.mpris.status == "Paused"):
             self._set_state("music")
         else:
@@ -785,6 +804,57 @@ class IslandController(QObject):
     @pyqtSlot()
     def openSettings(self):
         self.system.open_settings()
+
+    # --- Dedicated Separate In-App Settings View ---
+    @pyqtProperty(bool, notify=isSettingsViewOpenChanged)
+    def isSettingsViewOpen(self):
+        return self._is_settings_view_open
+
+    @pyqtSlot()
+    def openSettingsView(self):
+        self._is_settings_view_open = True
+        self.isSettingsViewOpenChanged.emit(True)
+        self.expandHub()
+
+    @pyqtSlot()
+    def closeSettingsView(self):
+        if self._is_settings_view_open:
+            self._is_settings_view_open = False
+            self.isSettingsViewOpenChanged.emit(False)
+
+    @pyqtSlot()
+    def toggleSettingsView(self):
+        self._is_settings_view_open = not self._is_settings_view_open
+        self.isSettingsViewOpenChanged.emit(self._is_settings_view_open)
+        if self._is_settings_view_open and not self._is_expanded:
+            self.expandHub()
+
+    # --- Network / Wi-Fi Peek Properties & Slots ---
+    @pyqtProperty(str, notify=networkChanged)
+    def networkSsid(self):
+        return self.network.ssid
+
+    @pyqtProperty(bool, notify=networkChanged)
+    def networkConnected(self):
+        return self.network.connected
+
+    @pyqtProperty(int, notify=networkChanged)
+    def networkSignal(self):
+        return self.network.signalPercent
+
+    @pyqtProperty(str, notify=networkChanged)
+    def networkType(self):
+        return self.network.netType
+
+    @pyqtSlot()
+    def triggerWifiPeekDemo(self):
+        self.network.trigger_demo()
+
+    @pyqtSlot()
+    def triggerLowBatteryDemo(self):
+        if not self._is_expanded:
+            self._set_state("hud-battery")
+            self._hud_timer.start(5000)
 
     @pyqtSlot()
     def toggleNightLight(self):

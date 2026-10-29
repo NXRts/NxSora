@@ -7,7 +7,7 @@ Item {
     implicitWidth: 420
     implicitHeight: 245
 
-    // Current page titles (10 pages)
+    // 9 Main Swipeable Module Pages (Settings is separated into its own view)
     readonly property var pageTitles: [
         "Sistem & Pomodoro Fokus",
         IslandController.lyricsModeActive ? "Musik & Lirik Karaoke" : "Pemutar Musik",
@@ -17,9 +17,10 @@ Item {
         "Pusat Notifikasi",
         "Kesehatan & Air",
         "Daftar Tugas (To-Do)",
-        "Rak File (Shelf)",
-        "Pengaturan & Personalisasi"
+        "Rak File (Shelf)"
     ]
+
+    readonly property bool isSettingsOpen: IslandController.isSettingsViewOpen
 
     function jumpToPageInstant(idx) {
         if (!pageContainer) return;
@@ -68,9 +69,10 @@ Item {
             Layout.fillWidth: true
             spacing: 10
 
-            // Navigation Arrows Capsule (< >)
+            // Navigation Arrows Capsule (< >) when Settings is closed
             Rectangle {
                 id: navCapsule
+                visible: !root.isSettingsOpen
                 width: 62
                 height: 28
                 radius: 14
@@ -135,20 +137,60 @@ Item {
                 }
             }
 
+            // Dedicated Back Button [ ← Kembali ] when Settings is open
+            Rectangle {
+                id: backCapsule
+                visible: root.isSettingsOpen
+                width: backRow.implicitWidth + 18
+                height: 28
+                radius: 14
+                color: backMouse.containsMouse ? "#282a3d" : "#181a26"
+                border.color: backMouse.containsMouse ? "#38bdf8" : "#282b3d"
+                border.width: 1
+
+                RowLayout {
+                    id: backRow
+                    anchors.centerIn: parent
+                    spacing: 6
+
+                    Image {
+                        width: 11
+                        height: 11
+                        source: "file://" + AppConfig.assetsDir + "/chevron-left.svg"
+                    }
+
+                    Text {
+                        text: "Kembali"
+                        color: "#f8fafc"
+                        font.pixelSize: 11
+                        font.weight: Font.DemiBold
+                    }
+                }
+
+                MouseArea {
+                    id: backMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: IslandController.closeSettingsView()
+                }
+            }
+
             // Title & Indicator Dots
             ColumnLayout {
                 Layout.alignment: Qt.AlignVCenter
                 spacing: 3
 
                 Text {
-                    text: root.pageTitles[pageContainer.currentIndex] || "Control Hub"
+                    text: root.isSettingsOpen ? "Pengaturan & Preferensi" : (root.pageTitles[pageContainer.currentIndex] || "Control Hub")
                     color: "#f8fafc"
                     font.pixelSize: 12
                     font.weight: Font.Bold
                 }
 
-                // Interactive Page Dots (7 pages)
+                // Interactive Page Dots (9 main pages)
                 Row {
+                    visible: !root.isSettingsOpen
                     spacing: 4
                     Repeater {
                         model: pageContainer.count
@@ -177,6 +219,24 @@ Item {
                                 }
                             }
                         }
+                    }
+                }
+
+                // Mode badge when in Settings
+                RowLayout {
+                    visible: root.isSettingsOpen
+                    spacing: 4
+                    Rectangle {
+                        width: 4
+                        height: 4
+                        radius: 2
+                        color: "#38bdf8"
+                    }
+                    Text {
+                        text: "Menu Konfigurasi Terpisah"
+                        color: "#38bdf8"
+                        font.pixelSize: 9
+                        font.weight: Font.DemiBold
                     }
                 }
             }
@@ -272,21 +332,21 @@ Item {
                     }
                 }
 
-                // Settings Button (⚙️ jump to Page 10)
+                // Settings Button (⚙️ toggle separate Settings View)
                 Rectangle {
                     width: 28
                     height: 28
                     radius: 14
-                    color: pageContainer.currentIndex === 9 ? "#1e293b" : (settingsHdrMouse.containsMouse ? "#2d2d3a" : "#181a24")
-                    border.color: pageContainer.currentIndex === 9 ? "#38bdf8" : (settingsHdrMouse.containsMouse ? "#3b3b4a" : "#282a36")
-                    border.width: pageContainer.currentIndex === 9 ? 1.5 : 1
+                    color: root.isSettingsOpen ? "#1e293b" : (settingsHdrMouse.containsMouse ? "#2d2d3a" : "#181a24")
+                    border.color: root.isSettingsOpen ? "#38bdf8" : (settingsHdrMouse.containsMouse ? "#3b3b4a" : "#282a36")
+                    border.width: root.isSettingsOpen ? 1.5 : 1
 
                     Image {
                         anchors.centerIn: parent
                         width: 12
                         height: 12
                         source: "file://" + AppConfig.assetsDir + "/settings.svg"
-                        opacity: pageContainer.currentIndex === 9 ? 1.0 : (settingsHdrMouse.containsMouse ? 0.9 : 0.6)
+                        opacity: root.isSettingsOpen ? 1.0 : (settingsHdrMouse.containsMouse ? 0.9 : 0.6)
                     }
 
                     MouseArea {
@@ -294,12 +354,7 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            if (pageContainer.currentIndex !== 9) {
-                                var dir = (9 > pageContainer.currentIndex) ? 1 : -1;
-                                pageContainer.goTo(9, dir);
-                            }
-                        }
+                        onClicked: IslandController.toggleSettingsView()
                     }
                 }
 
@@ -331,24 +386,31 @@ Item {
         }
 
         // =====================================================================
-        // BODY: DIRECTIONAL CAROUSEL CONTAINER (7 PAGES) + SWIPE GESTURE
+        // BODY: DIRECTIONAL CAROUSEL CONTAINER (9 MAIN PAGES) + SWIPE GESTURE
         // =====================================================================
         Item {
             id: pageContainer
+            visible: !root.isSettingsOpen
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
 
             property int currentIndex: IslandController.activeHubPage
-            readonly property int count: 10
-            readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageBluetooth, pageNotifications, pageHealth, pageTodo, pageShelf, pageSettings]
+            readonly property int count: 9
+            readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageBluetooth, pageNotifications, pageHealth, pageTodo, pageShelf]
             readonly property bool isChildSliderActive: seekMouseArea.pressed || seekMouseArea.isDragging || hubVolBarMouse.pressed || lyricsVolMouse.pressed || brightnessSliderMouse.pressed || pageShelf.isCardPressed
 
             // Allow keyboard Left/Right arrow navigation & Esc to close
-            focus: true
+            focus: !root.isSettingsOpen
             Keys.onLeftPressed: root.goToPrevPage()
             Keys.onRightPressed: root.goToNextPage()
-            Keys.onEscapePressed: IslandController.collapse()
+            Keys.onEscapePressed: {
+                if (root.isSettingsOpen) {
+                    IslandController.closeSettingsView();
+                } else {
+                    IslandController.collapse();
+                }
+            }
 
             // Cooldown timer for touchpad / mouse wheel horizontal page swiping
             Timer {
@@ -1942,7 +2004,7 @@ Item {
                                 ColumnLayout {
                                     spacing: 0
                                     Text { text: "Pengaturan"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
-                                    Text { text: "KDE Settings"; color: "#64748b"; font.pixelSize: 9 }
+                                    Text { text: "Preferensi NxSora"; color: "#64748b"; font.pixelSize: 9 }
                                 }
                             }
 
@@ -1951,9 +2013,14 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    IslandController.collapse()
-                                    IslandController.openSettings()
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                onClicked: (mouse) => {
+                                    if (mouse.button === Qt.RightButton) {
+                                        IslandController.collapse()
+                                        IslandController.openSettings()
+                                    } else {
+                                        IslandController.openSettingsView()
+                                    }
                                 }
                             }
                         }
@@ -2069,15 +2136,24 @@ Item {
                 height: pageContainer.height
                 y: 0
             }
+        }
 
-            // -----------------------------------------------------------------
-            // PAGE 10: PENGATURAN & PERSONALISASI (FASE 3)
-            // -----------------------------------------------------------------
+        // =====================================================================
+        // DEDICATED SEPARATE SETTINGS VIEW (Completely isolated from carousel)
+        // =====================================================================
+        Item {
+            id: settingsContainer
+            visible: root.isSettingsOpen
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            clip: true
+
+            focus: root.isSettingsOpen
+            Keys.onEscapePressed: IslandController.closeSettingsView()
+
             PageSettings {
                 id: pageSettings
-                width: pageContainer.width
-                height: pageContainer.height
-                y: 0
+                anchors.fill: parent
             }
         }
     }

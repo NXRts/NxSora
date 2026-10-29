@@ -128,6 +128,7 @@ Item {
             case "hud-hardware": return 250;
             case "hud-battery": return 310;
             case "hud-bluetooth": return 310;
+            case "hud-network": return 310;
             case "hud-notification": return 330;
             case "expanded-music":
                 return IslandController.lyricsModeActive ? 520 : 420;
@@ -148,6 +149,7 @@ Item {
             case "hud-hardware": return 36;
             case "hud-battery": return 60;
             case "hud-bluetooth": return 60;
+            case "hud-network": return 60;
             case "hud-notification": return 56;
             case "expanded-music": return 245;
             case "expanded-hub": return 245;
@@ -159,7 +161,8 @@ Item {
         if (IslandController.isExpanded
                 || IslandController.state === "hud-notification"
                 || IslandController.state === "hud-battery"
-                || IslandController.state === "hud-bluetooth") {
+                || IslandController.state === "hud-bluetooth"
+                || IslandController.state === "hud-network") {
             return 20;
         }
         return targetHeight / 2;
@@ -449,7 +452,15 @@ Item {
             Behavior on opacity { NumberAnimation { duration: 180 } }
         }
 
-        // 4C. HUD Hardware (Brightness, Caps Lock, Mic Mute - 250x36px)
+        // 4C. HUD Network / Wi-Fi Peek (310x60px)
+        HudNetwork {
+            anchors.fill: parent
+            visible: opacity > 0
+            opacity: IslandController.state === "hud-network" ? 1.0 : 0.0
+            Behavior on opacity { NumberAnimation { duration: 180 } }
+        }
+
+        // 4D. HUD Hardware (Brightness, Caps Lock, Mic Mute - 250x36px)
         HudHardware {
             anchors.fill: parent
             visible: opacity > 0
