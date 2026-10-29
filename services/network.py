@@ -182,3 +182,4 @@ class NetworkService(QObject):
             self.check_status(emit_peek=False)
 
         QTimer.singleShot(5000, restore)
+

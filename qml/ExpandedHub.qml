@@ -69,20 +69,25 @@ Item {
             Layout.fillWidth: true
             spacing: 10
 
-            // Navigation Arrows Capsule (< >) when Settings is closed
+            // Top Left Action Capsule (Always fixed at 62px so the Title position NEVER shifts!)
             Rectangle {
                 id: navCapsule
-                visible: !root.isSettingsOpen
                 width: 62
                 height: 28
                 radius: 14
-                color: "#181a26"
-                border.color: "#282b3d"
+                color: (root.isSettingsOpen && backMouse.containsMouse)
+                       ? "#282a3d"
+                       : "#181a26"
+                border.color: (root.isSettingsOpen && backMouse.containsMouse)
+                              ? "#38bdf8"
+                              : "#282b3d"
                 border.width: 1
 
+                // 1. Navigation Arrows (< >) when Settings is closed
                 RowLayout {
                     anchors.fill: parent
                     spacing: 0
+                    visible: !root.isSettingsOpen
 
                     // < Button
                     Item {
@@ -135,23 +140,12 @@ Item {
                         }
                     }
                 }
-            }
 
-            // Dedicated Back Button [ ← Kembali ] when Settings is open
-            Rectangle {
-                id: backCapsule
-                visible: root.isSettingsOpen
-                width: backRow.implicitWidth + 18
-                height: 28
-                radius: 14
-                color: backMouse.containsMouse ? "#282a3d" : "#181a26"
-                border.color: backMouse.containsMouse ? "#38bdf8" : "#282b3d"
-                border.width: 1
-
+                // 2. [ ‹ Kembali ] Button when Settings is open (Fixed at 62px, 0 shift!)
                 RowLayout {
-                    id: backRow
                     anchors.centerIn: parent
-                    spacing: 6
+                    spacing: 3
+                    visible: root.isSettingsOpen
 
                     Image {
                         width: 11
@@ -162,7 +156,7 @@ Item {
                     Text {
                         text: "Kembali"
                         color: "#f8fafc"
-                        font.pixelSize: 11
+                        font.pixelSize: 10
                         font.weight: Font.DemiBold
                     }
                 }
@@ -170,19 +164,20 @@ Item {
                 MouseArea {
                     id: backMouse
                     anchors.fill: parent
+                    enabled: root.isSettingsOpen
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: IslandController.closeSettingsView()
                 }
             }
 
-            // Title & Indicator Dots
+            // Title & Indicator Dots (Starts at exact same horizontal position as main menu!)
             ColumnLayout {
                 Layout.alignment: Qt.AlignVCenter
                 spacing: 3
 
                 Text {
-                    text: root.isSettingsOpen ? "Pengaturan & Preferensi" : (root.pageTitles[pageContainer.currentIndex] || "Control Hub")
+                    text: root.isSettingsOpen ? "Pengaturan" : (root.pageTitles[pageContainer.currentIndex] || "Control Hub")
                     color: "#f8fafc"
                     font.pixelSize: 12
                     font.weight: Font.Bold
@@ -222,7 +217,7 @@ Item {
                     }
                 }
 
-                // Mode badge when in Settings
+                // Subtitle badge when in Settings (Compact & perfectly balanced)
                 RowLayout {
                     visible: root.isSettingsOpen
                     spacing: 4
@@ -233,7 +228,7 @@ Item {
                         color: "#38bdf8"
                     }
                     Text {
-                        text: "Menu Konfigurasi Terpisah"
+                        text: "Preferensi Island"
                         color: "#38bdf8"
                         font.pixelSize: 9
                         font.weight: Font.DemiBold
