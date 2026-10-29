@@ -23,10 +23,14 @@ Semua perubahan dan catatan rilis pada projek **NxSora** didokumentasikan di sin
 - **Fullscreen Auto-Hide**: Otomatis menyembunyikan notch saat aplikasi/game fullscreen aktif.
 - **Privacy Dots**: Titik indikator oranye (mikrofon) dan hijau (kamera) saat PipeWire sedang menangkap audio/video.
 - **Mascot Eye-Tracking**: Mata maskot melirik halus mengikuti arah kursor mouse.
+- **Wi-Fi & Network Auto-Peek**: Kapsul pop-up dinamis `310x60px` saat tersambung atau terputus dari SSID Wi-Fi.
+- **Smart Low-Battery Nudge**: Peringatan otomatis saat baterai laptop `<= 20%` dengan tombol aksi 1-klik "🍃 Hemat Daya".
+- **Halaman Pengaturan Terpisah**: Menu Pengaturan independen di luar carousel geser 9 halaman dengan tombol navigasi `‹ Kembali` adaptif (76px) dan sakelar terpadu per-fitur.
+- **Global D-Bus CLI**: Registrasi layanan D-Bus `org.nxsora.Island` dan CLI action flags (`--toggle`, `--settings`, dll.).
 
 ### 🛠️ Kualitas & Pemasangan
 - **Paket AUR (`PKGBUILD`)**: Dukungan instalasi praktis di Arch Linux dan CachyOS via `yay -S nxsora-git`.
 - **Skrip Pemasangan (`install.sh`)**: Pengecekan dependensi dan pendaftaran desktop entry / autostart.
-- **Unit Tests Suite (`tests/`)**: Tes otomatis untuk parser lirik, notifikasi, bluetooth, dan sistem telemetri.
-- **GitHub Actions CI**: Alur otomatisasi pengujian sintaks (`ruff`) dan fungsionalitas (`pytest`) pada Python 3.11 dan 3.12.
+- **Unit Tests Suite (`tests/`)**: 21 tes otomatis mencakup parser lirik, notifikasi, bluetooth, jaringan Wi-Fi, dan sistem telemetri.
+- **GitHub Actions CI**: Alur otomatisasi pengujian lint (`ruff`) dan tes unit otomatis pada matriks Python 3.11, 3.12, dan 3.13.
 

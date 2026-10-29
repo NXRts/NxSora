@@ -24,8 +24,12 @@
 - [x] Fullscreen Auto-Hide (sembunyi saat game/video layar penuh)
 - [x] Privacy Dots (titik mikrofon oranye & kamera hijau via PipeWire)
 - [x] Mascot Eye-Tracking (mata melirik kursor mouse)
-- [x] Unit test otomatis (`tests/`) dan GitHub Actions CI
-- [x] Dokumentasi lengkap: `LICENSE`, `CHANGELOG.md`, `CONTRIBUTING.md`, issue template
+- [x] Wi-Fi & Network Auto-Peek (`310x60px`) saat connect/disconnect SSID
+- [x] Smart Low-Battery Nudge (≤20%) dengan tombol aksi 1-klik "🍃 Hemat Daya"
+- [x] Halaman Pengaturan Terpisah (`qml/PageSettings.qml`) dengan tombol `‹ Kembali` adaptif (76px)
+- [x] Global D-Bus CLI (`nxsora --toggle`, `--settings`, `--expand`, `--collapse`, `--next`, `--prev`)
+- [x] Unit test otomatis (`tests/`) 21 test dan GitHub Actions CI (Python 3.11, 3.12, 3.13)
+- [x] Dokumentasi lengkap: `LICENSE`, `CHANGELOG.md`, `CONTRIBUTING.md`, issue template, dan kredit inspirasi Nusa
 
 ---
 
