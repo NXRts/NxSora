@@ -38,12 +38,12 @@ Item {
 
     function categoryIcon(cat) {
         switch (String(cat || "system")) {
-            case "chat": return "💬";
-            case "media": return "🎵";
-            case "thermal": return "⚡";
-            case "focus": return "🎯";
-            case "browser": return "🌐";
-            default: return "🔔";
+            case "chat": return "/message-square.svg";
+            case "media": return "/music.svg";
+            case "thermal": return "/bolt.svg";
+            case "focus": return "/target.svg";
+            case "browser": return "/globe.svg";
+            default: return "/bell.svg";
         }
     }
 
@@ -115,7 +115,7 @@ Item {
 
                     Item { Layout.fillWidth: true }
 
-                    // DND Toggle Button (🔕 Mode Fokus / Jangan Ganggu)
+                    // DND Toggle Button (Mode Fokus / Jangan Ganggu)
                     Rectangle {
                         Layout.preferredWidth: 22
                         Layout.preferredHeight: 20
@@ -124,10 +124,12 @@ Item {
                         border.color: root.isDnd ? "#f59e0b" : "#2d2d3c"
                         border.width: 1
 
-                        Text {
+                        Image {
                             anchors.centerIn: parent
-                            text: root.isDnd ? "🔕" : "🔔"
-                            font.pixelSize: 9
+                            width: 11
+                            height: 11
+                            sourceSize: Qt.size(11, 11)
+                            source: "file://" + AppConfig.assetsDir + (root.isDnd ? "/bell-off.svg" : "/bell.svg")
                         }
 
                         MouseArea {
@@ -175,11 +177,12 @@ Item {
                         border.color: clrMouse.containsMouse ? "#f43f5e" : "#2d2d3c"
                         border.width: 1
 
-                        Text {
+                        Image {
                             anchors.centerIn: parent
-                            text: "🗑"
-                            color: clrMouse.containsMouse ? "#fda4af" : "#94a3b8"
-                            font.pixelSize: 9
+                            width: 11
+                            height: 11
+                            sourceSize: Qt.size(11, 11)
+                            source: "file://" + AppConfig.assetsDir + "/trash.svg"
                         }
 
                         MouseArea {
@@ -244,9 +247,11 @@ Item {
                                 Layout.fillWidth: true
                                 spacing: 4
 
-                                Text {
-                                    text: root.categoryIcon(modelData.category)
-                                    font.pixelSize: 9
+                                Image {
+                                    width: 10
+                                    height: 10
+                                    sourceSize: Qt.size(10, 10)
+                                    source: "file://" + AppConfig.assetsDir + root.categoryIcon(modelData.category)
                                 }
 
                                 Text {
@@ -304,12 +309,15 @@ Item {
                     ColumnLayout {
                         anchors.centerIn: parent
                         visible: !root.hasItems
-                        spacing: 4
+                        spacing: 6
 
-                        Text {
+                        Image {
                             Layout.alignment: Qt.AlignHCenter
-                            text: "🔕"
-                            font.pixelSize: 16
+                            width: 20
+                            height: 20
+                            sourceSize: Qt.size(20, 20)
+                            source: "file://" + AppConfig.assetsDir + "/bell-off.svg"
+                            opacity: 0.6
                         }
                         Text {
                             Layout.alignment: Qt.AlignHCenter
@@ -355,13 +363,15 @@ Item {
                         Layout.preferredHeight: 26
                         radius: 13
                         color: "#1a1b28"
-                        border.color: root.categoryColor(root.currentItem.category)
+                        border.color: root.hasItems ? root.categoryColor(root.currentItem.category) : "#2d2d3c"
                         border.width: 1
 
-                        Text {
+                        Image {
                             anchors.centerIn: parent
-                            text: root.categoryIcon(root.currentItem.category)
-                            font.pixelSize: 11
+                            width: 13
+                            height: 13
+                            sourceSize: Qt.size(13, 13)
+                            source: "file://" + AppConfig.assetsDir + (root.hasItems ? root.categoryIcon(root.currentItem.category) : "/bell.svg")
                         }
                     }
 
@@ -394,13 +404,13 @@ Item {
                             Layout.fillWidth: true
                             Layout.minimumWidth: 0
                             text: root.isDnd
-                                  ? "🔕 Mode Jangan Ganggu Aktif"
+                                  ? "Mode Jangan Ganggu Aktif"
                                   : (root.hasItems 
                                      ? (String(root.currentItem.time || "").indexOf(":") !== -1 && String(root.currentItem.time || "").indexOf(" ") === -1
                                         ? ("Pukul " + String(root.currentItem.time))
                                         : String(root.currentItem.time || "--:--"))
                                      : "Tidak ada pesan")
-                            color: root.isDnd ? "#f59e0b" : root.categoryColor(root.currentItem.category)
+                            color: root.isDnd ? "#f59e0b" : (root.hasItems ? root.categoryColor(root.currentItem.category) : "#64748b")
                             font.pixelSize: 9
                             font.weight: Font.DemiBold
                             elide: Text.ElideRight
@@ -408,10 +418,10 @@ Item {
                         }
                     }
 
-                    // Copy Message Button (📋 Salin)
+                    // Copy Message Button (Salin)
                     Rectangle {
                         visible: root.hasItems
-                        Layout.preferredWidth: copyLbl.implicitWidth + 14
+                        Layout.preferredWidth: copyRow.implicitWidth + 14
                         Layout.preferredHeight: 22
                         radius: 7
                         color: root.copiedFeedback
@@ -420,13 +430,25 @@ Item {
                         border.color: root.copiedFeedback ? "#34d399" : "#32344a"
                         border.width: 1
 
-                        Text {
-                            id: copyLbl
+                        RowLayout {
+                            id: copyRow
                             anchors.centerIn: parent
-                            text: root.copiedFeedback ? "✓ Disalin" : "Salin"
-                            color: root.copiedFeedback ? "#34d399" : "#e2e8f0"
-                            font.pixelSize: 9
-                            font.weight: Font.Bold
+                            spacing: 4
+
+                            Image {
+                                visible: root.copiedFeedback
+                                width: 10
+                                height: 10
+                                sourceSize: Qt.size(10, 10)
+                                source: "file://" + AppConfig.assetsDir + "/check.svg"
+                            }
+
+                            Text {
+                                text: root.copiedFeedback ? "Disalin" : "Salin"
+                                color: root.copiedFeedback ? "#34d399" : "#e2e8f0"
+                                font.pixelSize: 9
+                                font.weight: Font.Bold
+                            }
                         }
 
                         MouseArea {
@@ -443,7 +465,7 @@ Item {
                         }
                     }
 
-                    // Delete Single Notification Button (✕)
+                    // Delete Single Notification Button (Close vector icon)
                     Rectangle {
                         visible: root.hasItems
                         Layout.preferredWidth: 22
@@ -453,12 +475,12 @@ Item {
                         border.color: delOneMouse.containsMouse ? "#f43f5e" : "#32344a"
                         border.width: 1
 
-                        Text {
+                        Image {
                             anchors.centerIn: parent
-                            text: "✕"
-                            color: delOneMouse.containsMouse ? "#fda4af" : "#94a3b8"
-                            font.pixelSize: 9
-                            font.weight: Font.Bold
+                            width: 10
+                            height: 10
+                            sourceSize: Qt.size(10, 10)
+                            source: "file://" + AppConfig.assetsDir + "/close.svg"
                         }
 
                         MouseArea {
@@ -562,12 +584,12 @@ Item {
                                 color: prevNotifMouse.containsMouse ? "#282a3e" : "#1e1f2e"
                                 opacity: IslandController.notifSelectedIndex > 0 ? 1.0 : 0.4
 
-                                Text {
+                                Image {
                                     anchors.centerIn: parent
-                                    text: "‹"
-                                    color: "#cbd5e1"
-                                    font.pixelSize: 11
-                                    font.weight: Font.Bold
+                                    width: 10
+                                    height: 10
+                                    sourceSize: Qt.size(10, 10)
+                                    source: "file://" + AppConfig.assetsDir + "/chevron-left.svg"
                                 }
 
                                 MouseArea {
@@ -591,12 +613,12 @@ Item {
                                 color: nextNotifMouse.containsMouse ? "#282a3e" : "#1e1f2e"
                                 opacity: IslandController.notifSelectedIndex < IslandController.notifTotalCount - 1 ? 1.0 : 0.4
 
-                                Text {
+                                Image {
                                     anchors.centerIn: parent
-                                    text: "›"
-                                    color: "#cbd5e1"
-                                    font.pixelSize: 11
-                                    font.weight: Font.Bold
+                                    width: 10
+                                    height: 10
+                                    sourceSize: Qt.size(10, 10)
+                                    source: "file://" + AppConfig.assetsDir + "/chevron-right.svg"
                                 }
 
                                 MouseArea {

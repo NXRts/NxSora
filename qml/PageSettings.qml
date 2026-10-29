@@ -73,11 +73,20 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
-                        Text {
+                        RowLayout {
                             Layout.fillWidth: true
-                            text: "🔊 Volume HUD"
-                            color: "#e2e8f0"
-                            font.pixelSize: 11
+                            spacing: 6
+                            Image {
+                                width: 11
+                                height: 11
+                                sourceSize: Qt.size(11, 11)
+                                source: "file://" + AppConfig.assetsDir + "/volume-high.svg"
+                            }
+                            Text {
+                                text: "Volume HUD"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                            }
                         }
                         Switch {
                             checked: root.volHudEnabled
@@ -89,11 +98,20 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
-                        Text {
+                        RowLayout {
                             Layout.fillWidth: true
-                            text: "⚡ Cas & Baterai HUD"
-                            color: "#e2e8f0"
-                            font.pixelSize: 11
+                            spacing: 6
+                            Image {
+                                width: 11
+                                height: 11
+                                sourceSize: Qt.size(11, 11)
+                                source: "file://" + AppConfig.assetsDir + "/battery.svg"
+                            }
+                            Text {
+                                text: "Cas & Baterai HUD"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                            }
                         }
                         Switch {
                             checked: root.battHudEnabled
@@ -105,11 +123,20 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
-                        Text {
+                        RowLayout {
                             Layout.fillWidth: true
-                            text: "🎧 Bluetooth & TWS"
-                            color: "#e2e8f0"
-                            font.pixelSize: 11
+                            spacing: 6
+                            Image {
+                                width: 11
+                                height: 11
+                                sourceSize: Qt.size(11, 11)
+                                source: "file://" + AppConfig.assetsDir + "/headphones.svg"
+                            }
+                            Text {
+                                text: "Bluetooth & TWS"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                            }
                         }
                         Switch {
                             checked: root.btHudEnabled
@@ -121,11 +148,20 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
-                        Text {
+                        RowLayout {
                             Layout.fillWidth: true
-                            text: "🔆 Caps & Kecerahan"
-                            color: "#e2e8f0"
-                            font.pixelSize: 11
+                            spacing: 6
+                            Image {
+                                width: 11
+                                height: 11
+                                sourceSize: Qt.size(11, 11)
+                                source: "file://" + AppConfig.assetsDir + "/sun.svg"
+                            }
+                            Text {
+                                text: "Caps & Kecerahan"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                            }
                         }
                         Switch {
                             checked: root.hwHudEnabled
@@ -137,11 +173,20 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: 8
-                        Text {
+                        RowLayout {
                             Layout.fillWidth: true
-                            text: "🔔 Notifikasi Pop-up"
-                            color: "#e2e8f0"
-                            font.pixelSize: 11
+                            spacing: 6
+                            Image {
+                                width: 11
+                                height: 11
+                                sourceSize: Qt.size(11, 11)
+                                source: "file://" + AppConfig.assetsDir + "/bell.svg"
+                            }
+                            Text {
+                                text: "Notifikasi Pop-up"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                            }
                         }
                         Switch {
                             checked: root.notifHudEnabled
@@ -183,11 +228,20 @@ Item {
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 1
-                            Text {
-                                text: "🎮 Fullscreen Auto-Hide"
-                                color: "#e2e8f0"
-                                font.pixelSize: 11
-                                font.weight: Font.Bold
+                            RowLayout {
+                                spacing: 5
+                                Image {
+                                    width: 12
+                                    height: 12
+                                    sourceSize: Qt.size(12, 12)
+                                    source: "file://" + AppConfig.assetsDir + "/gamepad.svg"
+                                }
+                                Text {
+                                    text: "Fullscreen Auto-Hide"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
                             }
                             Text {
                                 text: "Otomatis sembunyikan notch saat game atau video fullscreen berjalan"
@@ -210,11 +264,20 @@ Item {
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 1
-                            Text {
-                                text: "🟢 Privacy Dots (Kamera & Mikrofon)"
-                                color: "#e2e8f0"
-                                font.pixelSize: 11
-                                font.weight: Font.Bold
+                            RowLayout {
+                                spacing: 5
+                                Image {
+                                    width: 12
+                                    height: 12
+                                    sourceSize: Qt.size(12, 12)
+                                    source: "file://" + AppConfig.assetsDir + "/shield.svg"
+                                }
+                                Text {
+                                    text: "Privacy Dots (Kamera & Mikrofon)"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
                             }
                             Text {
                                 text: "Tampilkan titik oranye (mic) & hijau (kamera) saat PipeWire aktif merekam"
@@ -237,11 +300,20 @@ Item {
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 1
-                            Text {
-                                text: "👁️ Mascot Eye-Tracking"
-                                color: "#e2e8f0"
-                                font.pixelSize: 11
-                                font.weight: Font.Bold
+                            RowLayout {
+                                spacing: 5
+                                Image {
+                                    width: 12
+                                    height: 12
+                                    sourceSize: Qt.size(12, 12)
+                                    source: "file://" + AppConfig.assetsDir + "/eye.svg"
+                                }
+                                Text {
+                                    text: "Mascot Eye-Tracking"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
                             }
                             Text {
                                 text: "Mata maskot melirik halus mengikuti arah kursor mouse di sekitar notch"
@@ -276,8 +348,14 @@ Item {
                     RowLayout {
                         anchors.centerIn: parent
                         spacing: 6
+                        Image {
+                            width: 11
+                            height: 11
+                            sourceSize: Qt.size(11, 11)
+                            source: "file://" + AppConfig.assetsDir + "/file-text.svg"
+                        }
                         Text {
-                            text: "📝 Buka config.json"
+                            text: "Buka config.json"
                             color: "#38bdf8"
                             font.pixelSize: 10
                             font.weight: Font.Bold
@@ -305,8 +383,14 @@ Item {
                     RowLayout {
                         anchors.centerIn: parent
                         spacing: 6
+                        Image {
+                            width: 11
+                            height: 11
+                            sourceSize: Qt.size(11, 11)
+                            source: "file://" + AppConfig.assetsDir + "/refresh.svg"
+                        }
                         Text {
-                            text: "↺ Reset ke Default"
+                            text: "Reset ke Default"
                             color: rstBtnMouse.containsMouse ? "#f43f5e" : "#cbd5e1"
                             font.pixelSize: 10
                             font.weight: Font.Bold

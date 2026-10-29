@@ -82,22 +82,33 @@ Item {
             }
         }
 
-        // Right "Baca ▸" Pill Badge
+        // Right "Baca" Pill Badge with Chevron
         Rectangle {
-            Layout.preferredWidth: readTxt.implicitWidth + 12
+            Layout.preferredWidth: readRow.implicitWidth + 14
             Layout.preferredHeight: 22
             radius: 11
             color: hudClickMouse.containsMouse ? "#312e81" : "#1e1b4b"
             border.color: "#6366f1"
             border.width: 1
 
-            Text {
-                id: readTxt
+            RowLayout {
+                id: readRow
                 anchors.centerIn: parent
-                text: "Baca ▸"
-                color: "#c7d2fe"
-                font.pixelSize: 9
-                font.weight: Font.Bold
+                spacing: 3
+
+                Text {
+                    text: "Baca"
+                    color: "#c7d2fe"
+                    font.pixelSize: 9
+                    font.weight: Font.Bold
+                }
+
+                Image {
+                    width: 8
+                    height: 8
+                    sourceSize: Qt.size(8, 8)
+                    source: "file://" + AppConfig.assetsDir + "/chevron-right.svg"
+                }
             }
         }
     }

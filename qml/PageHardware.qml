@@ -422,20 +422,38 @@ Item {
                     Item { Layout.fillWidth: true }
 
                     ColumnLayout {
-                        spacing: 1
-                        Text {
+                        spacing: 2
+                        RowLayout {
                             Layout.alignment: Qt.AlignRight
-                            text: "↓ " + IslandController.netDownSpeed
-                            color: "#38bdf8"
-                            font.pixelSize: 10
-                            font.weight: Font.Bold
+                            spacing: 3
+                            Image {
+                                width: 8
+                                height: 8
+                                sourceSize: Qt.size(8, 8)
+                                source: "file://" + AppConfig.assetsDir + "/arrow-down.svg"
+                            }
+                            Text {
+                                text: IslandController.netDownSpeed
+                                color: "#38bdf8"
+                                font.pixelSize: 10
+                                font.weight: Font.Bold
+                            }
                         }
-                        Text {
+                        RowLayout {
                             Layout.alignment: Qt.AlignRight
-                            text: "↑ " + IslandController.netUpSpeed
-                            color: "#22c55e"
-                            font.pixelSize: 9
-                            font.weight: Font.DemiBold
+                            spacing: 3
+                            Image {
+                                width: 8
+                                height: 8
+                                sourceSize: Qt.size(8, 8)
+                                source: "file://" + AppConfig.assetsDir + "/arrow-up.svg"
+                            }
+                            Text {
+                                text: IslandController.netUpSpeed
+                                color: "#22c55e"
+                                font.pixelSize: 9
+                                font.weight: Font.DemiBold
+                            }
                         }
                     }
                 }
@@ -489,12 +507,22 @@ Item {
                             elide: Text.ElideRight
                         }
 
-                        Text {
+                        RowLayout {
                             Layout.fillWidth: true
-                            text: "🔥 Top: " + IslandController.topProcess
-                            color: "#94a3b8"
-                            font.pixelSize: 9
-                            elide: Text.ElideRight
+                            spacing: 3
+                            Image {
+                                width: 9
+                                height: 9
+                                sourceSize: Qt.size(9, 9)
+                                source: "file://" + AppConfig.assetsDir + "/flame.svg"
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                text: "Top: " + IslandController.topProcess
+                                color: "#94a3b8"
+                                font.pixelSize: 9
+                                elide: Text.ElideRight
+                            }
                         }
                     }
                 }
@@ -519,11 +547,20 @@ Item {
                 anchors.rightMargin: 8
                 spacing: 6
 
-                Text {
-                    text: "⚡ Mode TDP:"
-                    color: "#cbd5e1"
-                    font.pixelSize: 10
-                    font.weight: Font.Bold
+                RowLayout {
+                    spacing: 4
+                    Image {
+                        width: 11
+                        height: 11
+                        sourceSize: Qt.size(11, 11)
+                        source: "file://" + AppConfig.assetsDir + "/bolt.svg"
+                    }
+                    Text {
+                        text: "Mode TDP:"
+                        color: "#cbd5e1"
+                        font.pixelSize: 10
+                        font.weight: Font.Bold
+                    }
                 }
 
                 Item { Layout.fillWidth: true }
@@ -539,12 +576,21 @@ Item {
                     border.color: IslandController.powerProfile === "power-saver" ? "#22c55e" : "#2a2e45"
                     border.width: 1
 
-                    Text {
+                    RowLayout {
                         anchors.centerIn: parent
-                        text: "🍃 Hemat"
-                        color: IslandController.powerProfile === "power-saver" ? "#4ade80" : "#94a3b8"
-                        font.pixelSize: 9
-                        font.weight: Font.Bold
+                        spacing: 4
+                        Image {
+                            width: 10
+                            height: 10
+                            sourceSize: Qt.size(10, 10)
+                            source: "file://" + AppConfig.assetsDir + "/leaf.svg"
+                        }
+                        Text {
+                            text: "Hemat"
+                            color: IslandController.powerProfile === "power-saver" ? "#4ade80" : "#94a3b8"
+                            font.pixelSize: 9
+                            font.weight: Font.Bold
+                        }
                     }
 
                     MouseArea {
@@ -567,12 +613,21 @@ Item {
                     border.color: IslandController.powerProfile === "balanced" ? "#38bdf8" : "#2a2e45"
                     border.width: 1
 
-                    Text {
+                    RowLayout {
                         anchors.centerIn: parent
-                        text: "⚖️ Seimbang"
-                        color: IslandController.powerProfile === "balanced" ? "#38bdf8" : "#94a3b8"
-                        font.pixelSize: 9
-                        font.weight: Font.Bold
+                        spacing: 4
+                        Image {
+                            width: 10
+                            height: 10
+                            sourceSize: Qt.size(10, 10)
+                            source: "file://" + AppConfig.assetsDir + "/scale.svg"
+                        }
+                        Text {
+                            text: "Seimbang"
+                            color: IslandController.powerProfile === "balanced" ? "#38bdf8" : "#94a3b8"
+                            font.pixelSize: 9
+                            font.weight: Font.Bold
+                        }
                     }
 
                     MouseArea {
@@ -595,12 +650,21 @@ Item {
                     border.color: IslandController.powerProfile === "performance" ? "#f43f5e" : "#2a2e45"
                     border.width: 1
 
-                    Text {
+                    RowLayout {
                         anchors.centerIn: parent
-                        text: "🚀 Performa"
-                        color: IslandController.powerProfile === "performance" ? "#fb7185" : "#94a3b8"
-                        font.pixelSize: 9
-                        font.weight: Font.Bold
+                        spacing: 4
+                        Image {
+                            width: 10
+                            height: 10
+                            sourceSize: Qt.size(10, 10)
+                            source: "file://" + AppConfig.assetsDir + "/rocket.svg"
+                        }
+                        Text {
+                            text: "Performa"
+                            color: IslandController.powerProfile === "performance" ? "#fb7185" : "#94a3b8"
+                            font.pixelSize: 9
+                            font.weight: Font.Bold
+                        }
                     }
 
                     MouseArea {

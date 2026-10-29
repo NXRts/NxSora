@@ -29,10 +29,12 @@ Item {
                     GradientStop { position: 0.0; color: "#38bdf8" }
                     GradientStop { position: 1.0; color: "#6366f1" }
                 }
-                Text {
+                Image {
                     anchors.centerIn: parent
-                    text: "📥"
-                    font.pixelSize: 11
+                    width: 12
+                    height: 12
+                    sourceSize: Qt.size(12, 12)
+                    source: "file://" + AppConfig.assetsDir + "/inbox.svg"
                 }
             }
 
@@ -68,18 +70,29 @@ Item {
                 visible: IslandController.shelfCount > 1
                 height: 22
                 radius: 11
-                implicitWidth: dragAllTxt.implicitWidth + 16
+                implicitWidth: dragAllRow.implicitWidth + 16
                 color: dragAllMouse.containsMouse ? "#0284c7" : "#0c4a6e"
                 border.color: "#38bdf8"
                 border.width: 1
 
-                Text {
-                    id: dragAllTxt
+                RowLayout {
+                    id: dragAllRow
                     anchors.centerIn: parent
-                    text: "📤 Seret Semua"
-                    color: "#f8fafc"
-                    font.pixelSize: 9
-                    font.weight: Font.Bold
+                    spacing: 4
+
+                    Image {
+                        width: 10
+                        height: 10
+                        sourceSize: Qt.size(10, 10)
+                        source: "file://" + AppConfig.assetsDir + "/upload.svg"
+                    }
+
+                    Text {
+                        text: "Seret Semua"
+                        color: "#f8fafc"
+                        font.pixelSize: 9
+                        font.weight: Font.Bold
+                    }
                 }
 
                 MouseArea {
@@ -365,12 +378,12 @@ Item {
                         opacity: (cardMouse.containsMouse || rmMouse.containsMouse) ? 1.0 : 0.0
                         Behavior on opacity { NumberAnimation { duration: 120 } }
 
-                        Text {
+                        Image {
                             anchors.centerIn: parent
-                            text: "✕"
-                            color: "#ffffff"
-                            font.pixelSize: 8
-                            font.weight: Font.Bold
+                            width: 8
+                            height: 8
+                            sourceSize: Qt.size(8, 8)
+                            source: "file://" + AppConfig.assetsDir + "/close.svg"
                         }
 
                         MouseArea {
@@ -405,12 +418,12 @@ Item {
                     border.color: root.isDragHovering ? "#7dd3fc" : "#334155"
                     border.width: 1
 
-                    Text {
-                        id: arrowIcon
+                    Image {
                         anchors.centerIn: parent
-                        text: root.isDragHovering ? "⬇" : "📥"
-                        font.pixelSize: 15
-                        color: "#ffffff"
+                        width: 16
+                        height: 16
+                        sourceSize: Qt.size(16, 16)
+                        source: "file://" + AppConfig.assetsDir + (root.isDragHovering ? "/arrow-down.svg" : "/inbox.svg")
                     }
                 }
 

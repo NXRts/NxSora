@@ -233,12 +233,23 @@ Item {
                         border.color: root.btPowered ? "#5ec2ff" : "#334155"
                         border.width: 1
 
-                        Text {
+                        RowLayout {
                             anchors.centerIn: parent
-                            text: root.btPowered ? "⏻ Aktif" : "⏻ Mati"
-                            color: root.btPowered ? "#5ec2ff" : "#94a3b8"
-                            font.pixelSize: 9
-                            font.weight: Font.Bold
+                            spacing: 4
+
+                            Image {
+                                width: 10
+                                height: 10
+                                sourceSize: Qt.size(10, 10)
+                                source: "file://" + AppConfig.assetsDir + "/power.svg"
+                            }
+
+                            Text {
+                                text: root.btPowered ? "Aktif" : "Mati"
+                                color: root.btPowered ? "#5ec2ff" : "#94a3b8"
+                                font.pixelSize: 9
+                                font.weight: Font.Bold
+                            }
                         }
 
                         MouseArea {
@@ -260,12 +271,23 @@ Item {
                         border.color: "#2d2d3c"
                         border.width: 1
 
-                        Text {
+                        RowLayout {
                             anchors.centerIn: parent
-                            text: "⚙ Setelan"
-                            color: "#cbd5e1"
-                            font.pixelSize: 9
-                            font.weight: Font.DemiBold
+                            spacing: 4
+
+                            Image {
+                                width: 10
+                                height: 10
+                                sourceSize: Qt.size(10, 10)
+                                source: "file://" + AppConfig.assetsDir + "/settings.svg"
+                            }
+
+                            Text {
+                                text: "Setelan"
+                                color: "#cbd5e1"
+                                font.pixelSize: 9
+                                font.weight: Font.DemiBold
+                            }
                         }
 
                         MouseArea {
@@ -314,20 +336,31 @@ Item {
 
                     // Test Peek Animation Button
                     Rectangle {
-                        Layout.preferredWidth: peekBtnTxt.implicitWidth + 14
+                        Layout.preferredWidth: peekBtnRow.implicitWidth + 14
                         Layout.preferredHeight: 20
                         radius: 10
                         color: peekTestMouse.containsMouse ? "#1b334f" : "#132235"
                         border.color: "#29527a"
                         border.width: 1
 
-                        Text {
-                            id: peekBtnTxt
+                        RowLayout {
+                            id: peekBtnRow
                             anchors.centerIn: parent
-                            text: "🎬 Peek TWS"
-                            color: "#5ec2ff"
-                            font.pixelSize: 9
-                            font.weight: Font.Bold
+                            spacing: 4
+
+                            Image {
+                                width: 9
+                                height: 9
+                                sourceSize: Qt.size(9, 9)
+                                source: "file://" + AppConfig.assetsDir + "/sparkles.svg"
+                            }
+
+                            Text {
+                                text: "Peek TWS"
+                                color: "#5ec2ff"
+                                font.pixelSize: 9
+                                font.weight: Font.Bold
+                            }
                         }
 
                         MouseArea {
@@ -378,18 +411,20 @@ Item {
                                 border.color: Boolean(modelData.connected) ? "#5ec2ff" : "#334155"
                                 border.width: 1
 
-                                Text {
+                                Image {
                                     anchors.centerIn: parent
-                                    text: {
+                                    width: 13
+                                    height: 13
+                                    sourceSize: Qt.size(13, 13)
+                                    source: {
                                         var cat = String(modelData.category || "device")
-                                        if (cat === "tws" || cat === "headphones") return "🎧"
-                                        if (cat === "speaker") return "🔊"
-                                        if (cat === "mouse") return "🖱"
-                                        if (cat === "keyboard") return "⌨"
-                                        if (cat === "phone") return "📱"
-                                        return "🔹"
+                                        if (cat === "tws" || cat === "headphones") return "file://" + AppConfig.assetsDir + "/headphones.svg"
+                                        if (cat === "speaker") return "file://" + AppConfig.assetsDir + "/speaker.svg"
+                                        if (cat === "mouse") return "file://" + AppConfig.assetsDir + "/mouse.svg"
+                                        if (cat === "keyboard") return "file://" + AppConfig.assetsDir + "/keyboard.svg"
+                                        if (cat === "phone") return "file://" + AppConfig.assetsDir + "/smartphone.svg"
+                                        return "file://" + AppConfig.assetsDir + "/bluetooth.svg"
                                     }
-                                    font.pixelSize: 13
                                 }
                             }
 

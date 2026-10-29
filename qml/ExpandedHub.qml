@@ -889,12 +889,12 @@ Item {
                                             border.color: "#333954"
                                             border.width: 1
 
-                                            Text {
+                                            Image {
                                                 anchors.centerIn: parent
-                                                text: "↺"
-                                                color: "#f8fafc"
-                                                font.pixelSize: 12
-                                                font.weight: Font.Bold
+                                                width: 12
+                                                height: 12
+                                                sourceSize: Qt.size(12, 12)
+                                                source: "file://" + AppConfig.assetsDir + "/refresh.svg"
                                             }
 
                                             MouseArea {
@@ -907,7 +907,7 @@ Item {
                                         }
                                     }
 
-                                    // Bottom Row: [☕ Short Break] [▶/⏸ Play] [🎯 Focus Time]
+                                    // Bottom Row: [Short Break] [Play/Pause] [Focus Time]
                                     RowLayout {
                                         Layout.fillWidth: true
                                         spacing: 6
@@ -923,12 +923,23 @@ Item {
                                             border.color: IslandController.timerMode === "short_break" ? "#38bdf8" : "#2b3048"
                                             border.width: 1
 
-                                            Text {
+                                            RowLayout {
                                                 anchors.centerIn: parent
-                                                text: "☕ Short Break"
-                                                color: "#f8fafc"
-                                                font.pixelSize: 10
-                                                font.weight: Font.DemiBold
+                                                spacing: 4
+
+                                                Image {
+                                                    width: 11
+                                                    height: 11
+                                                    sourceSize: Qt.size(11, 11)
+                                                    source: "file://" + AppConfig.assetsDir + "/coffee.svg"
+                                                }
+
+                                                Text {
+                                                    text: "Short Break"
+                                                    color: "#f8fafc"
+                                                    font.pixelSize: 10
+                                                    font.weight: Font.DemiBold
+                                                }
                                             }
 
                                             MouseArea {
@@ -949,12 +960,12 @@ Item {
                                                    ? (IslandController.timerMode === "focus" ? "#e11d48" : "#0284c7")
                                                    : (IslandController.timerMode === "focus" ? "#ff4b55" : "#0ea5e9")
 
-                                            Text {
+                                            Image {
                                                 anchors.centerIn: parent
-                                                text: IslandController.timerRunning ? "⏸" : "▶"
-                                                color: "#ffffff"
-                                                font.pixelSize: 11
-                                                font.weight: Font.Bold
+                                                width: 11
+                                                height: 11
+                                                sourceSize: Qt.size(11, 11)
+                                                source: "file://" + AppConfig.assetsDir + (IslandController.timerRunning ? "/pause.svg" : "/play.svg")
                                             }
 
                                             MouseArea {
@@ -977,12 +988,23 @@ Item {
                                             border.color: IslandController.timerMode === "focus" ? "#ff5a6e" : "#2b3048"
                                             border.width: 1
 
-                                            Text {
+                                            RowLayout {
                                                 anchors.centerIn: parent
-                                                text: "🎯 Focus Time"
-                                                color: "#f8fafc"
-                                                font.pixelSize: 10
-                                                font.weight: Font.DemiBold
+                                                spacing: 4
+
+                                                Image {
+                                                    width: 11
+                                                    height: 11
+                                                    sourceSize: Qt.size(11, 11)
+                                                    source: "file://" + AppConfig.assetsDir + "/target.svg"
+                                                }
+
+                                                Text {
+                                                    text: "Focus Time"
+                                                    color: "#f8fafc"
+                                                    font.pixelSize: 10
+                                                    font.weight: Font.DemiBold
+                                                }
                                             }
 
                                             MouseArea {
@@ -1663,11 +1685,11 @@ Item {
                             anchors.rightMargin: 10
                             spacing: 8
 
-                            Text {
-                                text: "☀"
-                                color: "#facc15"
-                                font.pixelSize: 13
-                                font.weight: Font.Bold
+                            Image {
+                                width: 14
+                                height: 14
+                                sourceSize: Qt.size(14, 14)
+                                source: "file://" + AppConfig.assetsDir + "/sun.svg"
                             }
 
                             Text {
@@ -1833,9 +1855,11 @@ Item {
                             RowLayout {
                                 anchors.centerIn: parent
                                 spacing: 7
-                                Text {
-                                    text: "🎙"
-                                    font.pixelSize: 14
+                                Image {
+                                    width: 15
+                                    height: 15
+                                    sourceSize: Qt.size(15, 15)
+                                    source: "file://" + AppConfig.assetsDir + (IslandController.micMuted ? "/mic-off.svg" : "/mic.svg")
                                 }
                                 ColumnLayout {
                                     spacing: 0
@@ -1949,9 +1973,11 @@ Item {
                             RowLayout {
                                 anchors.centerIn: parent
                                 spacing: 7
-                                Text {
-                                    text: "🎧"
-                                    font.pixelSize: 14
+                                Image {
+                                    width: 15
+                                    height: 15
+                                    sourceSize: Qt.size(15, 15)
+                                    source: "file://" + AppConfig.assetsDir + "/headphones.svg"
                                 }
                                 ColumnLayout {
                                     spacing: 0
