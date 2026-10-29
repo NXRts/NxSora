@@ -22,10 +22,6 @@
   <a href="README.md"><strong>Bahasa Indonesia</strong></a> | <a href="README.en.md"><strong>English</strong></a>
 </p>
 
-<p align="center">
-  <img src="docs/screenshots/01-expanded-hub.png" alt="NxSora Expanded Hub Preview" width="620" />
-</p>
-
 ---
 
 ## 🧭 Navigasi Cepat Dokumen
@@ -33,7 +29,6 @@
 - 📜 **Catatan Rilis**: [`CHANGELOG.md`](CHANGELOG.md) — Riwayat versi dan perubahan rilis `v0.1.0`.
 - 🤝 **Panduan Kontribusi**: [`CONTRIBUTING.md`](CONTRIBUTING.md) — Standar kontribusi, testing, dan pull request.
 - 🌌 **Spesifikasi & Filosofi**: [`docs/NXSORA.md`](docs/NXSORA.md) — Asal-usul nama, bahasa desain Neo-Sora, dan palet warna.
-- 🔬 **Master Plan Detail**: [`docs/NEXT.md`](docs/NEXT.md) — Analisis arsitektur dan komparasi ekosistem dynamic island.
 - 📖 **Panduan Penggunaan**: [`docs/TUTORIAL.md`](docs/TUTORIAL.md) — Navigasi gestur, klik, dan pintasan keyboard.
 
 ---

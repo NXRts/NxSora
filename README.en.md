@@ -22,10 +22,6 @@
   <a href="README.md"><strong>Bahasa Indonesia</strong></a> | <a href="README.en.md"><strong>English</strong></a>
 </p>
 
-<p align="center">
-  <img src="docs/screenshots/01-expanded-hub.png" alt="NxSora Expanded Hub Preview" width="620" />
-</p>
-
 ---
 
 ## 🧭 Document Navigation
@@ -33,7 +29,6 @@
 - 📜 **Changelog**: [`CHANGELOG.md`](CHANGELOG.md) — Release notes and version history for `v0.1.0`.
 - 🤝 **Contributing**: [`CONTRIBUTING.md`](CONTRIBUTING.md) — Development guidelines, tests, and pull request workflow.
 - 🌌 **Design & Philosophy**: [`docs/NXSORA.md`](docs/NXSORA.md) — Identity origin, Neo-Sora design language, and color palette.
-- 🔬 **Master Plan & Architecture**: [`docs/NEXT.md`](docs/NEXT.md) — In-depth architectural analysis and dynamic island ecosystem comparison.
 - 📖 **User Tutorial**: [`docs/TUTORIAL.md`](docs/TUTORIAL.md) — Gestures, navigation, and keyboard shortcuts.
 
 ---

@@ -29,5 +29,5 @@
 
 ---
 
-Untuk rencana teknis mendalam dan analisis perbandingan aplikasi Dynamic Island lainnya, lihat [docs/NEXT.md](docs/NEXT.md).
+Untuk spesifikasi desain dan filosofi antarmuka, lihat [docs/NXSORA.md](docs/NXSORA.md).
 
