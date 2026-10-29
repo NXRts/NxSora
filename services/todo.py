@@ -1,11 +1,12 @@
 """
 To-Do Service
-Manages quick checklists and daily task reminders persistently in ~/.config/dynamic_island/tasks.json
+Manages quick checklists and daily task reminders persistently in $XDG_CONFIG_HOME/nxsora/tasks.json
 """
 
 import json
 import os
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtProperty, pyqtSlot
+import config
 
 
 class TodoService(QObject):
@@ -13,9 +14,7 @@ class TodoService(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._config_dir = os.path.expanduser("~/.config/dynamic_island")
-        self._config_file = os.path.join(self._config_dir, "tasks.json")
-        os.makedirs(self._config_dir, exist_ok=True)
+        self._config_file = str(config.CONFIG_DIR / "tasks.json")
 
         self._tasks = [
             {"id": 1, "text": "Cek email & notifikasi", "done": True},
@@ -36,11 +35,7 @@ class TodoService(QObject):
                 print(f"[TodoService] Error loading tasks.json: {e}")
 
     def _save_tasks(self):
-        try:
-            with open(self._config_file, "w", encoding="utf-8") as f:
-                json.dump(self._tasks, f, indent=2)
-        except Exception as e:
-            print(f"[TodoService] Error saving tasks.json: {e}")
+        config.safe_write_private_json(self._config_file, self._tasks)
 
     @pyqtProperty(list, notify=tasksChanged)
     def tasks(self):

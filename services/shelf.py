@@ -21,15 +21,16 @@ AUDIO_EXTS = {".mp3", ".flac", ".wav", ".ogg", ".m4a", ".opus"}
 VIDEO_EXTS = {".mp4", ".mkv", ".webm", ".mov", ".avi"}
 
 
+import config
+
+
 class ShelfService(QObject):
     shelfChanged = pyqtSignal()
     shelfGulpTriggered = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._config_dir = os.path.expanduser("~/.config/dynamic_island")
-        self._config_file = os.path.join(self._config_dir, "shelf.json")
-        os.makedirs(self._config_dir, exist_ok=True)
+        self._config_file = str(config.CONFIG_DIR / "shelf.json")
 
         self._paths = []
         self._items = []
@@ -110,11 +111,7 @@ class ShelfService(QObject):
         self._rebuild_items()
 
     def _save_shelf(self):
-        try:
-            with open(self._config_file, "w", encoding="utf-8") as f:
-                json.dump(self._paths, f, indent=2, ensure_ascii=False)
-        except Exception as e:
-            print(f"[ShelfService] Error saving shelf.json: {e}")
+        config.safe_write_private_json(self._config_file, self._paths)
 
     @pyqtProperty(list, notify=shelfChanged)
     def items(self):

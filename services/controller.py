@@ -15,6 +15,8 @@ from services.lyrics import LyricsService
 from services.shelf import ShelfService
 from services.bluetooth import BluetoothService
 from services.hardware_hud import HardwareHudService
+from services.privacy import PrivacyService
+from PyQt6.QtCore import QVariant
 import config
 
 
@@ -64,6 +66,11 @@ class IslandController(QObject):
     bluetoothChanged = pyqtSignal()
     hardwareHudChanged = pyqtSignal()
 
+    # Privacy & Fullscreen signals (Fase 3)
+    privacyChanged = pyqtSignal()
+    fullscreenChanged = pyqtSignal(bool)
+    settingsChanged = pyqtSignal()
+
     # Mascot & Pin mode
     mascotModeChanged = pyqtSignal(bool)
     isPinnedChanged = pyqtSignal(bool)
@@ -83,10 +90,12 @@ class IslandController(QObject):
         self.shelf = ShelfService(self)
         self.bluetooth = BluetoothService(self)
         self.hw_hud = HardwareHudService(self)
+        self.privacy = PrivacyService(self)
 
         # Mascot mode toggle (Resting Eyes vs Digital Clock)
         self._mascot_mode = False
         self._is_pinned = False
+        self._low_battery_nudged = False
 
         # Island UI State:
         # "idle", "music", "hud-volume", "hud-battery", "hud-bluetooth", "hud-hardware", "hud-notification", "expanded-hub"
@@ -144,6 +153,10 @@ class IslandController(QObject):
         self.hw_hud.micMuteChanged.connect(lambda m, v: self.hardwareHudChanged.emit())
         self.hw_hud.hardwareHudTriggered.connect(self._on_hardware_hud_triggered)
 
+        self.privacy.micInUseChanged.connect(lambda _: self.privacyChanged.emit())
+        self.privacy.camInUseChanged.connect(lambda _: self.privacyChanged.emit())
+        self.privacy.fullscreenActiveChanged.connect(self._on_fullscreen_changed)
+
         # Initial state setup
         if self.mpris.status in ("Playing", "Paused") and self.mpris.title:
             self._state = "music"
@@ -195,7 +208,7 @@ class IslandController(QObject):
 
     def _on_volume_changed(self, vol, is_muted):
         self.volumeChanged.emit()
-        if not self._is_expanded:
+        if not self._is_expanded and config.CONFIG.get("hud_volume_enabled", True):
             self._set_state("hud-volume")
             self._hud_timer.start(config.CONFIG.get("hud_volume_timeout", 2200))
 
@@ -204,22 +217,30 @@ class IslandController(QObject):
 
     def _on_battery_updated(self, pct, plugged):
         self.batteryChanged.emit()
+        if not plugged and pct <= 20 and not self._low_battery_nudged:
+            self._low_battery_nudged = True
+            self.notifications.trigger_test(
+                f"🔋 Baterai Lemah ({int(round(pct))}%)",
+                "Daya baterai laptop hampir habis. Anda dapat mengaktifkan Mode Hemat Daya di Pengaturan."
+            )
+        elif plugged or pct > 25:
+            self._low_battery_nudged = False
 
     def _on_power_plugged_event(self, plugged, pct):
         self.batteryChanged.emit()
-        if not self._is_expanded:
+        if not self._is_expanded and config.CONFIG.get("hud_battery_enabled", True):
             self._set_state("hud-battery")
             self._hud_timer.start(config.CONFIG.get("hud_battery_timeout", 3500))
 
     def _on_bluetooth_peek(self, name, connected, battery):
         self.bluetoothChanged.emit()
-        if not self._is_expanded:
+        if not self._is_expanded and config.CONFIG.get("hud_bluetooth_enabled", True):
             self._set_state("hud-bluetooth")
             self._hud_timer.start(4200)
 
     def _on_hardware_hud_triggered(self, hud_type, label, val, active):
         self.hardwareHudChanged.emit()
-        if not self._is_expanded:
+        if not self._is_expanded and config.CONFIG.get("hud_hardware_enabled", True):
             self._set_state("hud-hardware")
             timeout = 1800 if hud_type == "capslock" else 2200
             self._hud_timer.start(timeout)
@@ -229,9 +250,15 @@ class IslandController(QObject):
         self._notif_title = summary
         self._notif_body = body
         self.notificationChanged.emit()
-        if not self._is_expanded:
+        if not self._is_expanded and config.CONFIG.get("hud_notification_enabled", True):
             self._set_state("hud-notification")
             self._hud_timer.start(config.CONFIG.get("hud_notification_timeout", 5000))
+
+    def _on_fullscreen_changed(self, is_fs):
+        self.fullscreenChanged.emit(is_fs)
+        if is_fs and config.CONFIG.get("fullscreen_autohide_enabled", True):
+            if self._is_expanded:
+                self.collapse()
 
     def _on_timer_tick(self, rem, text):
         self.timerChanged.emit()
@@ -1037,3 +1064,41 @@ class IslandController(QObject):
     @pyqtSlot(result=bool)
     def copySelectedNotification(self):
         return self.notifications.copy_selected()
+
+    # --- Privacy & Fullscreen Properties (Fase 3) ---
+    @pyqtProperty(bool, notify=privacyChanged)
+    def micInUse(self):
+        return bool(self.privacy.micInUse)
+
+    @pyqtProperty(bool, notify=privacyChanged)
+    def camInUse(self):
+        return bool(self.privacy.camInUse)
+
+    @pyqtProperty(bool, notify=fullscreenChanged)
+    def fullscreenActive(self):
+        return bool(self.privacy.fullscreenActive)
+
+    # --- Settings Slots (Fase 3) ---
+    @pyqtSlot(str, result="QVariant")
+    def getSetting(self, key: str):
+        return config.CONFIG.get(key, None)
+
+    @pyqtSlot(str, "QVariant")
+    def setSetting(self, key: str, value):
+        config.CONFIG[key] = value
+        config.save_user_config(config.CONFIG)
+        self.settingsChanged.emit()
+
+    @pyqtSlot()
+    def resetSettings(self):
+        config.CONFIG = config.DEFAULT_CONFIG.copy()
+        config.save_user_config(config.CONFIG)
+        self.settingsChanged.emit()
+
+    @pyqtSlot()
+    def openConfigFile(self):
+        try:
+            import subprocess
+            subprocess.Popen(["xdg-open", str(config.USER_CONFIG_FILE)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception:
+            pass

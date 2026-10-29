@@ -1,0 +1,73 @@
+# Maintainer: NXRts <dangouu123@gmail.com>
+pkgname=nxsora-git
+_pkgname=nxsora
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="The Living Sky-Notch for Linux Desktop (KDE Plasma 6 Wayland)"
+arch=('any')
+url="https://github.com/NXRts/NxSora"
+license=('GPL3')
+depends=(
+    'python'
+    'python-pyqt6'
+    'layer-shell-qt'
+    'wireplumber'
+    'bluez-utils'
+    'power-profiles-daemon'
+    'wl-clipboard'
+    'python-psutil'
+)
+optdepends=(
+    'cava: Real-time audio spectrum visualizer'
+    'libpulse: Sound effects playback (paplay)'
+    'kdeconnect: Send shelf files to mobile devices'
+)
+makedepends=('git')
+provides=('nxsora')
+conflicts=('nxsora')
+source=("git+https://github.com/NXRts/NxSora.git")
+sha256sums=('SKIP')
+
+package() {
+    cd "$srcdir/NxSora"
+
+    # Install application files
+    install -d "$pkgdir/usr/lib/$_pkgname"
+    cp -r assets qml services "$pkgdir/usr/lib/$_pkgname/"
+    install -m 644 config.py "$pkgdir/usr/lib/$_pkgname/"
+    install -m 755 main.py "$pkgdir/usr/lib/$_pkgname/"
+    install -m 755 run.sh "$pkgdir/usr/lib/$_pkgname/"
+
+    # Install binary launcher
+    install -d "$pkgdir/usr/bin"
+    ln -s "/usr/lib/$_pkgname/run.sh" "$pkgdir/usr/bin/$_pkgname"
+
+    # Install Desktop Entry & Autostart
+    install -d "$pkgdir/usr/share/applications"
+    cat <<EOF > "$pkgdir/usr/share/applications/$_pkgname.desktop"
+[Desktop Entry]
+Name=NxSora
+Comment=The Living Sky-Notch for Linux Desktop
+Exec=/usr/bin/nxsora --daemon
+Icon=nxsora
+Terminal=false
+Type=Application
+Categories=Utility;System;
+StartupNotify=false
+X-KDE-autostart-phase=2
+EOF
+
+    # Install Application Icon
+    install -d "$pkgdir/usr/share/icons/hicolor/scalable/apps"
+    if [ -f assets/nxsora.svg ]; then
+        install -m 644 assets/nxsora.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/$_pkgname.svg"
+    elif [ -f assets/logo.svg ]; then
+        install -m 644 assets/logo.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/$_pkgname.svg"
+    fi
+
+    # Install Documentation & License
+    install -d "$pkgdir/usr/share/doc/$_pkgname"
+    install -m 644 README.md CHANGELOG.md ROADMAP.md NXSORA.md "$pkgdir/usr/share/doc/$_pkgname/"
+    install -d "$pkgdir/usr/share/licenses/$_pkgname"
+    install -m 644 LICENSE "$pkgdir/usr/share/licenses/$_pkgname/"
+}

@@ -10,6 +10,7 @@ import glob
 import os
 import platform
 import re
+import shutil
 import subprocess
 import time
 import psutil
@@ -232,17 +233,45 @@ class SystemService(QObject):
         # 1. Temperatures (CPU, GPU, NVMe)
         try:
             temps = psutil.sensors_temperatures()
-            # CPU Temp (k10temp / coretemp / zenpower / cpu_thermal)
-            for key in ("k10temp", "coretemp", "zenpower", "cpu_thermal", "acpitz"):
+            # CPU Temp (k10temp / coretemp / zenpower / cpu_thermal / acpitz)
+            found_cpu = False
+            for key in ("k10temp", "coretemp", "zenpower", "cpu_thermal", "acpitz", "soc_thermal"):
                 if key in temps and temps[key]:
                     self.cpu_temp = float(temps[key][0].current)
+                    found_cpu = True
                     break
+            # Fallback to any thermal sensor if specific names not matched
+            if not found_cpu and temps:
+                for k, v in temps.items():
+                    if v and ("temp" in k.lower() or "thermal" in k.lower() or "cpu" in k.lower()):
+                        self.cpu_temp = float(v[0].current)
+                        found_cpu = True
+                        break
+                if not found_cpu and temps:
+                    first_list = next(iter(temps.values()))
+                    if first_list:
+                        self.cpu_temp = float(first_list[0].current)
 
-            # GPU Temp (amdgpu / nouveau)
-            for key in ("amdgpu", "nouveau"):
+            # GPU Temp (amdgpu / nouveau / nvidia)
+            found_gpu = False
+            for key in ("amdgpu", "nouveau", "nvidia"):
                 if key in temps and temps[key]:
                     self.gpu_temp = float(temps[key][0].current)
+                    found_gpu = True
                     break
+            # NVIDIA proprietary fallback via nvidia-smi if not found in sysfs
+            if not found_gpu and shutil.which("nvidia-smi"):
+                try:
+                    nv_out = subprocess.check_output(
+                        ["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"],
+                        timeout=0.4,
+                        stderr=subprocess.DEVNULL
+                    ).decode().strip()
+                    if nv_out.isdigit():
+                        self.gpu_temp = float(nv_out)
+                        found_gpu = True
+                except Exception:
+                    pass
 
             # NVMe SSD Temp
             if "nvme" in temps and temps["nvme"]:

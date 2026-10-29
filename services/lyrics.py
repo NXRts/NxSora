@@ -12,6 +12,7 @@ import threading
 import urllib.parse
 import urllib.request
 from PyQt6.QtCore import QObject, pyqtSignal
+import config
 
 
 class LyricsService(QObject):
@@ -24,7 +25,7 @@ class LyricsService(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._cache_dir = os.path.expanduser("~/.cache/dynamic_island/lyrics")
+        self._cache_dir = str(config.CACHE_DIR / "lyrics")
         os.makedirs(self._cache_dir, exist_ok=True)
 
         self._lyrics_mode = False
@@ -74,8 +75,8 @@ class LyricsService(QObject):
 
         # Strip common video/audio tags in brackets/parentheses
         patterns = [
-            r"\(\s*(?:official\s*)?(?:music\s*)?(?:video|audio|lyric\s*video|lyrics|visualizer|mv|hd|4k|hq|live|remastered[^)]*)\s*\)",
-            r"\[\s*(?:official\s*)?(?:music\s*)?(?:video|audio|lyric\s*video|lyrics|visualizer|mv|hd|4k|hq|live|remastered[^\]]*)\s*\]",
+            r"\(\s*(?:official\s*)?(?:music\s*)?(?:video|audio|lyric\s*video|lyrics|visualizer|mv|hd|4k|hq|live|(?:[0-9]{4}\s+)?remaster(?:ed)?[^)]*)\s*\)",
+            r"\[\s*(?:official\s*)?(?:music\s*)?(?:video|audio|lyric\s*video|lyrics|visualizer|mv|hd|4k|hq|live|(?:[0-9]{4}\s+)?remaster(?:ed)?[^\]]*)\s*\]",
             r"\b(?:official\s+music\s+video|official\s+video|official\s+audio|lyric\s+video)\b",
         ]
         for pat in patterns:

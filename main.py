@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Dynamic Island for KDE Plasma 6 (Wayland)
-Main Application Entry Point
+NxSora (Nx空) — The Living Sky-Notch for KDE Plasma 6 (Wayland)
+Main Application Entry Point, Single-Instance Guardian & System Tray Manager
 """
 
 import sys
@@ -10,7 +10,8 @@ import signal
 from pathlib import Path
 
 from PyQt6.QtCore import QUrl, QObject, pyqtProperty, QTimer, QLockFile, QDir
-from PyQt6.QtGui import QGuiApplication, QIcon
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu
 from PyQt6.QtQml import QQmlApplicationEngine
 
 import config
@@ -56,13 +57,19 @@ def main():
     # Force Wayland platform
     os.environ["QT_QPA_PLATFORM"] = "wayland"
 
-    app = QGuiApplication(sys.argv)
-    app.setApplicationName("Dynamic Island")
-    app.setOrganizationName("KDE Dynamic Island")
+    app = QApplication(sys.argv)
+    app.setApplicationName("NxSora")
+    app.setApplicationDisplayName("NxSora (Nx空)")
+    app.setOrganizationName("NXRts")
+
+    # Set Window Icon
+    logo_path = config.ASSETS_DIR / "logo.svg"
+    if logo_path.exists():
+        app.setWindowIcon(QIcon(str(logo_path)))
 
     # Handle SIGTERM gracefully (e.g. systemctl stop / pkill)
     def handle_sigterm(signum, frame):
-        QGuiApplication.quit()
+        QApplication.quit()
 
     signal.signal(signal.SIGTERM, handle_sigterm)
 
@@ -72,15 +79,14 @@ def main():
     sig_timer.start(500)
     app._sig_timer = sig_timer
 
-    # Single-instance lock with stale lock recovery
-    lock_path = QDir.tempPath() + "/dynamic_island_kde.lock"
+    # Single-instance lock in XDG_RUNTIME_DIR
+    lock_path = str(config.RUNTIME_DIR / "nxsora.lock")
     lock_file = QLockFile(lock_path)
     lock_file.setStaleLockTime(3000)
     if not lock_file.tryLock(200):
-        # Stale lock check
         lock_file.removeStaleLockFile()
         if not lock_file.tryLock(200):
-            print("Dynamic Island is already running!")
+            print("NxSora is already running!")
             sys.exit(0)
 
     # Keep lock file reference alive
@@ -110,7 +116,72 @@ def main():
         print(f"Error: Failed to load QML from {main_qml_path}")
         sys.exit(1)
 
-    print("Dynamic Island successfully launched on KDE Plasma Wayland!")
+    # Setup System Tray Icon
+    if QSystemTrayIcon.isSystemTrayAvailable():
+        tray = QSystemTrayIcon(app)
+        if logo_path.exists():
+            tray.setIcon(QIcon(str(logo_path)))
+        else:
+            tray.setIcon(QIcon(str(config.ASSETS_DIR / "settings.svg")))
+        tray.setToolTip("NxSora (Nx空) — The Living Sky-Notch")
+
+        menu = QMenu()
+
+        title_act = menu.addAction("🌌 NxSora v0.1.0 (Aktif)")
+        title_act.setEnabled(False)
+        menu.addSeparator()
+
+        toggle_act = menu.addAction("Buka / Tutup Hub")
+        toggle_act.triggered.connect(controller.toggleExpand)
+
+        mascot_act = menu.addAction("Mode Maskot (Mata)")
+        mascot_act.setCheckable(True)
+        mascot_act.setChecked(controller.mascotMode)
+        mascot_act.triggered.connect(controller.toggleMascotMode)
+        controller.mascotModeChanged.connect(mascot_act.setChecked)
+
+        pin_act = menu.addAction("Sematkan Hub (Pin)")
+        pin_act.setCheckable(True)
+        pin_act.setChecked(controller.isPinned)
+        pin_act.triggered.connect(controller.togglePin)
+        controller.isPinnedChanged.connect(pin_act.setChecked)
+
+        dnd_act = menu.addAction("Jangan Ganggu (DND)")
+        dnd_act.setCheckable(True)
+        dnd_act.setChecked(controller.notifications.dnd_enabled)
+        dnd_act.triggered.connect(controller.toggleNotifDnd)
+
+        menu.addSeparator()
+
+        def open_settings_page():
+            controller.openPage(9)
+            controller.expand()
+
+        settings_act = menu.addAction("⚙️ Pengaturan...")
+        settings_act.triggered.connect(open_settings_page)
+
+        menu.addSeparator()
+
+        def restart_app():
+            import subprocess
+            subprocess.Popen([str(config.BASE_DIR / "run.sh"), "--restart"])
+
+        restart_act = menu.addAction("🔄 Restart NxSora")
+        restart_act.triggered.connect(restart_app)
+
+        quit_act = menu.addAction("❌ Keluar")
+        quit_act.triggered.connect(QApplication.quit)
+
+        tray.setContextMenu(menu)
+        tray.activated.connect(
+            lambda reason: controller.toggleExpand()
+            if reason == QSystemTrayIcon.ActivationReason.Trigger
+            else None
+        )
+        tray.show()
+        app._tray = tray
+
+    print("🌌 NxSora (Nx空) successfully launched on KDE Plasma Wayland!")
     sys.exit(app.exec())
 
 

@@ -7,7 +7,7 @@ Item {
     implicitWidth: 420
     implicitHeight: 245
 
-    // Current page titles (9 pages)
+    // Current page titles (10 pages)
     readonly property var pageTitles: [
         "Sistem & Pomodoro Fokus",
         IslandController.lyricsModeActive ? "Musik & Lirik Karaoke" : "Pemutar Musik",
@@ -17,7 +17,8 @@ Item {
         "Pusat Notifikasi",
         "Kesehatan & Air",
         "Daftar Tugas (To-Do)",
-        "Rak File (Shelf)"
+        "Rak File (Shelf)",
+        "Pengaturan & Personalisasi"
     ]
 
     function jumpToPageInstant(idx) {
@@ -271,6 +272,37 @@ Item {
                     }
                 }
 
+                // Settings Button (⚙️ jump to Page 10)
+                Rectangle {
+                    width: 28
+                    height: 28
+                    radius: 14
+                    color: pageContainer.currentIndex === 9 ? "#1e293b" : (settingsHdrMouse.containsMouse ? "#2d2d3a" : "#181a24")
+                    border.color: pageContainer.currentIndex === 9 ? "#38bdf8" : (settingsHdrMouse.containsMouse ? "#3b3b4a" : "#282a36")
+                    border.width: pageContainer.currentIndex === 9 ? 1.5 : 1
+
+                    Image {
+                        anchors.centerIn: parent
+                        width: 12
+                        height: 12
+                        source: "file://" + AppConfig.assetsDir + "/settings.svg"
+                        opacity: pageContainer.currentIndex === 9 ? 1.0 : (settingsHdrMouse.containsMouse ? 0.9 : 0.6)
+                    }
+
+                    MouseArea {
+                        id: settingsHdrMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            if (pageContainer.currentIndex !== 9) {
+                                var dir = (9 > pageContainer.currentIndex) ? 1 : -1;
+                                pageContainer.goTo(9, dir);
+                            }
+                        }
+                    }
+                }
+
                 // Close button (✕)
                 Rectangle {
                     width: 28
@@ -308,8 +340,8 @@ Item {
             clip: true
 
             property int currentIndex: IslandController.activeHubPage
-            readonly property int count: 9
-            readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageBluetooth, pageNotifications, pageHealth, pageTodo, pageShelf]
+            readonly property int count: 10
+            readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageBluetooth, pageNotifications, pageHealth, pageTodo, pageShelf, pageSettings]
             readonly property bool isChildSliderActive: seekMouseArea.pressed || seekMouseArea.isDragging || hubVolBarMouse.pressed || lyricsVolMouse.pressed || brightnessSliderMouse.pressed || pageShelf.isCardPressed
 
             // Allow keyboard Left/Right arrow navigation & Esc to close
@@ -2007,6 +2039,16 @@ Item {
             // -----------------------------------------------------------------
             PageShelf {
                 id: pageShelf
+                width: pageContainer.width
+                height: pageContainer.height
+                y: 0
+            }
+
+            // -----------------------------------------------------------------
+            // PAGE 10: PENGATURAN & PERSONALISASI (FASE 3)
+            // -----------------------------------------------------------------
+            PageSettings {
+                id: pageSettings
                 width: pageContainer.width
                 height: pageContainer.height
                 y: 0

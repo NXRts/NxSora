@@ -7,6 +7,8 @@ Item {
     implicitHeight: 28
 
     property real eyeScaleY: 1.0
+    property real eyeOffsetX: 0.0
+    property real eyeOffsetY: 0.0
 
     // Random blink timer
     Timer {
@@ -51,8 +53,16 @@ Item {
 
     // The two eyes
     Row {
+        id: eyesRow
         anchors.centerIn: parent
         spacing: 18
+
+        transform: Translate {
+            x: root.eyeOffsetX
+            y: root.eyeOffsetY
+            Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutQuad } }
+            Behavior on y { NumberAnimation { duration: 120; easing.type: Easing.OutQuad } }
+        }
 
         // Left Eye
         Rectangle {
@@ -111,6 +121,20 @@ Item {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
+
+        onPositionChanged: (mouse) => {
+            // Smoothly look at cursor within -3.5px .. +3.5px
+            var halfW = width / 2;
+            var halfH = height / 2;
+            root.eyeOffsetX = Math.max(-3.5, Math.min(3.5, ((mouse.x - halfW) / halfW) * 3.5));
+            root.eyeOffsetY = Math.max(-2.0, Math.min(2.0, ((mouse.y - halfH) / halfH) * 2.0));
+        }
+
+        onExited: {
+            root.eyeOffsetX = 0.0;
+            root.eyeOffsetY = 0.0;
+        }
+
         onClicked: (mouse) => {
             if (mouse.button === Qt.RightButton) {
                 IslandController.toggleMascotMode()
