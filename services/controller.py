@@ -452,7 +452,12 @@ class IslandController(QObject):
 
     @pyqtProperty(str, notify=statsChanged)
     def cpuTdpText(self):
-        return f"{self.system.cpu_tdp_watts:.1f} W"
+        prefix = "~" if getattr(self.system, "cpu_tdp_is_estimated", False) else ""
+        return f"{prefix}{self.system.cpu_tdp_watts:.1f} W"
+
+    @pyqtProperty(bool, notify=statsChanged)
+    def cpuTdpIsEstimated(self):
+        return bool(getattr(self.system, "cpu_tdp_is_estimated", False))
 
     @pyqtProperty(int, notify=statsChanged)
     def gpuPercent(self):

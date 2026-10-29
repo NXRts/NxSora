@@ -36,6 +36,7 @@ class SystemService(QObject):
         # Processor TDP / Package Power (PPT in Watts)
         self.cpu_tdp_watts = 0.0
         self.cpu_tdp_max_watts = 30.0
+        self.cpu_tdp_is_estimated = False
         self._ppt_hwmon_path = None
         self._gpu_freq_path = None
         self._gpu_busy_path = None
@@ -294,11 +295,13 @@ class SystemService(QObject):
         raw_uw = self._read_int_file(self._ppt_hwmon_path)
         if raw_uw is not None and raw_uw > 0:
             self.cpu_tdp_watts = round(raw_uw / 1_000_000.0, 1)
+            self.cpu_tdp_is_estimated = False
             if self.cpu_tdp_watts > self.cpu_tdp_max_watts:
                 self.cpu_tdp_max_watts = float(int(round(self.cpu_tdp_watts)))
         else:
             # Fallback estimation based on CPU load if sensor unavailable
             self.cpu_tdp_watts = round(4.0 + (self.cpu_percent / 100.0) * 21.0, 1)
+            self.cpu_tdp_is_estimated = True
 
         # 4. GPU Load (%), GPU Clock (MHz) & VRAM (MB)
         gpu_busy = self._read_int_file(self._gpu_busy_path)
