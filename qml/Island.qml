@@ -130,6 +130,7 @@ Item {
             case "hud-bluetooth": return 310;
             case "hud-network": return 310;
             case "hud-notification": return 330;
+            case "hud-camera": return 340;
             case "expanded-music":
                 return IslandController.lyricsModeActive ? 520 : 420;
             case "expanded-hub":
@@ -151,6 +152,7 @@ Item {
             case "hud-bluetooth": return 60;
             case "hud-network": return 60;
             case "hud-notification": return 56;
+            case "hud-camera": return 240;
             case "expanded-music": return 245;
             case "expanded-hub": return 245;
             default: return 28;
@@ -162,7 +164,8 @@ Item {
                 || IslandController.state === "hud-notification"
                 || IslandController.state === "hud-battery"
                 || IslandController.state === "hud-bluetooth"
-                || IslandController.state === "hud-network") {
+                || IslandController.state === "hud-network"
+                || IslandController.state === "hud-camera") {
             return 20;
         }
         return targetHeight / 2;
@@ -474,6 +477,14 @@ Item {
             visible: opacity > 0
             opacity: IslandController.state === "hud-notification" ? 1.0 : 0.0
             Behavior on opacity { NumberAnimation { duration: 180 } }
+        }
+
+        // 5B. HUD Camera Mirror (340x240px Quick Webcam Preview)
+        HudCameraMirror {
+            anchors.fill: parent
+            visible: opacity > 0
+            opacity: IslandController.state === "hud-camera" ? 1.0 : 0.0
+            Behavior on opacity { NumberAnimation { duration: 200 } }
         }
 
         // 6. Expanded Multi-Page Control Hub

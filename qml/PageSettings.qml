@@ -357,7 +357,7 @@ Item {
             }
 
             // =================================================================
-            // SECTION 3: PENGUJIAN PEEK OVERLAYS & RESET
+            // SECTION 3: PENGUJIAN PEEK OVERLAYS & FASE 4 FITUR
             // =================================================================
             RowLayout {
                 Layout.fillWidth: true
@@ -430,6 +430,120 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: IslandController.triggerLowBatteryDemo()
+                    }
+                }
+            }
+
+            // Uji Fitur Fase 4: Maskot & Cermin Kamera
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 6
+
+                // Uji Tidur Maskot
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 28
+                    radius: 6
+                    color: mSleepMouse.containsMouse ? "#26203a" : "#181726"
+                    border.color: mSleepMouse.containsMouse ? "#a855f7" : "#2d2944"
+                    border.width: 1
+
+                    RowLayout {
+                        anchors.centerIn: parent
+                        spacing: 4
+                        Image {
+                            width: 11
+                            height: 11
+                            sourceSize: Qt.size(11, 11)
+                            source: "file://" + AppConfig.assetsDir + "/moon.svg"
+                        }
+                        Text {
+                            text: "Tidur Maskot"
+                            color: "#c084fc"
+                            font.pixelSize: 10
+                            font.weight: Font.Bold
+                        }
+                    }
+
+                    MouseArea {
+                        id: mSleepMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: IslandController.triggerMascotSleep()
+                    }
+                }
+
+                // Uji Bangun / Sapa Maskot
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 28
+                    radius: 6
+                    color: mWakeMouse.containsMouse ? "#1c2b36" : "#141f28"
+                    border.color: mWakeMouse.containsMouse ? "#38bdf8" : "#203444"
+                    border.width: 1
+
+                    RowLayout {
+                        anchors.centerIn: parent
+                        spacing: 4
+                        Image {
+                            width: 11
+                            height: 11
+                            sourceSize: Qt.size(11, 11)
+                            source: "file://" + AppConfig.assetsDir + "/sparkles.svg"
+                        }
+                        Text {
+                            text: "Sapa Maskot"
+                            color: "#38bdf8"
+                            font.pixelSize: 10
+                            font.weight: Font.Bold
+                        }
+                    }
+
+                    MouseArea {
+                        id: mWakeMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: IslandController.triggerMascotWake()
+                    }
+                }
+
+                // Uji Cermin Kamera
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 28
+                    radius: 6
+                    color: mCamMouse.containsMouse ? "#2a1e36" : "#1a1524"
+                    border.color: mCamMouse.containsMouse ? "#f43f5e" : "#382436"
+                    border.width: 1
+
+                    RowLayout {
+                        anchors.centerIn: parent
+                        spacing: 4
+                        Image {
+                            width: 11
+                            height: 11
+                            sourceSize: Qt.size(11, 11)
+                            source: "file://" + AppConfig.assetsDir + "/video.svg"
+                        }
+                        Text {
+                            text: "Cermin Kamera"
+                            color: "#fb7185"
+                            font.pixelSize: 10
+                            font.weight: Font.Bold
+                        }
+                    }
+
+                    MouseArea {
+                        id: mCamMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            IslandController.closeSettingsView()
+                            IslandController.openCameraMirror()
+                        }
                     }
                 }
             }

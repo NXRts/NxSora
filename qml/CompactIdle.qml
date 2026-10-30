@@ -112,6 +112,41 @@ Item {
             font.family: "Inter, Noto Sans, sans-serif"
         }
 
+        // KDE Virtual Desktop Indicator Pill (e.g. [ 1 ] with 1-click & wheel switch)
+        Rectangle {
+            visible: IslandController.workspaceCount > 1
+            height: 14
+            radius: 7
+            implicitWidth: wsText.implicitWidth + 8
+            color: wsMouse.containsMouse ? "#282a3d" : "#181a26"
+            border.color: wsMouse.containsMouse ? "#38bdf8" : "#282b3d"
+            border.width: 1
+
+            Text {
+                id: wsText
+                anchors.centerIn: parent
+                text: String(IslandController.currentWorkspaceIndex + 1)
+                color: "#38bdf8"
+                font.pixelSize: 8
+                font.weight: Font.Bold
+            }
+
+            MouseArea {
+                id: wsMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: IslandController.nextWorkspace()
+                onWheel: (wheel) => {
+                    if (wheel.angleDelta.y > 0) {
+                        IslandController.previousWorkspace()
+                    } else if (wheel.angleDelta.y < 0) {
+                        IslandController.nextWorkspace()
+                    }
+                }
+            }
+        }
+
         // Privacy Indicators (Fase 3): Green Dot (Camera), Orange Dot (Microphone)
         Row {
             spacing: 3
