@@ -260,3 +260,4 @@ class WeatherService(QObject):
     @pyqtProperty(str, notify=dayProgressChanged)
     def dayProgressText(self) -> str:
         return self._day_progress_text
+
