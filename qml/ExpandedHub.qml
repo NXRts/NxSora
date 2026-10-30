@@ -233,6 +233,42 @@ Item {
                 }
             }
 
+            // KDE Virtual Desktop Switcher in Header (when > 1 workspace)
+            Row {
+                visible: !root.isSettingsOpen && IslandController.workspaceCount > 1
+                spacing: 4
+                Layout.alignment: Qt.AlignVCenter
+
+                Repeater {
+                    model: IslandController.workspacesList
+                    Rectangle {
+                        required property var modelData
+                        width: 18
+                        height: 18
+                        radius: 9
+                        color: modelData.isCurrent ? "#0284c7" : (wsHdrMouse.containsMouse ? "#272a3e" : "#181a26")
+                        border.color: modelData.isCurrent ? "#38bdf8" : "#282a3d"
+                        border.width: 1
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: String(modelData.index + 1)
+                            color: modelData.isCurrent ? "#ffffff" : "#94a3b8"
+                            font.pixelSize: 8
+                            font.weight: Font.Bold
+                        }
+
+                        MouseArea {
+                            id: wsHdrMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: IslandController.switchToWorkspace(modelData.index)
+                        }
+                    }
+                }
+            }
+
             Item { Layout.fillWidth: true }
 
             // Action Buttons: [Notifikasi 🔔], [Pin 📌] and [Close ✕]
@@ -1727,7 +1763,7 @@ Item {
                     // Top Bar: Interactive Screen Brightness Slider
                     Rectangle {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 34
+                        Layout.preferredHeight: 28
                         radius: 10
                         color: "#121217"
                         border.color: "#22222a"
@@ -1802,6 +1838,100 @@ Item {
                                 Layout.preferredWidth: 30
                                 horizontalAlignment: Text.AlignRight
                             }
+                        }
+                    }
+
+                    // Middle Bar: Live Weather & Day Progress Bar (Fase 4)
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 28
+                        radius: 10
+                        color: weatherCardMouse.containsMouse ? "#181a24" : "#121217"
+                        border.color: weatherCardMouse.containsMouse ? "#38bdf8" : "#22222a"
+                        border.width: 1
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
+                            spacing: 8
+
+                            // Weather Section
+                            RowLayout {
+                                spacing: 5
+                                Image {
+                                    width: 14
+                                    height: 14
+                                    sourceSize: Qt.size(14, 14)
+                                    source: "file://" + AppConfig.assetsDir + "/" + (IslandController.weatherIcon ? (IslandController.weatherIcon.indexOf(".svg") !== -1 ? IslandController.weatherIcon : (IslandController.weatherIcon + ".svg")) : "cloud.svg")
+                                }
+
+                                Text {
+                                    text: Math.round(IslandController.weatherTemperature) + "°C"
+                                    color: "#f8fafc"
+                                    font.pixelSize: 10
+                                    font.weight: Font.Bold
+                                }
+
+                                Text {
+                                    text: IslandController.weatherCondition || "Memuat..."
+                                    color: "#94a3b8"
+                                    font.pixelSize: 9
+                                    font.weight: Font.Medium
+                                    elide: Text.ElideRight
+                                    Layout.maximumWidth: 100
+                                }
+                            }
+
+                            Item { Layout.fillWidth: true }
+
+                            // Vertical divider
+                            Rectangle {
+                                width: 1
+                                height: 14
+                                color: "#22222a"
+                            }
+
+                            // Day Progress Section
+                            RowLayout {
+                                spacing: 6
+
+                                Text {
+                                    text: "Hari"
+                                    color: "#64748b"
+                                    font.pixelSize: 9
+                                    font.weight: Font.Medium
+                                }
+
+                                Rectangle {
+                                    width: 50
+                                    height: 5
+                                    radius: 2.5
+                                    color: "#272732"
+
+                                    Rectangle {
+                                        width: parent.width * Math.min(1.0, Math.max(0.02, IslandController.dayProgressPercent / 100.0))
+                                        height: parent.height
+                                        radius: 2.5
+                                        color: "#38bdf8"
+                                    }
+                                }
+
+                                Text {
+                                    text: IslandController.dayProgressPercent + "%"
+                                    color: "#38bdf8"
+                                    font.pixelSize: 9
+                                    font.weight: Font.Bold
+                                }
+                            }
+                        }
+
+                        MouseArea {
+                            id: weatherCardMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: IslandController.refreshWeather()
                         }
                     }
 
@@ -1972,7 +2102,7 @@ Item {
                             }
                         }
 
-                        // 5. System Settings
+                        // 5. Cermin Kamera (Webcam Mirror Preview - Fase 4)
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
@@ -1980,8 +2110,8 @@ Item {
                             Layout.preferredHeight: 1
                             radius: 10
                             clip: true
-                            color: setMouse.containsMouse ? "#20202c" : "#121217"
-                            border.color: "#22222a"
+                            color: camMouse.containsMouse ? "#20202c" : "#121217"
+                            border.color: camMouse.containsMouse ? "#a855f7" : "#22222a"
                             border.width: 1
 
                             RowLayout {
@@ -1991,28 +2121,23 @@ Item {
                                     Layout.preferredWidth: 16
                                     Layout.preferredHeight: 16
                                     sourceSize: Qt.size(16, 16)
-                                    source: "file://" + AppConfig.assetsDir + "/settings.svg"
+                                    source: "file://" + AppConfig.assetsDir + "/video.svg"
                                 }
                                 ColumnLayout {
                                     spacing: 0
-                                    Text { text: "Pengaturan"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
-                                    Text { text: "Preferensi NxSora"; color: "#64748b"; font.pixelSize: 9 }
+                                    Text { text: "Cermin Kamera"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
+                                    Text { text: "Webcam Notch"; color: "#a855f7"; font.pixelSize: 9 }
                                 }
                             }
 
                             MouseArea {
-                                id: setMouse
+                                id: camMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                onClicked: (mouse) => {
-                                    if (mouse.button === Qt.RightButton) {
-                                        IslandController.collapse()
-                                        IslandController.openSettings()
-                                    } else {
-                                        IslandController.openSettingsView()
-                                    }
+                                onClicked: {
+                                    IslandController.collapse()
+                                    IslandController.openCameraMirror()
                                 }
                             }
                         }

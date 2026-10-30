@@ -65,6 +65,52 @@ Item {
 
             Item { Layout.fillWidth: true }
 
+            // Quick Share to Phone via KDE Connect
+            Rectangle {
+                visible: IslandController.shelfCount > 0 && IslandController.kdeConnectAvailable
+                height: 22
+                radius: 11
+                implicitWidth: kdeShareAllRow.implicitWidth + 14
+                color: kdeShareMouse.containsMouse ? "#0284c7" : "#0f2338"
+                border.color: "#38bdf8"
+                border.width: 1
+
+                RowLayout {
+                    id: kdeShareAllRow
+                    anchors.centerIn: parent
+                    spacing: 4
+
+                    Image {
+                        width: 10
+                        height: 10
+                        sourceSize: Qt.size(10, 10)
+                        source: "file://" + AppConfig.assetsDir + "/smartphone.svg"
+                    }
+
+                    Text {
+                        text: IslandController.kdeConnectHasDevices ? ("Kirim ke " + (IslandController.kdeConnectDeviceName || "HP")) : "KDE Connect"
+                        color: "#38bdf8"
+                        font.pixelSize: 9
+                        font.weight: Font.Bold
+                    }
+                }
+
+                MouseArea {
+                    id: kdeShareMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (IslandController.shelfCount > 0) {
+                            var items = IslandController.shelfItems;
+                            if (items && items.length > 0) {
+                                IslandController.shareFileToPhone(items[0].path);
+                            }
+                        }
+                    }
+                }
+            }
+
             // Drag All Out Button (visible when > 1 item)
             Rectangle {
                 visible: IslandController.shelfCount > 1
@@ -363,6 +409,38 @@ Item {
                             if (!dragStarted) {
                                 IslandController.openShelfFile(fileCard.index)
                             }
+                        }
+                    }
+
+                    // Send to Phone button (top-left)
+                    Rectangle {
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.margins: 4
+                        width: 16
+                        height: 16
+                        radius: 8
+                        color: kdeBtnMouse.containsMouse ? "#0284c7" : "#1e293b"
+                        border.color: "#38bdf8"
+                        border.width: 1
+                        visible: IslandController.kdeConnectAvailable
+                        opacity: (cardMouse.containsMouse || kdeBtnMouse.containsMouse) ? 1.0 : 0.0
+                        Behavior on opacity { NumberAnimation { duration: 120 } }
+
+                        Image {
+                            anchors.centerIn: parent
+                            width: 8
+                            height: 8
+                            sourceSize: Qt.size(8, 8)
+                            source: "file://" + AppConfig.assetsDir + "/smartphone.svg"
+                        }
+
+                        MouseArea {
+                            id: kdeBtnMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: IslandController.shareFileToPhone(fileCard.modelData.path)
                         }
                     }
 

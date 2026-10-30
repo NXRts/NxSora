@@ -17,6 +17,9 @@ from services.bluetooth import BluetoothService
 from services.hardware_hud import HardwareHudService
 from services.privacy import PrivacyService
 from services.network import NetworkService
+from services.workspace import WorkspaceService
+from services.weather import WeatherService
+from services.kdeconnect import KdeConnectService
 from PyQt6.QtCore import QVariant
 import config
 
@@ -76,6 +79,15 @@ class IslandController(QObject):
     # Mascot & Pin mode
     mascotModeChanged = pyqtSignal(bool)
     isPinnedChanged = pyqtSignal(bool)
+    mascotSleepTriggered = pyqtSignal()
+    mascotWakeTriggered = pyqtSignal()
+
+    # Fase 4 signals: Workspace, Weather & Camera Mirror
+    workspaceChanged = pyqtSignal()
+    weatherChanged = pyqtSignal()
+    dayProgressChanged = pyqtSignal()
+    kdeConnectChanged = pyqtSignal()
+    cameraMirrorStateChanged = pyqtSignal(bool)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -94,6 +106,9 @@ class IslandController(QObject):
         self.hw_hud = HardwareHudService(self)
         self.privacy = PrivacyService(self)
         self.network = NetworkService(self)
+        self.workspace = WorkspaceService(self)
+        self.weather = WeatherService(self)
+        self.kdeconnect = KdeConnectService(self)
 
         # Mascot mode toggle (Resting Eyes vs Digital Clock)
         self._mascot_mode = False
@@ -163,6 +178,12 @@ class IslandController(QObject):
 
         self.network.networkChanged.connect(lambda: self.networkChanged.emit())
         self.network.networkPeekTriggered.connect(self._on_network_peek)
+
+        self.workspace.workspaceChanged.connect(lambda: self.workspaceChanged.emit())
+        self.weather.weatherChanged.connect(lambda: self.weatherChanged.emit())
+        self.weather.dayProgressChanged.connect(lambda: self.dayProgressChanged.emit())
+        self.kdeconnect.devicesChanged.connect(lambda: self.kdeConnectChanged.emit())
+        self.kdeconnect.shareStatusChanged.connect(lambda s, m: self.kdeConnectChanged.emit())
 
         # Initial state setup
         if self.mpris.status in ("Playing", "Paused") and self.mpris.title:
@@ -1177,3 +1198,131 @@ class IslandController(QObject):
             subprocess.Popen(["xdg-open", str(config.USER_CONFIG_FILE)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception:
             pass
+
+    # =========================================================================
+    # FASE 4: WORKSPACE, WEATHER, CAMERA MIRROR, MASCOT 2.0 & KDE CONNECT
+    # =========================================================================
+
+    # --- Mascot 2.0 Actions ---
+    @pyqtSlot()
+    def triggerMascotSleep(self):
+        self.mascotSleepTriggered.emit()
+
+    @pyqtSlot()
+    def triggerMascotWake(self):
+        self.mascotWakeTriggered.emit()
+
+    # --- Camera Mirror Slots ---
+    @pyqtSlot()
+    def openCameraMirror(self):
+        if self._state != "hud-camera":
+            self._previous_compact_state = self._state if self._state != "hud-camera" else "idle"
+            self._set_state("hud-camera")
+            self.cameraMirrorStateChanged.emit(True)
+
+    @pyqtSlot()
+    def closeCameraMirror(self):
+        if self._state == "hud-camera":
+            prev = self._previous_compact_state if self._previous_compact_state not in ("hud-camera",) else "idle"
+            self._set_state(prev)
+            self.cameraMirrorStateChanged.emit(False)
+
+    @pyqtSlot()
+    def toggleCameraMirror(self):
+        if self._state == "hud-camera":
+            self.closeCameraMirror()
+        else:
+            self.openCameraMirror()
+
+    # --- KDE Virtual Desktop / Workspace Slots & Properties ---
+    @pyqtSlot(int)
+    def switchToWorkspace(self, idx: int):
+        self.workspace.switchToIndex(idx)
+
+    @pyqtSlot()
+    def nextWorkspace(self):
+        self.workspace.nextDesktop()
+
+    @pyqtSlot()
+    def previousWorkspace(self):
+        self.workspace.previousDesktop()
+
+    @pyqtProperty(int, notify=workspaceChanged)
+    def workspaceCount(self) -> int:
+        return self.workspace.count
+
+    @pyqtProperty(int, notify=workspaceChanged)
+    def currentWorkspaceIndex(self) -> int:
+        return self.workspace.currentIndex
+
+    @pyqtProperty(str, notify=workspaceChanged)
+    def currentWorkspaceName(self) -> str:
+        return self.workspace.currentName
+
+    @pyqtProperty("QVariantList", notify=workspaceChanged)
+    def workspacesList(self):
+        return self.workspace.desktops
+
+    # --- Live Weather & Day Progress Properties ---
+    @pyqtProperty(str, notify=weatherChanged)
+    def weatherTemp(self) -> str:
+        return self.weather.temperature
+
+    @pyqtProperty(int, notify=weatherChanged)
+    def weatherTemperature(self) -> int:
+        return self.weather.temperatureC
+
+    @pyqtProperty(str, notify=weatherChanged)
+    def weatherCondition(self) -> str:
+        return self.weather.condition
+
+    @pyqtProperty(str, notify=weatherChanged)
+    def weatherIcon(self) -> str:
+        return self.weather.icon
+
+    @pyqtProperty(str, notify=weatherChanged)
+    def weatherCity(self) -> str:
+        return self.weather.city
+
+    @pyqtProperty(float, notify=dayProgressChanged)
+    def dayProgressPercent(self) -> float:
+        return self.weather.dayProgressPercent
+
+    @pyqtProperty(str, notify=dayProgressChanged)
+    def dayProgressText(self) -> str:
+        return self.weather.dayProgressText
+
+    @pyqtSlot()
+    def refreshWeather(self):
+        self.weather.refresh_weather_async()
+
+    # --- Quick Share KDE Connect Slots & Properties ---
+    @pyqtProperty(bool, notify=kdeConnectChanged)
+    def kdeConnectAvailable(self) -> bool:
+        return self.kdeconnect.available
+
+    @pyqtProperty(bool, notify=kdeConnectChanged)
+    def kdeConnectHasDevices(self) -> bool:
+        return self.kdeconnect.hasDevices
+
+    @pyqtProperty(str, notify=kdeConnectChanged)
+    def kdeConnectDeviceName(self) -> str:
+        return self.kdeconnect.defaultDeviceName
+
+    @pyqtProperty(str, notify=kdeConnectChanged)
+    def kdeConnectStatus(self) -> str:
+        return self.kdeconnect.lastStatus
+
+    @pyqtProperty(bool, notify=kdeConnectChanged)
+    def kdeConnectIsSharing(self) -> bool:
+        return self.kdeconnect.isSharing
+
+    @pyqtProperty("QVariantList", notify=kdeConnectChanged)
+    def kdeConnectDevices(self):
+        return self.kdeconnect.devices
+
+    @pyqtSlot(str)
+    @pyqtSlot(str, str)
+    def shareFileToPhone(self, file_path: str, device_id: str = ""):
+        self.kdeconnect.shareFile(file_path, device_id)
+

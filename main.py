@@ -98,6 +98,18 @@ class IslandDBusService(QObject):
     def lowBatteryPeek(self):
         self.c.triggerLowBatteryDemo()
 
+    @pyqtSlot()
+    def camera(self):
+        self.c.openCameraMirror()
+
+    @pyqtSlot()
+    def mirror(self):
+        self.c.openCameraMirror()
+
+    @pyqtSlot()
+    def weather(self):
+        self.c.refreshWeather()
+
 
 def main():
     # Graceful exit on Ctrl+C in terminal
@@ -114,7 +126,7 @@ def main():
     app.setOrganizationName("NXRts")
 
     # CLI Forwarding to running instance via D-Bus
-    cli_flags = {"--toggle", "--settings", "--expand", "--collapse", "--next", "--prev", "--dnd", "--mascot"}
+    cli_flags = {"--toggle", "--settings", "--expand", "--collapse", "--next", "--prev", "--dnd", "--mascot", "--camera", "--mirror", "--weather"}
     invoked = [arg for arg in sys.argv[1:] if arg in cli_flags]
     if invoked:
         probe_bus = QDBusConnection.sessionBus()
