@@ -57,6 +57,32 @@ class TestWeatherService(unittest.TestCase):
         seconds_passed_start = now_start.hour * 3600 + now_start.minute * 60 + now_start.second
         self.assertEqual(round(seconds_passed_start / 86400.0 * 100, 1), 0.0)
 
+    def test_weather_properties_defaults(self):
+        service = WeatherService.__new__(WeatherService)
+        service._temp_text = "27°C"
+        service._temp_c = 27
+        service._condition = "Sebagian Berawan"
+        service._icon = "sun.svg"
+        service._city = "Jakarta"
+        service._is_day = True
+        service._humidity = 70
+        service._wind_speed = "12 km/h"
+        service._last_updated = "19:00 WIB"
+        service._is_refreshing = False
+        service._hourly_forecast = [
+            {"time": "Sekarang", "temp": "27°", "icon": "sun.svg", "condition": "Cerah"}
+        ]
+
+        self.assertEqual(service.temperature, "27°C")
+        self.assertEqual(service.temperatureC, 27)
+        self.assertEqual(service.condition, "Sebagian Berawan")
+        self.assertEqual(service.city, "Jakarta")
+        self.assertEqual(service.humidityText, "70%")
+        self.assertEqual(service.windSpeed, "12 km/h")
+        self.assertEqual(len(service.hourlyForecast), 1)
+        self.assertEqual(service.lastUpdated, "19:00 WIB")
+        self.assertFalse(service.isRefreshing)
+
 
 if __name__ == "__main__":
     unittest.main()

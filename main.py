@@ -74,12 +74,12 @@ class IslandDBusService(QObject):
 
     @pyqtSlot()
     def next(self):
-        next_idx = (self.c._active_hub_page + 1) % 9
+        next_idx = (self.c._active_hub_page + 1) % 10
         self.c.openHubPage(next_idx)
 
     @pyqtSlot()
     def prev(self):
-        prev_idx = (self.c._active_hub_page - 1) % 9
+        prev_idx = (self.c._active_hub_page - 1) % 10
         self.c.openHubPage(prev_idx)
 
     @pyqtSlot()
@@ -108,6 +108,7 @@ class IslandDBusService(QObject):
 
     @pyqtSlot()
     def weather(self):
+        self.c.expandToWeather()
         self.c.refreshWeather()
 
 

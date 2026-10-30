@@ -7,11 +7,12 @@ Item {
     implicitWidth: 420
     implicitHeight: 245
 
-    // 9 Main Swipeable Module Pages (Settings is separated into its own view)
+    // 10 Main Swipeable Module Pages (Settings is separated into its own view)
     readonly property var pageTitles: [
         "Sistem & Pomodoro Fokus",
         IslandController.lyricsModeActive ? "Musik & Lirik Karaoke" : "Pemutar Musik",
         "Pintasan Cepat",
+        "Cuaca & Hari Ini",
         "Hardware, Suhu & TDP",
         "Bluetooth & Perangkat",
         "Pusat Notifikasi",
@@ -326,9 +327,9 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            if (pageContainer.currentIndex !== 5) {
-                                var dir = (5 > pageContainer.currentIndex) ? 1 : -1;
-                                pageContainer.goTo(5, dir);
+                            if (pageContainer.currentIndex !== 6) {
+                                var dir = (6 > pageContainer.currentIndex) ? 1 : -1;
+                                pageContainer.goTo(6, dir);
                             }
                         }
                     }
@@ -424,8 +425,8 @@ Item {
             clip: true
 
             property int currentIndex: IslandController.activeHubPage
-            readonly property int count: 9
-            readonly property var pages: [pageSystem, pageMusic, pageTools, pageNet, pageBluetooth, pageNotifications, pageHealth, pageTodo, pageShelf]
+            readonly property int count: 10
+            readonly property var pages: [pageSystem, pageMusic, pageTools, pageWeather, pageNet, pageBluetooth, pageNotifications, pageHealth, pageTodo, pageShelf]
             readonly property bool isChildSliderActive: seekMouseArea.pressed || seekMouseArea.isDragging || hubVolBarMouse.pressed || lyricsVolMouse.pressed || brightnessSliderMouse.pressed || pageShelf.isCardPressed
 
             // Allow keyboard Left/Right arrow navigation & Esc to close
@@ -723,7 +724,7 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: pageContainer.goTo(3, 1)
+                                onClicked: pageContainer.goTo(4, 1)
                             }
                         }
 
@@ -1931,7 +1932,7 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: IslandController.refreshWeather()
+                            onClicked: pageContainer.goTo(3, 1)
                         }
                     }
 
@@ -2185,7 +2186,7 @@ Item {
                                         IslandController.collapse()
                                         IslandController.triggerTestBluetoothPeek()
                                     } else {
-                                        pageContainer.goTo(4, 1)
+                                        pageContainer.goTo(5, 1)
                                     }
                                 }
                             }
@@ -2195,7 +2196,17 @@ Item {
             }
 
             // -----------------------------------------------------------------
-            // PAGE 3: HARDWARE, SUHU, TDP & JARINGAN
+            // PAGE 3: CUACA & HARI INI (DEDICATED WEATHER & DAY CYCLE VIEW)
+            // -----------------------------------------------------------------
+            PageWeather {
+                id: pageWeather
+                width: pageContainer.width
+                height: pageContainer.height
+                y: 0
+            }
+
+            // -----------------------------------------------------------------
+            // PAGE 4: HARDWARE, SUHU, TDP & JARINGAN
             // -----------------------------------------------------------------
             PageHardware {
                 id: pageNet
@@ -2205,7 +2216,7 @@ Item {
             }
 
             // -----------------------------------------------------------------
-            // PAGE 4: BLUETOOTH & PERANGKAT TERKONEKSI
+            // PAGE 5: BLUETOOTH & PERANGKAT TERKONEKSI
             // -----------------------------------------------------------------
             PageBluetooth {
                 id: pageBluetooth
