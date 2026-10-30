@@ -71,9 +71,21 @@ class WeatherService(QObject):
         self._humidity = 70
         self._wind_speed = "12 km/h"
         self._weather_code = 2
+        self._is_refreshing = False
+        self._last_updated = "Hari ini"
 
         self._day_progress_percent = 50.0
         self._day_progress_text = "Hari Ini 50%"
+
+        # Default fallback hourly forecast
+        self._hourly_forecast = [
+            {"time": "Sekarang", "temp": "27°", "icon": "sun.svg", "condition": "Cerah"},
+            {"time": "+1 jam", "temp": "27°", "icon": "sun.svg", "condition": "Cerah"},
+            {"time": "+2 jam", "temp": "26°", "icon": "cloud.svg", "condition": "Berawan"},
+            {"time": "+3 jam", "temp": "26°", "icon": "cloud.svg", "condition": "Berawan"},
+            {"time": "+4 jam", "temp": "25°", "icon": "cloud.svg", "condition": "Berawan"},
+            {"time": "+5 jam", "temp": "25°", "icon": "cloud.svg", "condition": "Berawan"},
+        ]
 
         # Initialize location
         self._lat, self._lon, self._city = self._detect_location()
@@ -95,7 +107,7 @@ class WeatherService(QObject):
         self._refresh_timer.start()
 
         # Initial asynchronous fetch
-        QTimer.singleShot(1500, self.refresh_weather_async)
+        QTimer.singleShot(1200, self.refresh_weather_async)
 
     def _detect_location(self):
         """Detects city and coordinates from system timezone or default."""
@@ -129,6 +141,10 @@ class WeatherService(QObject):
                     self._humidity = data.get("humidity", self._humidity)
                     self._wind_speed = data.get("wind", self._wind_speed)
                     self._weather_code = data.get("code", self._weather_code)
+                    self._last_updated = data.get("last_updated", self._last_updated)
+                    cached_hourly = data.get("hourly", [])
+                    if cached_hourly and len(cached_hourly) >= 3:
+                        self._hourly_forecast = cached_hourly
         except Exception:
             pass
 
@@ -146,6 +162,8 @@ class WeatherService(QObject):
                     "humidity": self._humidity,
                     "wind": self._wind_speed,
                     "code": self._weather_code,
+                    "hourly": self._hourly_forecast,
+                    "last_updated": self._last_updated,
                     "updated_at": datetime.now().isoformat(),
                 }, f)
         except Exception:
@@ -174,6 +192,10 @@ class WeatherService(QObject):
     @pyqtSlot()
     def refresh_weather_async(self):
         """Triggers a non-blocking background fetch from Open-Meteo."""
+        if self._is_refreshing:
+            return
+        self._is_refreshing = True
+        self.weatherChanged.emit()
         thread = threading.Thread(target=self._fetch_weather_worker, daemon=True)
         thread.start()
 
@@ -184,7 +206,9 @@ class WeatherService(QObject):
                 f"https://api.open-meteo.com/v1/forecast"
                 f"?latitude={self._lat:.4f}&longitude={self._lon:.4f}"
                 f"&current=temperature_2m,relative_humidity_2m,is_day,weather_code,wind_speed_10m"
-                f"&forecast_days=1"
+                f"&hourly=temperature_2m,weather_code,is_day"
+                f"&forecast_days=2"
+                f"&timezone=auto"
             )
 
             req = urllib.request.Request(
@@ -213,11 +237,51 @@ class WeatherService(QObject):
                 else:
                     self._icon = cond_info[1]
 
+                # Hourly Forecast parsing (next 6 hours)
+                hourly = payload.get("hourly", {})
+                times = hourly.get("time", [])
+                temps = hourly.get("temperature_2m", [])
+                codes = hourly.get("weather_code", [])
+                is_days = hourly.get("is_day", [])
+
+                if times and temps:
+                    now_iso_hour = datetime.now().strftime("%Y-%m-%dT%H:00")
+                    current_idx = 0
+                    for i, t in enumerate(times):
+                        if t >= now_iso_hour:
+                            current_idx = i
+                            break
+
+                    new_hourly = []
+                    for idx in range(current_idx, min(current_idx + 6, len(times))):
+                        t_str = times[idx]
+                        hour_label = "Sekarang" if idx == current_idx else t_str.split("T")[-1][:5]
+                        code = int(codes[idx]) if idx < len(codes) else 0
+                        t_val = round(float(temps[idx])) if idx < len(temps) else self._temp_c
+                        is_d = bool(is_days[idx]) if idx < len(is_days) else True
+
+                        h_cond, h_icon = WMO_WEATHER_CODES.get(code, ("Cerah", "sun.svg"))
+                        if not is_d and h_icon == "sun.svg":
+                            h_icon = "moon.svg"
+
+                        new_hourly.append({
+                            "time": hour_label,
+                            "temp": f"{t_val}°",
+                            "icon": h_icon,
+                            "condition": h_cond,
+                        })
+
+                    if new_hourly:
+                        self._hourly_forecast = new_hourly
+
+                self._last_updated = datetime.now().strftime("%H:%M") + " WIB"
                 self._save_cache()
-                self.weatherChanged.emit()
         except Exception:
             # Silently retain cached/fallback state on network error
             pass
+        finally:
+            self._is_refreshing = False
+            self.weatherChanged.emit()
 
     # --- Properties ---
 
@@ -250,8 +314,24 @@ class WeatherService(QObject):
         return self._humidity
 
     @pyqtProperty(str, notify=weatherChanged)
+    def humidityText(self) -> str:
+        return f"{self._humidity}%"
+
+    @pyqtProperty(str, notify=weatherChanged)
     def windSpeed(self) -> str:
         return self._wind_speed
+
+    @pyqtProperty("QVariantList", notify=weatherChanged)
+    def hourlyForecast(self) -> list:
+        return self._hourly_forecast
+
+    @pyqtProperty(str, notify=weatherChanged)
+    def lastUpdated(self) -> str:
+        return self._last_updated
+
+    @pyqtProperty(bool, notify=weatherChanged)
+    def isRefreshing(self) -> bool:
+        return self._is_refreshing
 
     @pyqtProperty(float, notify=dayProgressChanged)
     def dayProgressPercent(self) -> float:
@@ -260,4 +340,3 @@ class WeatherService(QObject):
     @pyqtProperty(str, notify=dayProgressChanged)
     def dayProgressText(self) -> str:
         return self._day_progress_text
-

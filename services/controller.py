@@ -695,32 +695,39 @@ class IslandController(QObject):
         self._set_state("expanded-hub")
 
     @pyqtSlot()
-    def expandToBluetooth(self):
-        """Open Page 4 (Bluetooth & Perangkat)."""
-        self._active_hub_page = 4
-        self.activeHubPageChanged.emit(4)
+    def expandToWeather(self):
+        """Open Page 3 (Cuaca & Waktu)."""
+        self._active_hub_page = 3
+        self.activeHubPageChanged.emit(3)
         self._set_state("expanded-hub")
 
     @pyqtSlot()
-    def expandToNotifications(self):
-        """Open Page 5 (Pusat Notifikasi) and select the latest notification."""
-        self.notifications.refresh_relative_times()
-        self.notifications.select_notification(0)
+    def expandToBluetooth(self):
+        """Open Page 5 (Bluetooth & Perangkat)."""
         self._active_hub_page = 5
         self.activeHubPageChanged.emit(5)
         self._set_state("expanded-hub")
 
     @pyqtSlot()
+    def expandToNotifications(self):
+        """Open Page 6 (Pusat Notifikasi) and select the latest notification."""
+        self.notifications.refresh_relative_times()
+        self.notifications.select_notification(0)
+        self._active_hub_page = 6
+        self.activeHubPageChanged.emit(6)
+        self._set_state("expanded-hub")
+
+    @pyqtSlot()
     def expandToShelf(self):
-        """Automatically expand to Page 8 (File Shelf) when a file is dragged over the notch."""
-        self._active_hub_page = 8
-        self.activeHubPageChanged.emit(8)
+        """Automatically expand to Page 9 (File Shelf) when a file is dragged over the notch."""
+        self._active_hub_page = 9
+        self.activeHubPageChanged.emit(9)
         self._set_state("expanded-hub")
 
     @pyqtSlot(int)
     def openHubPage(self, page_index):
-        self._active_hub_page = max(0, min(page_index, 8))
-        if self._active_hub_page == 5:
+        self._active_hub_page = max(0, min(page_index, 9))
+        if self._active_hub_page == 6:
             self.notifications.refresh_relative_times()
             self.notifications.select_notification(self.notifications.selected_index)
         self.activeHubPageChanged.emit(self._active_hub_page)
@@ -1283,6 +1290,34 @@ class IslandController(QObject):
     @pyqtProperty(str, notify=weatherChanged)
     def weatherCity(self) -> str:
         return self.weather.city
+
+    @pyqtProperty(int, notify=weatherChanged)
+    def weatherHumidity(self) -> int:
+        return self.weather.humidity
+
+    @pyqtProperty(str, notify=weatherChanged)
+    def weatherHumidityText(self) -> str:
+        return self.weather.humidityText
+
+    @pyqtProperty(str, notify=weatherChanged)
+    def weatherWind(self) -> str:
+        return self.weather.windSpeed
+
+    @pyqtProperty(bool, notify=weatherChanged)
+    def weatherIsDay(self) -> bool:
+        return self.weather.isDay
+
+    @pyqtProperty("QVariantList", notify=weatherChanged)
+    def weatherHourlyForecast(self):
+        return self.weather.hourlyForecast
+
+    @pyqtProperty(str, notify=weatherChanged)
+    def weatherLastUpdated(self) -> str:
+        return self.weather.lastUpdated
+
+    @pyqtProperty(bool, notify=weatherChanged)
+    def weatherIsRefreshing(self) -> bool:
+        return self.weather.isRefreshing
 
     @pyqtProperty(float, notify=dayProgressChanged)
     def dayProgressPercent(self) -> float:
