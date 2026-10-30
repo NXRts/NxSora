@@ -208,6 +208,7 @@ class WeatherService(QObject):
                 f"&current=temperature_2m,relative_humidity_2m,is_day,weather_code,wind_speed_10m"
                 f"&hourly=temperature_2m,weather_code,is_day"
                 f"&forecast_days=2"
+                f"&timezone=auto"
             )
 
             req = urllib.request.Request(

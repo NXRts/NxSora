@@ -10,59 +10,53 @@ Item {
         spacing: 6
 
         // =====================================================================
-        // SECTION 1: HERO WEATHER + METRICS (TOP HALF)
+        // ROW 1: HERO WEATHER (LEFT) + 4 COMPACT METRICS (RIGHT) (HEIGHT: 86px)
         // =====================================================================
         RowLayout {
             Layout.fillWidth: true
-            Layout.preferredHeight: 88
+            Layout.preferredHeight: 86
+            Layout.maximumHeight: 86
             spacing: 6
 
-            // --- HERO WEATHER CARD (LEFT) ---
+            // --- HERO WEATHER CARD (LEFT ~205px) ---
             Rectangle {
-                Layout.preferredWidth: 235
+                Layout.preferredWidth: 205
                 Layout.fillHeight: true
-                radius: 12
-                color: "#111422"
-                border.color: "#1e243a"
+                radius: 10
+                color: "#12131c"
+                border.color: "#24273a"
                 border.width: 1
                 clip: true
 
-                // Subtle weather-adaptive glow background
+                // Gentle ambient glow
                 Rectangle {
                     anchors.centerIn: parent
                     width: parent.width * 0.9
                     height: parent.height * 0.9
                     radius: 30
                     color: IslandController.weatherIsDay ? "#0284c7" : "#4338ca"
-                    opacity: 0.12
+                    opacity: 0.10
                 }
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: 10
-                    spacing: 10
+                    anchors.margins: 8
+                    spacing: 8
 
-                    // Weather Icon with glow ring
-                    Item {
-                        width: 48
-                        height: 48
-                        Layout.alignment: Qt.AlignVCenter
-
-                        Rectangle {
-                            anchors.centerIn: parent
-                            width: 46
-                            height: 46
-                            radius: 23
-                            color: IslandController.weatherIsDay ? "#0c2a42" : "#1e1b4b"
-                            border.color: IslandController.weatherIsDay ? "#0284c7" : "#6366f1"
-                            border.width: 1
-                        }
+                    // Weather Icon with circular badge
+                    Rectangle {
+                        width: 44
+                        height: 44
+                        radius: 22
+                        color: IslandController.weatherIsDay ? "#0c2338" : "#1a1b38"
+                        border.color: IslandController.weatherIsDay ? "#0284c7" : "#6366f1"
+                        border.width: 1
 
                         Image {
                             anchors.centerIn: parent
-                            width: 26
-                            height: 26
-                            sourceSize: Qt.size(26, 26)
+                            width: 24
+                            height: 24
+                            sourceSize: Qt.size(24, 24)
                             source: "file://" + AppConfig.assetsDir + "/" + (IslandController.weatherIcon ? (IslandController.weatherIcon.indexOf(".svg") !== -1 ? IslandController.weatherIcon : (IslandController.weatherIcon + ".svg")) : "cloud.svg")
                         }
                     }
@@ -74,25 +68,27 @@ Item {
                         spacing: 1
 
                         RowLayout {
-                            spacing: 6
+                            spacing: 5
                             Text {
                                 text: IslandController.weatherTemp || "27°C"
                                 color: "#f8fafc"
-                                font.pixelSize: 22
+                                font.pixelSize: 20
                                 font.weight: Font.ExtraBold
                                 font.letterSpacing: -0.5
                             }
                             Rectangle {
                                 height: 16
                                 radius: 8
-                                color: "#1e243a"
-                                implicitWidth: cityTxt.implicitWidth + 10
+                                color: "#182338"
+                                border.color: "#0284c7"
+                                border.width: 1
+                                implicitWidth: cityTxt.implicitWidth + 8
                                 Text {
                                     id: cityTxt
                                     anchors.centerIn: parent
                                     text: IslandController.weatherCity || "Jakarta"
                                     color: "#38bdf8"
-                                    font.pixelSize: 9
+                                    font.pixelSize: 8
                                     font.weight: Font.Bold
                                 }
                             }
@@ -100,7 +96,7 @@ Item {
 
                         Text {
                             text: IslandController.weatherCondition || "Sebagian Berawan"
-                            color: "#cbd5e1"
+                            color: "#e2e8f0"
                             font.pixelSize: 10
                             font.weight: Font.DemiBold
                             elide: Text.ElideRight
@@ -108,7 +104,7 @@ Item {
                         }
 
                         Text {
-                            text: "Diperbarui: " + (IslandController.weatherLastUpdated || "Baru saja")
+                            text: "Update: " + (IslandController.weatherLastUpdated || "Baru saja")
                             color: "#64748b"
                             font.pixelSize: 8
                         }
@@ -116,45 +112,46 @@ Item {
                 }
             }
 
-            // --- QUICK METRICS GRID (RIGHT) ---
+            // --- QUICK METRICS GRID (RIGHT, 2x2 PILLS) ---
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                radius: 12
-                color: "#111422"
-                border.color: "#1e243a"
+                radius: 10
+                color: "#12131c"
+                border.color: "#24273a"
                 border.width: 1
 
                 GridLayout {
                     anchors.fill: parent
-                    anchors.margins: 8
+                    anchors.margins: 7
                     columns: 2
-                    rowSpacing: 6
-                    columnSpacing: 6
+                    rowSpacing: 5
+                    columnSpacing: 5
 
                     // 1. Kelembapan
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: 8
-                        color: "#151828"
-                        border.color: "#222740"
+                        radius: 7
+                        color: "#181a26"
+                        border.color: "#25283d"
                         border.width: 1
 
                         RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 5
+                            anchors.fill: parent
+                            anchors.leftMargin: 6
+                            anchors.rightMargin: 6
+                            spacing: 4
+
                             Image {
                                 width: 11
                                 height: 11
                                 sourceSize: Qt.size(11, 11)
                                 source: "file://" + AppConfig.assetsDir + "/droplet.svg"
                             }
-                            ColumnLayout {
-                                spacing: 0
-                                Text { text: "Lembap"; color: "#64748b"; font.pixelSize: 8 }
-                                Text { text: IslandController.weatherHumidityText || "70%"; color: "#38bdf8"; font.pixelSize: 9; font.weight: Font.Bold }
-                            }
+                            Text { text: "Lembap"; color: "#94a3b8"; font.pixelSize: 8; font.weight: Font.Medium }
+                            Item { Layout.fillWidth: true }
+                            Text { text: IslandController.weatherHumidityText || "70%"; color: "#38bdf8"; font.pixelSize: 9; font.weight: Font.Bold }
                         }
                     }
 
@@ -162,50 +159,57 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: 8
-                        color: "#151828"
-                        border.color: "#222740"
+                        radius: 7
+                        color: "#181a26"
+                        border.color: "#25283d"
                         border.width: 1
 
                         RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 5
+                            anchors.fill: parent
+                            anchors.leftMargin: 6
+                            anchors.rightMargin: 6
+                            spacing: 4
+
                             Image {
                                 width: 11
                                 height: 11
                                 sourceSize: Qt.size(11, 11)
                                 source: "file://" + AppConfig.assetsDir + "/wind.svg"
                             }
-                            ColumnLayout {
-                                spacing: 0
-                                Text { text: "Angin"; color: "#64748b"; font.pixelSize: 8 }
-                                Text { text: IslandController.weatherWind || "10 km/h"; color: "#f8fafc"; font.pixelSize: 9; font.weight: Font.Bold }
-                            }
+                            Text { text: "Angin"; color: "#94a3b8"; font.pixelSize: 8; font.weight: Font.Medium }
+                            Item { Layout.fillWidth: true }
+                            Text { text: IslandController.weatherWind || "10 km/h"; color: "#f8fafc"; font.pixelSize: 9; font.weight: Font.Bold }
                         }
                     }
 
-                    // 3. Fase Waktu (Siang / Malam)
+                    // 3. Fase Hari
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: 8
-                        color: "#151828"
-                        border.color: "#222740"
+                        radius: 7
+                        color: "#181a26"
+                        border.color: "#25283d"
                         border.width: 1
 
                         RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 5
+                            anchors.fill: parent
+                            anchors.leftMargin: 6
+                            anchors.rightMargin: 6
+                            spacing: 4
+
                             Image {
                                 width: 11
                                 height: 11
                                 sourceSize: Qt.size(11, 11)
                                 source: "file://" + AppConfig.assetsDir + (IslandController.weatherIsDay ? "/sun.svg" : "/moon.svg")
                             }
-                            ColumnLayout {
-                                spacing: 0
-                                Text { text: "Fase"; color: "#64748b"; font.pixelSize: 8 }
-                                Text { text: IslandController.weatherIsDay ? "Siang" : "Malam"; color: IslandController.weatherIsDay ? "#facc15" : "#818cf8"; font.pixelSize: 9; font.weight: Font.Bold }
+                            Text { text: "Fase"; color: "#94a3b8"; font.pixelSize: 8; font.weight: Font.Medium }
+                            Item { Layout.fillWidth: true }
+                            Text {
+                                text: IslandController.weatherIsDay ? "Siang" : "Malam"
+                                color: IslandController.weatherIsDay ? "#facc15" : "#818cf8"
+                                font.pixelSize: 9
+                                font.weight: Font.Bold
                             }
                         }
                     }
@@ -214,17 +218,18 @@ Item {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: 8
-                        color: rfMouse.containsMouse ? "#1e293b" : "#151828"
-                        border.color: rfMouse.containsMouse ? "#38bdf8" : "#222740"
+                        radius: 7
+                        color: rfMouse.containsMouse ? "#20273c" : "#181a26"
+                        border.color: rfMouse.containsMouse ? "#38bdf8" : "#25283d"
                         border.width: 1
 
                         RowLayout {
-                            anchors.centerIn: parent
-                            spacing: 5
+                            anchors.fill: parent
+                            anchors.leftMargin: 6
+                            anchors.rightMargin: 6
+                            spacing: 4
 
                             Image {
-                                id: rfIcon
                                 width: 11
                                 height: 11
                                 sourceSize: Qt.size(11, 11)
@@ -242,7 +247,7 @@ Item {
                             Text {
                                 text: IslandController.weatherIsRefreshing ? "Memuat..." : "Refresh"
                                 color: rfMouse.containsMouse ? "#38bdf8" : "#cbd5e1"
-                                font.pixelSize: 9
+                                font.pixelSize: 8
                                 font.weight: Font.Bold
                             }
                         }
@@ -260,55 +265,53 @@ Item {
         }
 
         // =====================================================================
-        // SECTION 2: DAY PROGRESS BAR & 6-HOUR FORECAST STRIP (BOTTOM HALF)
+        // ROW 2: DAY PROGRESS & 6-HOUR HOURLY FORECAST (HEIGHT: 76px)
         // =====================================================================
         Rectangle {
             Layout.fillWidth: true
-            Layout.fillHeight: true
-            radius: 12
-            color: "#111422"
-            border.color: "#1e243a"
+            Layout.preferredHeight: 76
+            Layout.maximumHeight: 76
+            radius: 10
+            color: "#12131c"
+            border.color: "#24273a"
             border.width: 1
+            clip: true
 
             ColumnLayout {
                 anchors.fill: parent
-                anchors.margins: 8
-                spacing: 6
+                anchors.margins: 7
+                spacing: 5
 
-                // Top: Day Progress Header & Track
+                // Top: Day Progress Track
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: 8
+                    spacing: 7
 
                     Text {
-                        text: "Siklus 24 Jam"
+                        text: "Siklus Hari"
                         color: "#94a3b8"
-                        font.pixelSize: 9
+                        font.pixelSize: 8
                         font.weight: Font.DemiBold
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
-                        height: 5
-                        radius: 2.5
-                        color: "#1e243a"
+                        height: 4
+                        radius: 2
+                        color: "#232638"
 
                         Rectangle {
                             width: parent.width * Math.min(1.0, Math.max(0.02, IslandController.dayProgressPercent / 100.0))
                             height: parent.height
-                            radius: 2.5
-                            gradient: Gradient {
-                                orientation: Gradient.Horizontal
-                                GradientStop { position: 0.0; color: "#0284c7" }
-                                GradientStop { position: 1.0; color: "#38bdf8" }
-                            }
+                            radius: 2
+                            color: "#38bdf8"
                         }
                     }
 
                     Text {
                         text: IslandController.dayProgressText || "50%"
                         color: "#38bdf8"
-                        font.pixelSize: 9
+                        font.pixelSize: 8
                         font.weight: Font.Bold
                     }
                 }
@@ -317,7 +320,7 @@ Item {
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    spacing: 6
+                    spacing: 5
 
                     Repeater {
                         model: IslandController.weatherHourlyForecast
@@ -328,9 +331,9 @@ Item {
 
                             Layout.fillWidth: true
                             Layout.fillHeight: true
-                            radius: 8
-                            color: hourMouse.containsMouse ? "#1c2236" : "#141726"
-                            border.color: index === 0 ? "#0284c7" : (hourMouse.containsMouse ? "#38bdf8" : "#1e2338")
+                            radius: 6
+                            color: index === 0 ? "#1c2538" : (hourMouse.containsMouse ? "#1c2236" : "#181a26")
+                            border.color: index === 0 ? "#0284c7" : (hourMouse.containsMouse ? "#38bdf8" : "#25283d")
                             border.width: 1
 
                             ColumnLayout {
@@ -347,9 +350,9 @@ Item {
 
                                 Image {
                                     Layout.alignment: Qt.AlignHCenter
-                                    width: 14
-                                    height: 14
-                                    sourceSize: Qt.size(14, 14)
+                                    width: 13
+                                    height: 13
+                                    sourceSize: Qt.size(13, 13)
                                     source: "file://" + AppConfig.assetsDir + "/" + (modelData.icon ? (modelData.icon.indexOf(".svg") !== -1 ? modelData.icon : (modelData.icon + ".svg")) : "cloud.svg")
                                 }
 
@@ -357,7 +360,7 @@ Item {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: modelData.temp || "--"
                                     color: "#f8fafc"
-                                    font.pixelSize: 9
+                                    font.pixelSize: 8
                                     font.weight: Font.Bold
                                 }
                             }
