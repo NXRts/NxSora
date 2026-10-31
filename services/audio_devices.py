@@ -146,3 +146,4 @@ class AudioDeviceService(QObject):
                     break
         except Exception:
             pass
+

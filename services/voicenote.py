@@ -155,3 +155,4 @@ class VoiceNoteService(QObject):
                 pass
 
         self.recordingStateChanged.emit()
+

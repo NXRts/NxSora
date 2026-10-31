@@ -146,3 +146,4 @@ class AudioVisualizerService(QObject):
             except Exception:
                 pass
             self._proc = None
+

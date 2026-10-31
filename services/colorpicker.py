@@ -116,3 +116,4 @@ class ColorPickerService(QObject):
 
         self.colorPicked.emit(self._last_hex, self._last_rgb)
         self.pickerChanged.emit()
+

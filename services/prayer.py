@@ -382,3 +382,4 @@ class PrayerService(QObject):
     @pyqtProperty("QVariantMap", notify=checklistChanged)
     def checklist(self) -> dict:
         return self._checklist
+
