@@ -29,19 +29,37 @@ Item {
             root.fsAutoHide = IslandController.getSetting("fullscreen_autohide_enabled") !== false;
             root.privacyDots = IslandController.getSetting("privacy_dots_enabled") !== false;
             root.eyeTracking = IslandController.getSetting("eye_tracking_enabled") !== false;
+            if (settingsFlickable && IslandController.settingsScrollY > 0) {
+                settingsFlickable.contentY = IslandController.settingsScrollY;
+            }
         }
     }
 
     Flickable {
+        id: settingsFlickable
         anchors.fill: parent
+        anchors.rightMargin: 8
         contentWidth: width
-        contentHeight: settingsCol.implicitHeight + 10
+        contentHeight: settingsCol.implicitHeight + 16
         clip: true
         boundsBehavior: Flickable.StopAtBounds
 
+        ScrollBar.vertical: ScrollBar {
+            id: vertScrollBar
+            policy: ScrollBar.AsNeeded
+            width: 4
+            anchors.right: parent.right
+            background: Item {} // Transparent background to eliminate grey slab
+            contentItem: Rectangle {
+                implicitWidth: 4
+                radius: 2
+                color: vertScrollBar.pressed ? "#38bdf8" : (vertScrollBar.hovered ? "#64748b" : "#334155")
+            }
+        }
+
         ColumnLayout {
             id: settingsCol
-            width: parent.width
+            width: settingsFlickable.width
             spacing: 8
 
             // =================================================================
@@ -357,10 +375,10 @@ Item {
             }
 
             // =================================================================
-            // SECTION 2B: JADWAL SHOLAT & PENGINGAT PINTAR (FASE 5)
+            // SECTION 2B: LOKASI TERPADU, CUACA & JADWAL SHOLAT (FASE 5)
             // =================================================================
             Text {
-                text: "JADWAL SHOLAT & PENGINGAT PINTAR (FASE 5)"
+                text: "LOKASI TERPADU, CUACA & JADWAL SHOLAT (FASE 5)"
                 color: "#64748b"
                 font.pixelSize: 9
                 font.weight: Font.Bold
@@ -381,25 +399,298 @@ Item {
                     anchors.margins: 10
                     spacing: 10
 
-                    // City Selector Pills
+                    // 1. Kartu Lokasi Aktif & Tombol Deteksi Otomatis
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 48
+                        radius: 8
+                        color: "#181a27"
+                        border.color: "#2a3147"
+                        border.width: 1
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
+                            spacing: 8
+
+                            Image {
+                                Layout.preferredWidth: 16
+                                Layout.preferredHeight: 16
+                                sourceSize: Qt.size(16, 16)
+                                source: "file://" + AppConfig.assetsDir + "/map-pin.svg"
+                                Layout.alignment: Qt.AlignVCenter
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.minimumWidth: 0
+                                spacing: 1
+                                Layout.alignment: Qt.AlignVCenter
+
+                                RowLayout {
+                                    Layout.fillWidth: true
+                                    Layout.minimumWidth: 0
+                                    spacing: 6
+
+                                    Text {
+                                        text: IslandController.locationCity || "Jakarta"
+                                        color: "#f8fafc"
+                                        font.pixelSize: 11
+                                        font.weight: Font.Bold
+                                        elide: Text.ElideRight
+                                        Layout.maximumWidth: 120
+                                    }
+
+                                    Rectangle {
+                                        height: 13
+                                        radius: 6.5
+                                        color: "#0369a1"
+                                        implicitWidth: coordTxt.implicitWidth + 8
+                                        Layout.alignment: Qt.AlignVCenter
+
+                                        Text {
+                                            id: coordTxt
+                                            anchors.centerIn: parent
+                                            text: IslandController.locationLatitude + ", " + IslandController.locationLongitude
+                                            color: "#e0f2fe"
+                                            font.pixelSize: 8
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    text: IslandController.locationRegion ? (IslandController.locationRegion + " · GMT+" + IslandController.locationTimezoneOffset) : "GMT+7"
+                                    color: "#94a3b8"
+                                    font.pixelSize: 8
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
+                                    Layout.minimumWidth: 0
+                                }
+                            }
+
+                            // Tombol Deteksi Otomatis (1-klik)
+                            Rectangle {
+                                Layout.preferredWidth: 84
+                                Layout.preferredHeight: 22
+                                Layout.alignment: Qt.AlignVCenter
+                                radius: 11
+                                color: IslandController.locationIsDetecting ? "#0369a1" : (autoDetectMouse.containsMouse ? "#262f44" : "#1c2233")
+                                border.color: "#38bdf8"
+                                border.width: 1
+
+                                RowLayout {
+                                    anchors.centerIn: parent
+                                    spacing: 4
+                                    Image {
+                                        Layout.preferredWidth: 10
+                                        Layout.preferredHeight: 10
+                                        sourceSize: Qt.size(10, 10)
+                                        source: "file://" + AppConfig.assetsDir + "/target.svg"
+                                    }
+                                    Text {
+                                        text: IslandController.locationIsDetecting ? "Mencari..." : "Deteksi Auto"
+                                        color: "#38bdf8"
+                                        font.pixelSize: 8
+                                        font.weight: Font.Bold
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: autoDetectMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: IslandController.detectLocationAuto()
+                                }
+                            }
+                        }
+                    }
+
+                    // 2. Kolom Pencarian Kota / Daerah (Open-Meteo Geocoding)
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 4
 
-                        RowLayout {
-                            spacing: 5
-                            Image {
-                                width: 12
-                                height: 12
-                                sourceSize: Qt.size(12, 12)
-                                source: "file://" + AppConfig.assetsDir + "/globe.svg"
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 28
+                            radius: 6
+                            color: "#161824"
+                            border.color: locSearchInput.activeFocus ? "#38bdf8" : "#2d334a"
+                            border.width: 1
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 6
+                                spacing: 6
+
+                                Image {
+                                    Layout.preferredWidth: 12
+                                    Layout.preferredHeight: 12
+                                    sourceSize: Qt.size(12, 12)
+                                    source: "file://" + AppConfig.assetsDir + "/search.svg"
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+
+                                TextInput {
+                                    id: locSearchInput
+                                    Layout.fillWidth: true
+                                    Layout.minimumWidth: 0
+                                    color: "#f1f5f9"
+                                    font.pixelSize: 10
+                                    selectByMouse: true
+                                    clip: true
+                                    verticalAlignment: TextInput.AlignVCenter
+
+                                    Text {
+                                        text: "Cari kota / kecamatan... (Enter)"
+                                        color: "#64748b"
+                                        font.pixelSize: 10
+                                        visible: !locSearchInput.text && !locSearchInput.activeFocus
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+
+                                    onAccepted: {
+                                        if (text.trim().length >= 2) {
+                                            IslandController.searchLocation(text.trim())
+                                        }
+                                    }
+                                }
+
+                                Rectangle {
+                                    Layout.preferredWidth: 38
+                                    Layout.preferredHeight: 18
+                                    Layout.alignment: Qt.AlignVCenter
+                                    radius: 4
+                                    color: searchBtnMouse.containsMouse ? "#0284c7" : "#0369a1"
+                                    visible: locSearchInput.text.trim().length >= 2
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "Cari"
+                                        color: "#ffffff"
+                                        font.pixelSize: 9
+                                        font.weight: Font.Bold
+                                    }
+
+                                    MouseArea {
+                                        id: searchBtnMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: IslandController.searchLocation(locSearchInput.text.trim())
+                                    }
+                                }
                             }
-                            Text {
-                                text: "Pilih Kota Lokasi Hisab Kemenag RI:"
-                                color: "#e2e8f0"
-                                font.pixelSize: 11
-                                font.weight: Font.Bold
+                        }
+
+                        // Status message / Indicator
+                        Text {
+                            text: IslandController.locationStatusMessage
+                            color: "#38bdf8"
+                            font.pixelSize: 8
+                            visible: IslandController.locationStatusMessage !== ""
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                        }
+
+                        // Search Results Dropdown List
+                        ListView {
+                            Layout.fillWidth: true
+                            implicitHeight: Math.min(count * 32, 128)
+                            visible: count > 0
+                            clip: true
+                            model: IslandController.locationSearchResults
+
+                            delegate: Rectangle {
+                                width: ListView.view.width
+                                height: 30
+                                radius: 4
+                                color: resMouse.containsMouse ? "#242a3e" : "#1a1d2c"
+                                border.color: "#2a3147"
+                                border.width: 1
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: 8
+                                    anchors.rightMargin: 6
+                                    spacing: 6
+
+                                    Image {
+                                        Layout.preferredWidth: 10
+                                        Layout.preferredHeight: 10
+                                        sourceSize: Qt.size(10, 10)
+                                        source: "file://" + AppConfig.assetsDir + "/map-pin.svg"
+                                        Layout.alignment: Qt.AlignVCenter
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        Layout.minimumWidth: 0
+                                        spacing: 0
+                                        Layout.alignment: Qt.AlignVCenter
+
+                                        Text {
+                                            text: modelData.name || ""
+                                            color: "#f8fafc"
+                                            font.pixelSize: 9
+                                            font.weight: Font.Bold
+                                            elide: Text.ElideRight
+                                            Layout.fillWidth: true
+                                        }
+                                        Text {
+                                            text: (modelData.subtitle || "") + " (" + modelData.lat + ", " + modelData.lon + ")"
+                                            color: "#94a3b8"
+                                            font.pixelSize: 8
+                                            elide: Text.ElideRight
+                                            Layout.fillWidth: true
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        Layout.preferredWidth: 34
+                                        Layout.preferredHeight: 18
+                                        Layout.alignment: Qt.AlignVCenter
+                                        radius: 3
+                                        color: "#0369a1"
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "Pilih"
+                                            color: "#e0f2fe"
+                                            font.pixelSize: 9
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: resMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        IslandController.selectLocationResult(index)
+                                        locSearchInput.text = ""
+                                    }
+                                }
                             }
+                        }
+                    }
+
+                    // 3. Preset Kota Populer (Horizontal scroll)
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 4
+
+                        Text {
+                            text: "Preset Kota Populer:"
+                            color: "#94a3b8"
+                            font.pixelSize: 9
+                            font.weight: Font.Bold
                         }
 
                         Flickable {
@@ -417,7 +708,7 @@ Item {
 
                                     Rectangle {
                                         required property string modelData
-                                        readonly property bool isSelected: (IslandController.prayerCity === modelData)
+                                        readonly property bool isSelected: (IslandController.locationCity === modelData || IslandController.prayerCity === modelData)
 
                                         height: 22
                                         radius: 11
@@ -440,9 +731,120 @@ Item {
                                             anchors.fill: parent
                                             hoverEnabled: true
                                             cursorShape: Qt.PointingHandCursor
-                                            onClicked: IslandController.setPrayerCity(modelData)
+                                            onClicked: IslandController.searchLocation(modelData)
                                         }
                                     }
+                                }
+                            }
+                        }
+                    }
+
+                    // Divider
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 1
+                        color: "#1e2235"
+                    }
+
+                    // 4. Koreksi Waktu Ihtiath Sholat (+/- menit)
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.minimumWidth: 0
+                            spacing: 1
+                            RowLayout {
+                                spacing: 5
+                                Image {
+                                    Layout.preferredWidth: 12
+                                    Layout.preferredHeight: 12
+                                    sourceSize: Qt.size(12, 12)
+                                    source: "file://" + AppConfig.assetsDir + "/timer.svg"
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+                                Text {
+                                    text: "Koreksi Waktu Sholat (Ihtiath)"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
+                            }
+                            Text {
+                                text: "Geser menit untuk mencocokkan azan masjid lokal"
+                                color: "#94a3b8"
+                                font.pixelSize: 8
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                                Layout.minimumWidth: 0
+                            }
+                        }
+
+                        RowLayout {
+                            spacing: 4
+                            Layout.alignment: Qt.AlignVCenter
+
+                            Rectangle {
+                                Layout.preferredWidth: 20
+                                Layout.preferredHeight: 20
+                                radius: 4
+                                color: minBtnMouse.containsMouse ? "#2d334a" : "#1e2235"
+                                border.color: "#334155"
+                                border.width: 1
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "–"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
+                                MouseArea {
+                                    id: minBtnMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: IslandController.setLocationIhtiath(IslandController.locationIhtiathMinutes - 1)
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.preferredHeight: 20
+                                radius: 4
+                                color: "#0f172a"
+                                border.color: "#0284c7"
+                                border.width: 1
+                                implicitWidth: ihtiathTxt.implicitWidth + 10
+
+                                Text {
+                                    id: ihtiathTxt
+                                    anchors.centerIn: parent
+                                    text: (IslandController.locationIhtiathMinutes > 0 ? "+" : "") + IslandController.locationIhtiathMinutes + " mnt"
+                                    color: "#38bdf8"
+                                    font.pixelSize: 9
+                                    font.weight: Font.Bold
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.preferredWidth: 20
+                                Layout.preferredHeight: 20
+                                radius: 4
+                                color: plusBtnMouse.containsMouse ? "#2d334a" : "#1e2235"
+                                border.color: "#334155"
+                                border.width: 1
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "+"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
+                                MouseArea {
+                                    id: plusBtnMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: IslandController.setLocationIhtiath(IslandController.locationIhtiathMinutes + 1)
                                 }
                             }
                         }
