@@ -13,10 +13,12 @@ Item {
         IslandController.lyricsModeActive ? "Musik & Lirik Karaoke" : "Pemutar Musik",
         "Pintasan Cepat",
         "Cuaca & Hari Ini",
+        "Jadwal Sholat & Waktu",
+        "Riwayat Clipboard",
         "Hardware, Suhu & TDP",
         "Bluetooth & Perangkat",
         "Pusat Notifikasi",
-        "Kesehatan & Air",
+        "Kesehatan & Relaksasi",
         "Daftar Tugas (To-Do)",
         "Rak File (Shelf)"
     ]
@@ -31,9 +33,7 @@ Item {
     Connections {
         target: IslandController
         function onActiveHubPageChanged() {
-            if (pageContainer.currentIndex !== IslandController.activeHubPage) {
-                root.jumpToPageInstant(IslandController.activeHubPage);
-            }
+            root.jumpToPageInstant(IslandController.activeHubPage);
         }
         function onIsExpandedChanged() {
             if (IslandController.isExpanded) {
@@ -327,9 +327,9 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            if (pageContainer.currentIndex !== 6) {
-                                var dir = (6 > pageContainer.currentIndex) ? 1 : -1;
-                                pageContainer.goTo(6, dir);
+                            if (pageContainer.currentIndex !== 8) {
+                                var dir = (8 > pageContainer.currentIndex) ? 1 : -1;
+                                pageContainer.goTo(8, dir);
                             }
                         }
                     }
@@ -425,8 +425,8 @@ Item {
             clip: true
 
             property int currentIndex: IslandController.activeHubPage
-            readonly property int count: 10
-            readonly property var pages: [pageSystem, pageMusic, pageTools, pageWeather, pageNet, pageBluetooth, pageNotifications, pageHealth, pageTodo, pageShelf]
+            readonly property int count: 12
+            readonly property var pages: [pageSystem, pageMusic, pageTools, pageWeather, pagePrayer, pageClipboard, pageNet, pageBluetooth, pageNotifications, pageHealth, pageTodo, pageShelf]
             readonly property bool isChildSliderActive: seekMouseArea.pressed || seekMouseArea.isDragging || hubVolBarMouse.pressed || lyricsVolMouse.pressed || brightnessSliderMouse.pressed || pageShelf.isCardPressed
 
             // Allow keyboard Left/Right arrow navigation & Esc to close
@@ -724,7 +724,7 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: pageContainer.goTo(4, 1)
+                                onClicked: pageContainer.goTo(6, 1)
                             }
                         }
 
@@ -1601,6 +1601,91 @@ Item {
                                 }
                             }
                         }
+
+                        // Real PipeWire Audio Spectrum Equalizer & Output Switcher (Fase 5)
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 20
+                            spacing: 8
+
+                            // Device Output Switcher Pill (Speaker / Headphones / HDMI)
+                            Rectangle {
+                                height: 20
+                                radius: 10
+                                color: devSwitchMouse.containsMouse ? "#27273a" : "#161824"
+                                border.color: devSwitchMouse.containsMouse ? "#38bdf8" : "#282b3d"
+                                border.width: 1
+                                implicitWidth: devRow.implicitWidth + 14
+
+                                RowLayout {
+                                    id: devRow
+                                    anchors.centerIn: parent
+                                    spacing: 4
+
+                                    Image {
+                                        width: 10
+                                        height: 10
+                                        sourceSize: Qt.size(10, 10)
+                                        source: "file://" + AppConfig.assetsDir + "/" + (
+                                            IslandController.currentSinkName.indexOf("HDMI") !== -1 ? "tv.svg" :
+                                            (IslandController.currentSinkName.indexOf("Headphone") !== -1 || IslandController.currentSinkName.indexOf("TWS") !== -1 ? "headphones.svg" : "speaker.svg")
+                                        )
+                                    }
+
+                                    Text {
+                                        text: IslandController.currentSinkName
+                                        color: "#cbd5e1"
+                                        font.pixelSize: 9
+                                        font.weight: Font.DemiBold
+                                        elide: Text.ElideRight
+                                        Layout.maximumWidth: 110
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: devSwitchMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        var sinks = IslandController.audioSinks;
+                                        if (sinks && sinks.length > 1) {
+                                            var nextIdx = 0;
+                                            for (var i = 0; i < sinks.length; i++) {
+                                                if (sinks[i].isDefault) {
+                                                    nextIdx = (i + 1) % sinks.length;
+                                                    break;
+                                                }
+                                            }
+                                            IslandController.setDefaultAudioSink(sinks[nextIdx].id);
+                                        }
+                                    }
+                                }
+                            }
+
+                            Item { Layout.fillWidth: true }
+
+                            // 12-Band Reactive Equalizer Bars
+                            Row {
+                                spacing: 3
+                                height: 16
+                                Layout.alignment: Qt.AlignVCenter
+                                visible: IslandController.mediaIsPlaying
+
+                                Repeater {
+                                    model: IslandController.audioSpectrum
+                                    Rectangle {
+                                        required property var modelData
+                                        width: 3.5
+                                        height: Math.max(3, 16 * Number(modelData))
+                                        radius: 1.75
+                                        anchors.bottom: parent.bottom
+                                        color: IslandController.mediaAccentColor || "#38bdf8"
+                                        Behavior on height { NumberAnimation { duration: 60 } }
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     // --- VERTICAL DIVIDER (x=252px split line) ---
@@ -2066,7 +2151,7 @@ Item {
                             }
                         }
 
-                        // 4. Lock Screen
+                        // 4. Screen Color Picker (Eyedropper - Fase 5)
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
@@ -2074,32 +2159,43 @@ Item {
                             Layout.preferredHeight: 1
                             radius: 10
                             clip: true
-                            color: lockMouse.containsMouse ? "#20202c" : "#121217"
-                            border.color: "#22222a"
+                            color: pickerMouse.containsMouse ? "#20202c" : "#121217"
+                            border.color: pickerMouse.containsMouse ? "#38bdf8" : "#22222a"
                             border.width: 1
 
                             RowLayout {
                                 anchors.centerIn: parent
                                 spacing: 7
+
                                 Image {
                                     Layout.preferredWidth: 16
                                     Layout.preferredHeight: 16
                                     sourceSize: Qt.size(16, 16)
-                                    source: "file://" + AppConfig.assetsDir + "/lock.svg"
+                                    source: "file://" + AppConfig.assetsDir + "/pipette.svg"
                                 }
+
                                 ColumnLayout {
                                     spacing: 0
-                                    Text { text: "Kunci Layar"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
-                                    Text { text: "Lock Session"; color: "#64748b"; font.pixelSize: 9 }
+                                    Text { text: "Color Picker"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
+                                    RowLayout {
+                                        spacing: 4
+                                        Rectangle {
+                                            width: 8
+                                            height: 8
+                                            radius: 4
+                                            color: IslandController.lastPickedHex || "#38bdf8"
+                                        }
+                                        Text { text: IslandController.lastPickedHex || "#HEX Salin"; color: "#64748b"; font.pixelSize: 9 }
+                                    }
                                 }
                             }
 
                             MouseArea {
-                                id: lockMouse
+                                id: pickerMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: IslandController.lockScreen()
+                                onClicked: IslandController.pickScreenColor()
                             }
                         }
 
@@ -2143,7 +2239,7 @@ Item {
                             }
                         }
 
-                        // 6. Bluetooth / Charging Peek Demo (Left-click: TWS Peek, Right-click: Charging Peek)
+                        // 6. Quick Voice Note Recorder (Fase 5 - Saves directly to Shelf)
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
@@ -2151,44 +2247,58 @@ Item {
                             Layout.preferredHeight: 1
                             radius: 10
                             clip: true
-                            color: peekMouse.containsMouse ? "#20202c" : "#121217"
-                            border.color: IslandController.btDeviceConnected ? "#5ec2ff" : "#22222a"
-                            border.width: 1
+                            color: vnMouse.containsMouse ? "#20202c" : (IslandController.isRecordingVoiceNote ? "#2d1217" : "#121217")
+                            border.color: IslandController.isRecordingVoiceNote ? "#ef4444" : (vnMouse.containsMouse ? "#38bdf8" : "#22222a")
+                            border.width: IslandController.isRecordingVoiceNote ? 1.5 : 1
 
                             RowLayout {
                                 anchors.centerIn: parent
                                 spacing: 7
-                                Image {
-                                    width: 15
-                                    height: 15
-                                    sourceSize: Qt.size(15, 15)
-                                    source: "file://" + AppConfig.assetsDir + "/headphones.svg"
+
+                                Rectangle {
+                                    width: 18
+                                    height: 18
+                                    radius: 9
+                                    color: IslandController.isRecordingVoiceNote ? "#ef4444" : "#1e293b"
+
+                                    Image {
+                                        anchors.centerIn: parent
+                                        width: 10
+                                        height: 10
+                                        sourceSize: Qt.size(10, 10)
+                                        source: "file://" + AppConfig.assetsDir + "/mic.svg"
+                                    }
+
+                                    SequentialAnimation on opacity {
+                                        running: IslandController.isRecordingVoiceNote
+                                        loops: Animation.Infinite
+                                        NumberAnimation { to: 0.3; duration: 500 }
+                                        NumberAnimation { to: 1.0; duration: 500 }
+                                    }
                                 }
+
                                 ColumnLayout {
                                     spacing: 0
-                                    Text { text: "Bluetooth"; color: "#f8fafc"; font.pixelSize: 11; font.weight: Font.DemiBold }
                                     Text {
-                                        text: IslandController.btDeviceConnected ? ("Aktif · " + IslandController.btDeviceBattery + "%") : "Menu / Klik Kanan"
-                                        color: IslandController.btDeviceConnected ? "#5ec2ff" : "#64748b"
+                                        text: IslandController.isRecordingVoiceNote ? "Merekam..." : "Voice Note"
+                                        color: IslandController.isRecordingVoiceNote ? "#fca5a5" : "#f8fafc"
+                                        font.pixelSize: 11
+                                        font.weight: Font.DemiBold
+                                    }
+                                    Text {
+                                        text: IslandController.isRecordingVoiceNote ? IslandController.voiceNoteDurationFormatted : "Simpan ke Rak"
+                                        color: IslandController.isRecordingVoiceNote ? "#ef4444" : "#64748b"
                                         font.pixelSize: 9
                                     }
                                 }
                             }
 
                             MouseArea {
-                                id: peekMouse
+                                id: vnMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
-                                acceptedButtons: Qt.LeftButton | Qt.RightButton
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: (mouse) => {
-                                    if (mouse.button === Qt.RightButton) {
-                                        IslandController.collapse()
-                                        IslandController.triggerTestBluetoothPeek()
-                                    } else {
-                                        pageContainer.goTo(5, 1)
-                                    }
-                                }
+                                onClicked: IslandController.toggleVoiceNoteRecording()
                             }
                         }
                     }
@@ -2206,7 +2316,27 @@ Item {
             }
 
             // -----------------------------------------------------------------
-            // PAGE 4: HARDWARE, SUHU, TDP & JARINGAN
+            // PAGE 4: JADWAL SHOLAT & SUN ARC TRAJECTORY (FASE 5)
+            // -----------------------------------------------------------------
+            PagePrayer {
+                id: pagePrayer
+                width: pageContainer.width
+                height: pageContainer.height
+                y: 0
+            }
+
+            // -----------------------------------------------------------------
+            // PAGE 5: RIWAYAT CLIPBOARD & QUICK PASTE (FASE 5)
+            // -----------------------------------------------------------------
+            PageClipboard {
+                id: pageClipboard
+                width: pageContainer.width
+                height: pageContainer.height
+                y: 0
+            }
+
+            // -----------------------------------------------------------------
+            // PAGE 6: HARDWARE, SUHU, TDP & JARINGAN
             // -----------------------------------------------------------------
             PageHardware {
                 id: pageNet

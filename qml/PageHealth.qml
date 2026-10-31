@@ -5,9 +5,255 @@ import QtQuick.Controls
 Item {
     id: root
 
+    property bool isBreathingMode: false
+    property bool isBreathingActive: true
+    property string breathPhase: "Tarik Napas Perlahan..."
+    property color breathPhaseColor: "#38bdf8"
+    property int breathCycles: 1
+
+    SequentialAnimation {
+        id: breathingAnim
+        running: root.isBreathingMode && root.isBreathingActive
+        loops: Animation.Infinite
+
+        // Phase 1: Inhale (4s)
+        ParallelAnimation {
+            ScriptAction { script: { root.breathPhase = "Tarik Napas Perlahan (4s)"; root.breathPhaseColor = "#38bdf8"; } }
+            NumberAnimation { target: breathCircle; property: "scale"; to: 1.45; duration: 4000; easing.type: Easing.InOutQuad }
+            NumberAnimation { target: glowCircle; property: "opacity"; to: 0.6; duration: 4000 }
+        }
+        // Phase 2: Hold (4s)
+        ParallelAnimation {
+            ScriptAction { script: { root.breathPhase = "Tahan Napas Sejenak (4s)"; root.breathPhaseColor = "#fbbf24"; } }
+            PauseAnimation { duration: 4000 }
+            NumberAnimation { target: glowCircle; property: "opacity"; to: 0.8; duration: 4000 }
+        }
+        // Phase 3: Exhale (4s)
+        ParallelAnimation {
+            ScriptAction { script: { root.breathPhase = "Hembuskan Perlahan (4s)"; root.breathPhaseColor = "#34d399"; } }
+            NumberAnimation { target: breathCircle; property: "scale"; to: 1.0; duration: 4000; easing.type: Easing.InOutQuad }
+            NumberAnimation { target: glowCircle; property: "opacity"; to: 0.2; duration: 4000 }
+        }
+        // Cycle completed
+        ScriptAction { script: { root.breathCycles += 1; } }
+    }
+
+    // =========================================================================
+    // VIEW 1: GUIDED BREATHING RELAXATION SCREEN (4-4-4)
+    // =========================================================================
+    Rectangle {
+        anchors.fill: parent
+        radius: 14
+        color: "#111420"
+        border.color: "#1e2238"
+        border.width: 1
+        visible: root.isBreathingMode
+
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 10
+            spacing: 6
+
+            // Breathing Header
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 6
+
+                Rectangle {
+                    width: 22
+                    height: 22
+                    radius: 11
+                    color: "#064e3b"
+                    border.color: "#10b981"
+                    border.width: 1
+
+                    Image {
+                        anchors.centerIn: parent
+                        width: 11
+                        height: 11
+                        sourceSize: Qt.size(11, 11)
+                        source: "file://" + AppConfig.assetsDir + "/heart.svg"
+                    }
+                }
+
+                Text {
+                    text: "Relaksasi Pernapasan 4-4-4"
+                    color: "#ffffff"
+                    font.pixelSize: 12
+                    font.weight: Font.Bold
+                }
+
+                Item { Layout.fillWidth: true }
+
+                Rectangle {
+                    height: 20
+                    radius: 10
+                    color: "#1e293b"
+                    border.color: "#334155"
+                    border.width: 1
+                    implicitWidth: cycleText.implicitWidth + 14
+
+                    Text {
+                        id: cycleText
+                        anchors.centerIn: parent
+                        text: "Siklus ke-" + root.breathCycles
+                        color: "#38bdf8"
+                        font.pixelSize: 9
+                        font.weight: Font.DemiBold
+                    }
+                }
+
+                // Back to Hydration Button
+                Rectangle {
+                    height: 22
+                    radius: 11
+                    color: backHealthMouse.containsMouse ? "#334155" : "#1e2438"
+                    border.color: "#475569"
+                    border.width: 1
+                    implicitWidth: backHealthText.implicitWidth + 16
+
+                    Text {
+                        id: backHealthText
+                        anchors.centerIn: parent
+                        text: "Kembali"
+                        color: "#cbd5e1"
+                        font.pixelSize: 10
+                        font.weight: Font.DemiBold
+                    }
+
+                    MouseArea {
+                        id: backHealthMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.isBreathingMode = false
+                    }
+                }
+            }
+
+            // Central Pulsing Breathing Orb Area
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                // Background Glow
+                Rectangle {
+                    id: glowCircle
+                    anchors.centerIn: parent
+                    width: 110
+                    height: 110
+                    radius: 55
+                    color: root.breathPhaseColor
+                    opacity: 0.3
+                    Behavior on color { ColorAnimation { duration: 600 } }
+                }
+
+                // Breathing Core Circle
+                Rectangle {
+                    id: breathCircle
+                    anchors.centerIn: parent
+                    width: 70
+                    height: 70
+                    radius: 35
+                    color: "#0f172a"
+                    border.color: root.breathPhaseColor
+                    border.width: 2
+                    scale: 1.0
+
+                    Image {
+                        anchors.centerIn: parent
+                        width: 24
+                        height: 24
+                        sourceSize: Qt.size(24, 24)
+                        source: "file://" + AppConfig.assetsDir + "/heart.svg"
+                        opacity: 0.8
+                    }
+
+                    Behavior on border.color { ColorAnimation { duration: 600 } }
+                }
+
+                // Phase Instruction Text
+                ColumnLayout {
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 2
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 2
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: root.breathPhase
+                        color: root.breathPhaseColor
+                        font.pixelSize: 12
+                        font.weight: Font.Bold
+                        Behavior on color { ColorAnimation { duration: 600 } }
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: root.isBreathingActive ? "Fokus pada napas Anda dan rilekskan bahu" : "Sesi dihentikan sementara"
+                        color: "#64748b"
+                        font.pixelSize: 9
+                    }
+                }
+            }
+
+            // Play/Pause Control Button
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
+                spacing: 8
+
+                Item { Layout.fillWidth: true }
+
+                Rectangle {
+                    height: 24
+                    radius: 12
+                    color: breathPlayMouse.containsMouse ? "#0284c7" : "#0f3d6c"
+                    border.color: "#38bdf8"
+                    border.width: 1
+                    implicitWidth: playTextRow.implicitWidth + 20
+
+                    RowLayout {
+                        id: playTextRow
+                        anchors.centerIn: parent
+                        spacing: 5
+
+                        Image {
+                            width: 10
+                            height: 10
+                            sourceSize: Qt.size(10, 10)
+                            source: "file://" + AppConfig.assetsDir + "/" + (root.isBreathingActive ? "pause.svg" : "play.svg")
+                        }
+
+                        Text {
+                            text: root.isBreathingActive ? "Jeda" : "Mulai"
+                            color: "#ffffff"
+                            font.pixelSize: 10
+                            font.weight: Font.Bold
+                        }
+                    }
+
+                    MouseArea {
+                        id: breathPlayMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.isBreathingActive = !root.isBreathingActive
+                    }
+                }
+
+                Item { Layout.fillWidth: true }
+            }
+        }
+    }
+
+    // =========================================================================
+    // VIEW 2: HYDRATION & EYE BREAK MAIN VIEW
+    // =========================================================================
     ColumnLayout {
         anchors.fill: parent
         spacing: 8
+        visible: !root.isBreathingMode
 
         // =====================================================================
         // SECTION 1: SPLIT WATER TRACKER + HOURLY HISTOGRAM CHART
@@ -76,6 +322,44 @@ Item {
                                 color: IslandController.waterPercent >= 100 ? "#4ade80" : "#38bdf8"
                                 font.pixelSize: 9
                                 font.weight: Font.Bold
+                            }
+                        }
+
+                        // Relaksasi 4-4-4 Switch Button
+                        Rectangle {
+                            height: 18
+                            radius: 9
+                            color: breathSwitchMouse.containsMouse ? "#065f46" : "#064e3b"
+                            border.color: "#10b981"
+                            border.width: 1
+                            implicitWidth: breathSwitchRow.implicitWidth + 12
+
+                            RowLayout {
+                                id: breathSwitchRow
+                                anchors.centerIn: parent
+                                spacing: 4
+
+                                Image {
+                                    width: 9
+                                    height: 9
+                                    sourceSize: Qt.size(9, 9)
+                                    source: "file://" + AppConfig.assetsDir + "/heart.svg"
+                                }
+
+                                Text {
+                                    text: "Relaksasi 4-4-4"
+                                    color: "#34d399"
+                                    font.pixelSize: 9
+                                    font.weight: Font.Bold
+                                }
+                            }
+
+                            MouseArea {
+                                id: breathSwitchMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.isBreathingMode = true
                             }
                         }
                     }

@@ -74,12 +74,12 @@ class IslandDBusService(QObject):
 
     @pyqtSlot()
     def next(self):
-        next_idx = (self.c._active_hub_page + 1) % 10
+        next_idx = (self.c._active_hub_page + 1) % 12
         self.c.openHubPage(next_idx)
 
     @pyqtSlot()
     def prev(self):
-        prev_idx = (self.c._active_hub_page - 1) % 10
+        prev_idx = (self.c._active_hub_page - 1) % 12
         self.c.openHubPage(prev_idx)
 
     @pyqtSlot()
@@ -111,6 +111,18 @@ class IslandDBusService(QObject):
         self.c.expandToWeather()
         self.c.refreshWeather()
 
+    @pyqtSlot()
+    def prayer(self):
+        self.c.expandToPrayer()
+
+    @pyqtSlot()
+    def clipboard(self):
+        self.c.expandToClipboard()
+
+    @pyqtSlot(int)
+    def page(self, idx):
+        self.c.openHubPage(idx)
+
 
 def main():
     # Graceful exit on Ctrl+C in terminal
@@ -127,7 +139,7 @@ def main():
     app.setOrganizationName("NXRts")
 
     # CLI Forwarding to running instance via D-Bus
-    cli_flags = {"--toggle", "--settings", "--expand", "--collapse", "--next", "--prev", "--dnd", "--mascot", "--camera", "--mirror", "--weather"}
+    cli_flags = {"--toggle", "--settings", "--expand", "--collapse", "--next", "--prev", "--dnd", "--mascot", "--camera", "--mirror", "--weather", "--prayer", "--clipboard"}
     invoked = [arg for arg in sys.argv[1:] if arg in cli_flags]
     if invoked:
         probe_bus = QDBusConnection.sessionBus()

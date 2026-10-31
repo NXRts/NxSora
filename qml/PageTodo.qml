@@ -171,21 +171,24 @@ Item {
                 model: IslandController.tasks
 
                 delegate: Rectangle {
+                    id: taskDelegate
                     required property var modelData
                     required property int index
 
+                    property bool isEditing: false
+
                     width: taskList.width
-                    height: 28
+                    height: 30
                     radius: 6
                     color: taskMouse.containsMouse ? "#1c1f30" : "#161826"
-                    border.color: modelData.done ? "#166534" : "#26293d"
+                    border.color: taskDelegate.isEditing ? "#38bdf8" : (modelData.done ? "#166534" : "#26293d")
                     border.width: 1
 
                     RowLayout {
                         anchors.fill: parent
                         anchors.leftMargin: 8
                         anchors.rightMargin: 6
-                        spacing: 8
+                        spacing: 6
 
                         // Checkbox circle
                         Rectangle {
@@ -212,14 +215,93 @@ Item {
                             }
                         }
 
-                        // Task text
-                        Text {
+                        // Task text or Inline Editor
+                        Item {
                             Layout.fillWidth: true
-                            text: modelData.text || ""
-                            color: modelData.done ? "#64748b" : "#f1f5f9"
-                            font.pixelSize: 11
-                            font.strikeout: modelData.done
-                            elide: Text.ElideRight
+                            Layout.fillHeight: true
+
+                            Text {
+                                anchors.fill: parent
+                                verticalAlignment: Text.AlignVCenter
+                                visible: !taskDelegate.isEditing
+                                text: modelData.text || ""
+                                color: modelData.done ? "#64748b" : "#f1f5f9"
+                                font.pixelSize: 11
+                                font.strikeout: modelData.done
+                                elide: Text.ElideRight
+                            }
+
+                            TextInput {
+                                id: editInput
+                                anchors.fill: parent
+                                verticalAlignment: TextInput.AlignVCenter
+                                visible: taskDelegate.isEditing
+                                text: modelData.text || ""
+                                color: "#ffffff"
+                                font.pixelSize: 11
+                                selectByMouse: true
+
+                                onAccepted: {
+                                    if (text.trim() !== "") {
+                                        IslandController.editTodoTask(index, text.trim());
+                                    }
+                                    taskDelegate.isEditing = false;
+                                }
+
+                                Keys.onEscapePressed: {
+                                    taskDelegate.isEditing = false;
+                                }
+                            }
+                        }
+
+                        // Due Time Badge (if set)
+                        Rectangle {
+                            height: 18
+                            radius: 4
+                            color: modelData.due ? "#1e293b" : "transparent"
+                            border.color: modelData.due ? "#475569" : "transparent"
+                            border.width: 1
+                            visible: modelData.due && modelData.due.length > 0 && !taskDelegate.isEditing
+                            implicitWidth: dueText.implicitWidth + 8
+
+                            Text {
+                                id: dueText
+                                anchors.centerIn: parent
+                                text: modelData.due || ""
+                                color: "#38bdf8"
+                                font.pixelSize: 9
+                                font.weight: Font.DemiBold
+                            }
+                        }
+
+                        // Edit Button
+                        Rectangle {
+                            width: 18
+                            height: 18
+                            radius: 4
+                            color: editMouse.containsMouse ? "#1e293b" : "transparent"
+
+                            Image {
+                                anchors.centerIn: parent
+                                width: 9
+                                height: 9
+                                sourceSize: Qt.size(9, 9)
+                                source: "file://" + AppConfig.assetsDir + "/edit.svg"
+                                opacity: editMouse.containsMouse ? 1.0 : 0.6
+                            }
+
+                            MouseArea {
+                                id: editMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    taskDelegate.isEditing = !taskDelegate.isEditing;
+                                    if (taskDelegate.isEditing) {
+                                        editInput.forceActiveFocus();
+                                    }
+                                }
+                            }
                         }
 
                         // Delete button
@@ -253,7 +335,11 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         z: -1
-                        onClicked: IslandController.toggleTask(index)
+                        onClicked: {
+                            if (!taskDelegate.isEditing) {
+                                IslandController.toggleTask(index)
+                            }
+                        }
                     }
                 }
 

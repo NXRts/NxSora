@@ -357,6 +357,209 @@ Item {
             }
 
             // =================================================================
+            // SECTION 2B: JADWAL SHOLAT & PENGINGAT PINTAR (FASE 5)
+            // =================================================================
+            Text {
+                text: "JADWAL SHOLAT & PENGINGAT PINTAR (FASE 5)"
+                color: "#64748b"
+                font.pixelSize: 9
+                font.weight: Font.Bold
+                font.letterSpacing: 0.5
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                radius: 10
+                color: "#12131c"
+                border.color: "#24273a"
+                border.width: 1
+                implicitHeight: prayerSetCol.implicitHeight + 16
+
+                ColumnLayout {
+                    id: prayerSetCol
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    spacing: 10
+
+                    // City Selector Pills
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 4
+
+                        RowLayout {
+                            spacing: 5
+                            Image {
+                                width: 12
+                                height: 12
+                                sourceSize: Qt.size(12, 12)
+                                source: "file://" + AppConfig.assetsDir + "/globe.svg"
+                            }
+                            Text {
+                                text: "Pilih Kota Lokasi Hisab Kemenag RI:"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                                font.weight: Font.Bold
+                            }
+                        }
+
+                        Flickable {
+                            Layout.fillWidth: true
+                            height: 24
+                            contentWidth: cityRow.implicitWidth
+                            clip: true
+
+                            Row {
+                                id: cityRow
+                                spacing: 5
+
+                                Repeater {
+                                    model: ["Jakarta", "Bandung", "Surabaya", "Yogyakarta", "Semarang", "Medan", "Palembang", "Makassar", "Denpasar", "Banjarmasin"]
+
+                                    Rectangle {
+                                        required property string modelData
+                                        readonly property bool isSelected: (IslandController.prayerCity === modelData)
+
+                                        height: 22
+                                        radius: 11
+                                        color: isSelected ? "#0369a1" : (cityMouse.containsMouse ? "#27273a" : "#1a1b26")
+                                        border.color: isSelected ? "#38bdf8" : "#334155"
+                                        border.width: 1
+                                        implicitWidth: cityLabel.implicitWidth + 14
+
+                                        Text {
+                                            id: cityLabel
+                                            anchors.centerIn: parent
+                                            text: modelData
+                                            color: isSelected ? "#ffffff" : "#94a3b8"
+                                            font.pixelSize: 10
+                                            font.weight: isSelected ? Font.Bold : Font.Normal
+                                        }
+
+                                        MouseArea {
+                                            id: cityMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: IslandController.setPrayerCity(modelData)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Divider
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 1
+                        color: "#1e2235"
+                    }
+
+                    // Auto-Pause Music on Adzan
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 1
+                            RowLayout {
+                                spacing: 5
+                                Image {
+                                    width: 12
+                                    height: 12
+                                    sourceSize: Qt.size(12, 12)
+                                    source: "file://" + AppConfig.assetsDir + "/music.svg"
+                                }
+                                Text {
+                                    text: "Auto-Pause Pemutar Musik"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
+                            }
+                            Text {
+                                text: "Otomatis jeda Spotify/lagu saat waktu adzan sholat tiba"
+                                color: "#94a3b8"
+                                font.pixelSize: 9
+                            }
+                        }
+                        Switch {
+                            checked: IslandController.prayerAutoPause
+                            onToggled: IslandController.setPrayerAutoPause(checked)
+                        }
+                    }
+
+                    // 10-Minute Heads-up Reminder
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 1
+                            RowLayout {
+                                spacing: 5
+                                Image {
+                                    width: 12
+                                    height: 12
+                                    sourceSize: Qt.size(12, 12)
+                                    source: "file://" + AppConfig.assetsDir + "/crescent.svg"
+                                }
+                                Text {
+                                    text: "Pengingat 10 Menit Sebelum Sholat"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
+                            }
+                            Text {
+                                text: "Tampilkan heads-up kapsul tenang (310x36px) sebelum waktu sholat tiba"
+                                color: "#94a3b8"
+                                font.pixelSize: 9
+                            }
+                        }
+                        Switch {
+                            checked: IslandController.prayerReminderHeadsup
+                            onToggled: IslandController.setPrayerReminderHeadsup(checked)
+                        }
+                    }
+
+                    // At-Time Adzan Reminder
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 1
+                            RowLayout {
+                                spacing: 5
+                                Image {
+                                    width: 12
+                                    height: 12
+                                    sourceSize: Qt.size(12, 12)
+                                    source: "file://" + AppConfig.assetsDir + "/bell.svg"
+                                }
+                                Text {
+                                    text: "Pengingat Saat Waktu Azan Tiba"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
+                            }
+                            Text {
+                                text: "Pop-up anggun di Dynamic Island saat masuk waktu sholat"
+                                color: "#94a3b8"
+                                font.pixelSize: 9
+                            }
+                        }
+                        Switch {
+                            checked: IslandController.prayerReminderAdzan
+                            onToggled: IslandController.setPrayerReminderAdzan(checked)
+                        }
+                    }
+                }
+            }
+
+            // =================================================================
             // SECTION 3: PENGUJIAN PEEK OVERLAYS & FASE 4 FITUR
             // =================================================================
             RowLayout {
