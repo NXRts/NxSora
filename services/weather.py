@@ -110,7 +110,11 @@ class WeatherService(QObject):
         QTimer.singleShot(1200, self.refresh_weather_async)
 
     def _detect_location(self):
-        """Detects city and coordinates from system timezone or default."""
+        """Detects city and coordinates from configuration, system timezone, or default."""
+        cfg = config.CONFIG
+        if cfg.get("location_city") and cfg.get("location_lat") and cfg.get("location_lon"):
+            return (float(cfg["location_lat"]), float(cfg["location_lon"]), cfg["location_city"])
+
         tz_name = "Asia/Jakarta"
         try:
             # Check /etc/timezone or readlink /etc/localtime
@@ -125,6 +129,14 @@ class WeatherService(QObject):
         if tz_name in TIMEZONE_COORDS:
             return TIMEZONE_COORDS[tz_name]
         return (-6.2146, 106.8451, "Jakarta")
+
+    def set_location(self, city: str, lat: float, lon: float):
+        """Updates weather location coordinates and triggers instant refresh."""
+        self._city = city
+        self._lat = float(lat)
+        self._lon = float(lon)
+        self.refresh_weather_async()
+        self.weatherChanged.emit()
 
     def _load_cache(self):
         """Loads cached weather data to display instantly on startup."""

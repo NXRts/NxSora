@@ -43,11 +43,12 @@ class PrayerService(QObject):
         super().__init__(parent)
 
         self._tracker_file = config.CACHE_DIR / "prayer_tracker.json"
-        self._city = "Jakarta"
-        self._lat = -6.2146
-        self._lon = 106.8451
-        self._tz = 7.0
-        self._fine_tune_minutes = 0  # User ihtiath offset
+        cfg = config.CONFIG
+        self._city = cfg.get("location_city", "Jakarta")
+        self._lat = float(cfg.get("location_lat", -6.2146))
+        self._lon = float(cfg.get("location_lon", 106.8451))
+        self._tz = float(cfg.get("location_tz_offset", 7.0))
+        self._fine_tune_minutes = int(cfg.get("prayer_ihtiath_minutes", 2))
 
         # Daily schedule times
         self._times = {
@@ -316,6 +317,21 @@ class PrayerService(QObject):
             config.CONFIG["prayer_city"] = city_name
             config.save_user_config(config.CONFIG)
             self.recalculate()
+
+    def set_coordinates(self, city: str, lat: float, lon: float, tz: float, fine_tune: int = 0):
+        self._city = city
+        self._lat = float(lat)
+        self._lon = float(lon)
+        self._tz = float(tz)
+        self._fine_tune_minutes = int(fine_tune)
+        self.recalculate()
+
+    @pyqtSlot(int)
+    def setFineTuneMinutes(self, minutes: int):
+        self._fine_tune_minutes = int(minutes)
+        config.CONFIG["prayer_ihtiath_minutes"] = self._fine_tune_minutes
+        config.save_user_config(config.CONFIG)
+        self.recalculate()
 
     # --- Properties ---
 

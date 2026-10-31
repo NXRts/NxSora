@@ -18,6 +18,8 @@ from services.audio_devices import AudioDeviceService
 from services.voicenote import VoiceNoteService
 from services.colorpicker import ColorPickerService
 from services.todo import TodoService
+from services.location import LocationService
+from services.weather import WeatherService
 
 
 class TestFase5Features(unittest.TestCase):
@@ -126,6 +128,30 @@ class TestFase5Features(unittest.TestCase):
         # Clean up
         todo.removeTask(idx)
         self.assertEqual(todo.totalCount, init_count)
+
+    def test_unified_location_service(self):
+        weather = WeatherService()
+        prayer = PrayerService()
+        loc = LocationService(weather, prayer)
+
+        self.assertIsInstance(loc.city, str)
+        self.assertIsInstance(loc.latitude, float)
+        self.assertIsInstance(loc.longitude, float)
+
+        # Apply specific location (e.g. Bandung)
+        loc.applyLocation("Bandung", "Jawa Barat, Indonesia", -6.9175, 107.6191, 7.0)
+        self.assertEqual(loc.city, "Bandung")
+        self.assertEqual(loc.region, "Jawa Barat, Indonesia")
+        self.assertAlmostEqual(loc.latitude, -6.9175, places=3)
+        self.assertAlmostEqual(loc.longitude, 107.6191, places=3)
+
+        # Verify synchronization to downstream services
+        self.assertEqual(weather.city, "Bandung")
+        self.assertEqual(prayer.city, "Bandung")
+
+        # Test ihtiath offset setting
+        loc.setIhtiathMinutes(3)
+        self.assertEqual(loc.ihtiathMinutes, 3)
 
 
 if __name__ == "__main__":

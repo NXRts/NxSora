@@ -26,6 +26,7 @@ from services.clipboard import ClipboardService
 from services.audio_devices import AudioDeviceService
 from services.voicenote import VoiceNoteService
 from services.colorpicker import ColorPickerService
+from services.location import LocationService
 from PyQt6.QtCore import QVariant
 import config
 
@@ -105,6 +106,13 @@ class IslandController(QObject):
     voiceNoteChanged = pyqtSignal()
     colorPickerChanged = pyqtSignal()
 
+    # Unified Location Manager signals
+    locationChanged = pyqtSignal()
+    locationSearchResultsChanged = pyqtSignal()
+    locationSearchingChanged = pyqtSignal()
+    locationDetectingChanged = pyqtSignal()
+    locationStatusMessageChanged = pyqtSignal(str)
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -131,6 +139,7 @@ class IslandController(QObject):
         self.audio_devices = AudioDeviceService(self)
         self.voicenote = VoiceNoteService(self.shelf, self)
         self.colorpicker = ColorPickerService(self.clipboard, self)
+        self.location = LocationService(self.weather, self.prayer, self)
 
         # Fase 5 state
         self._prayer_alert_type = ""
@@ -229,6 +238,11 @@ class IslandController(QObject):
         self.colorpicker.pickerChanged.connect(lambda: self.colorPickerChanged.emit())
         self.colorpicker.colorPicked.connect(self._on_color_picked)
         self.todo.taskDueReminder.connect(self._on_task_due_reminder)
+        self.location.locationChanged.connect(lambda: self.locationChanged.emit())
+        self.location.searchResultsChanged.connect(lambda: self.locationSearchResultsChanged.emit())
+        self.location.isSearchingChanged.connect(lambda: self.locationSearchingChanged.emit())
+        self.location.isDetectingChanged.connect(lambda: self.locationDetectingChanged.emit())
+        self.location.statusMessageChanged.connect(self.locationStatusMessageChanged.emit)
 
         # Initial state setup
         if self.mpris.status in ("Playing", "Paused") and self.mpris.title:
@@ -1743,5 +1757,65 @@ class IslandController(QObject):
     @pyqtSlot(int, str)
     def setTodoDueTime(self, index: int, due_time: str):
         self.todo.setDueTime(index, due_time)
+
+    # =========================================================================
+    # FASE 5: UNIFIED LOCATION MANAGER (WEATHER & PRAYER)
+    # =========================================================================
+
+    @pyqtProperty(str, notify=locationChanged)
+    def locationCity(self) -> str:
+        return self.location.city
+
+    @pyqtProperty(str, notify=locationChanged)
+    def locationRegion(self) -> str:
+        return self.location.region
+
+    @pyqtProperty(float, notify=locationChanged)
+    def locationLatitude(self) -> float:
+        return self.location.latitude
+
+    @pyqtProperty(float, notify=locationChanged)
+    def locationLongitude(self) -> float:
+        return self.location.longitude
+
+    @pyqtProperty(float, notify=locationChanged)
+    def locationTimezoneOffset(self) -> float:
+        return self.location.timezoneOffset
+
+    @pyqtProperty(int, notify=locationChanged)
+    def locationIhtiathMinutes(self) -> int:
+        return self.location.ihtiathMinutes
+
+    @pyqtProperty(bool, notify=locationSearchingChanged)
+    def locationIsSearching(self) -> bool:
+        return self.location.isSearching
+
+    @pyqtProperty(bool, notify=locationDetectingChanged)
+    def locationIsDetecting(self) -> bool:
+        return self.location.isDetecting
+
+    @pyqtProperty(list, notify=locationSearchResultsChanged)
+    def locationSearchResults(self) -> list:
+        return self.location.searchResults
+
+    @pyqtProperty(str, notify=locationStatusMessageChanged)
+    def locationStatusMessage(self) -> str:
+        return self.location.statusMessage
+
+    @pyqtSlot(str)
+    def searchLocation(self, query: str):
+        self.location.searchLocation(query)
+
+    @pyqtSlot()
+    def detectLocationAuto(self):
+        self.location.detectLocationAuto()
+
+    @pyqtSlot(int)
+    def selectLocationResult(self, index: int):
+        self.location.selectSearchResult(index)
+
+    @pyqtSlot(int)
+    def setLocationIhtiath(self, minutes: int):
+        self.location.setIhtiathMinutes(minutes)
 
 
