@@ -346,3 +346,4 @@ class LocationService(QObject):
             self._prayer_service.set_coordinates(
                 self._city, self._lat, self._lon, self._tz_offset, self._ihtiath_minutes
             )
+

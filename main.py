@@ -72,6 +72,10 @@ class IslandDBusService(QObject):
     def settings(self):
         self.c.openSettingsView()
 
+    @pyqtSlot(int)
+    def scroll_settings(self, pos: int):
+        self.c.scrollSettings(pos)
+
     @pyqtSlot()
     def next(self):
         next_idx = (self.c._active_hub_page + 1) % 12

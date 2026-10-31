@@ -29,29 +29,37 @@ Item {
             root.fsAutoHide = IslandController.getSetting("fullscreen_autohide_enabled") !== false;
             root.privacyDots = IslandController.getSetting("privacy_dots_enabled") !== false;
             root.eyeTracking = IslandController.getSetting("eye_tracking_enabled") !== false;
+            if (settingsFlickable && IslandController.settingsScrollY > 0) {
+                settingsFlickable.contentY = IslandController.settingsScrollY;
+            }
         }
     }
 
     Flickable {
         id: settingsFlickable
         anchors.fill: parent
+        anchors.rightMargin: 8
         contentWidth: width
-        contentHeight: settingsCol.implicitHeight + 10
+        contentHeight: settingsCol.implicitHeight + 16
         clip: true
         boundsBehavior: Flickable.StopAtBounds
 
         ScrollBar.vertical: ScrollBar {
-            policy: settingsFlickable.contentHeight > settingsFlickable.height ? ScrollBar.AlwaysOn : ScrollBar.AsNeeded
+            id: vertScrollBar
+            policy: ScrollBar.AsNeeded
             width: 4
+            anchors.right: parent.right
+            background: Item {} // Transparent background to eliminate grey slab
             contentItem: Rectangle {
+                implicitWidth: 4
                 radius: 2
-                color: "#475569"
+                color: vertScrollBar.pressed ? "#38bdf8" : (vertScrollBar.hovered ? "#64748b" : "#334155")
             }
         }
 
         ColumnLayout {
             id: settingsCol
-            width: parent.width
+            width: settingsFlickable.width
             spacing: 8
 
             // =================================================================
@@ -394,42 +402,53 @@ Item {
                     // 1. Kartu Lokasi Aktif & Tombol Deteksi Otomatis
                     Rectangle {
                         Layout.fillWidth: true
-                        height: 52
+                        height: 48
                         radius: 8
                         color: "#181a27"
-                        border.color: "#2e344d"
+                        border.color: "#2a3147"
                         border.width: 1
 
                         RowLayout {
                             anchors.fill: parent
-                            anchors.leftMargin: 10
-                            anchors.rightMargin: 10
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
                             spacing: 8
 
                             Image {
-                                width: 18
-                                height: 18
-                                sourceSize: Qt.size(18, 18)
+                                Layout.preferredWidth: 16
+                                Layout.preferredHeight: 16
+                                sourceSize: Qt.size(16, 16)
                                 source: "file://" + AppConfig.assetsDir + "/map-pin.svg"
+                                Layout.alignment: Qt.AlignVCenter
                             }
 
                             ColumnLayout {
                                 Layout.fillWidth: true
-                                spacing: 2
+                                Layout.minimumWidth: 0
+                                spacing: 1
+                                Layout.alignment: Qt.AlignVCenter
 
                                 RowLayout {
+                                    Layout.fillWidth: true
+                                    Layout.minimumWidth: 0
                                     spacing: 6
+
                                     Text {
                                         text: IslandController.locationCity || "Jakarta"
                                         color: "#f8fafc"
-                                        font.pixelSize: 12
+                                        font.pixelSize: 11
                                         font.weight: Font.Bold
+                                        elide: Text.ElideRight
+                                        Layout.maximumWidth: 120
                                     }
+
                                     Rectangle {
-                                        height: 14
-                                        radius: 7
+                                        height: 13
+                                        radius: 6.5
                                         color: "#0369a1"
                                         implicitWidth: coordTxt.implicitWidth + 8
+                                        Layout.alignment: Qt.AlignVCenter
+
                                         Text {
                                             id: coordTxt
                                             anchors.centerIn: parent
@@ -444,18 +463,20 @@ Item {
                                 Text {
                                     text: IslandController.locationRegion ? (IslandController.locationRegion + " · GMT+" + IslandController.locationTimezoneOffset) : "GMT+7"
                                     color: "#94a3b8"
-                                    font.pixelSize: 9
+                                    font.pixelSize: 8
                                     elide: Text.ElideRight
                                     Layout.fillWidth: true
+                                    Layout.minimumWidth: 0
                                 }
                             }
 
                             // Tombol Deteksi Otomatis (1-klik)
                             Rectangle {
-                                width: 110
-                                height: 26
-                                radius: 13
-                                color: IslandController.locationIsDetecting ? "#0369a1" : (autoDetectMouse.containsMouse ? "#2a3048" : "#202538")
+                                Layout.preferredWidth: 84
+                                Layout.preferredHeight: 22
+                                Layout.alignment: Qt.AlignVCenter
+                                radius: 11
+                                color: IslandController.locationIsDetecting ? "#0369a1" : (autoDetectMouse.containsMouse ? "#262f44" : "#1c2233")
                                 border.color: "#38bdf8"
                                 border.width: 1
 
@@ -463,15 +484,15 @@ Item {
                                     anchors.centerIn: parent
                                     spacing: 4
                                     Image {
-                                        width: 11
-                                        height: 11
-                                        sourceSize: Qt.size(11, 11)
+                                        Layout.preferredWidth: 10
+                                        Layout.preferredHeight: 10
+                                        sourceSize: Qt.size(10, 10)
                                         source: "file://" + AppConfig.assetsDir + "/target.svg"
                                     }
                                     Text {
-                                        text: IslandController.locationIsDetecting ? "Mendeteksi..." : "Deteksi Otomatis"
+                                        text: IslandController.locationIsDetecting ? "Mencari..." : "Deteksi Auto"
                                         color: "#38bdf8"
-                                        font.pixelSize: 9
+                                        font.pixelSize: 8
                                         font.weight: Font.Bold
                                     }
                                 }
@@ -494,7 +515,7 @@ Item {
 
                         Rectangle {
                             Layout.fillWidth: true
-                            height: 30
+                            height: 28
                             radius: 6
                             color: "#161824"
                             border.color: locSearchInput.activeFocus ? "#38bdf8" : "#2d334a"
@@ -503,19 +524,21 @@ Item {
                             RowLayout {
                                 anchors.fill: parent
                                 anchors.leftMargin: 8
-                                anchors.rightMargin: 8
+                                anchors.rightMargin: 6
                                 spacing: 6
 
                                 Image {
-                                    width: 12
-                                    height: 12
+                                    Layout.preferredWidth: 12
+                                    Layout.preferredHeight: 12
                                     sourceSize: Qt.size(12, 12)
                                     source: "file://" + AppConfig.assetsDir + "/search.svg"
+                                    Layout.alignment: Qt.AlignVCenter
                                 }
 
                                 TextInput {
                                     id: locSearchInput
                                     Layout.fillWidth: true
+                                    Layout.minimumWidth: 0
                                     color: "#f1f5f9"
                                     font.pixelSize: 10
                                     selectByMouse: true
@@ -523,7 +546,7 @@ Item {
                                     verticalAlignment: TextInput.AlignVCenter
 
                                     Text {
-                                        text: "Cari kota, kabupaten, kecamatan... (Enter)"
+                                        text: "Cari kota / kecamatan... (Enter)"
                                         color: "#64748b"
                                         font.pixelSize: 10
                                         visible: !locSearchInput.text && !locSearchInput.activeFocus
@@ -538,8 +561,9 @@ Item {
                                 }
 
                                 Rectangle {
-                                    width: 44
-                                    height: 20
+                                    Layout.preferredWidth: 38
+                                    Layout.preferredHeight: 18
+                                    Layout.alignment: Qt.AlignVCenter
                                     radius: 4
                                     color: searchBtnMouse.containsMouse ? "#0284c7" : "#0369a1"
                                     visible: locSearchInput.text.trim().length >= 2
@@ -567,14 +591,16 @@ Item {
                         Text {
                             text: IslandController.locationStatusMessage
                             color: "#38bdf8"
-                            font.pixelSize: 9
+                            font.pixelSize: 8
                             visible: IslandController.locationStatusMessage !== ""
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
                         }
 
                         // Search Results Dropdown List
                         ListView {
                             Layout.fillWidth: true
-                            implicitHeight: Math.min(count * 32, 160)
+                            implicitHeight: Math.min(count * 32, 128)
                             visible: count > 0
                             clip: true
                             model: IslandController.locationSearchResults
@@ -590,24 +616,30 @@ Item {
                                 RowLayout {
                                     anchors.fill: parent
                                     anchors.leftMargin: 8
-                                    anchors.rightMargin: 8
+                                    anchors.rightMargin: 6
                                     spacing: 6
 
                                     Image {
-                                        width: 10
-                                        height: 10
+                                        Layout.preferredWidth: 10
+                                        Layout.preferredHeight: 10
                                         sourceSize: Qt.size(10, 10)
                                         source: "file://" + AppConfig.assetsDir + "/map-pin.svg"
+                                        Layout.alignment: Qt.AlignVCenter
                                     }
 
                                     ColumnLayout {
                                         Layout.fillWidth: true
+                                        Layout.minimumWidth: 0
                                         spacing: 0
+                                        Layout.alignment: Qt.AlignVCenter
+
                                         Text {
                                             text: modelData.name || ""
                                             color: "#f8fafc"
-                                            font.pixelSize: 10
+                                            font.pixelSize: 9
                                             font.weight: Font.Bold
+                                            elide: Text.ElideRight
+                                            Layout.fillWidth: true
                                         }
                                         Text {
                                             text: (modelData.subtitle || "") + " (" + modelData.lat + ", " + modelData.lon + ")"
@@ -618,11 +650,20 @@ Item {
                                         }
                                     }
 
-                                    Text {
-                                        text: "Pilih"
-                                        color: "#38bdf8"
-                                        font.pixelSize: 9
-                                        font.weight: Font.Bold
+                                    Rectangle {
+                                        Layout.preferredWidth: 34
+                                        Layout.preferredHeight: 18
+                                        Layout.alignment: Qt.AlignVCenter
+                                        radius: 3
+                                        color: "#0369a1"
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "Pilih"
+                                            color: "#e0f2fe"
+                                            font.pixelSize: 9
+                                            font.weight: Font.Bold
+                                        }
                                     }
                                 }
 
@@ -711,14 +752,16 @@ Item {
                         spacing: 8
                         ColumnLayout {
                             Layout.fillWidth: true
+                            Layout.minimumWidth: 0
                             spacing: 1
                             RowLayout {
                                 spacing: 5
                                 Image {
-                                    width: 12
-                                    height: 12
+                                    Layout.preferredWidth: 12
+                                    Layout.preferredHeight: 12
                                     sourceSize: Qt.size(12, 12)
                                     source: "file://" + AppConfig.assetsDir + "/timer.svg"
+                                    Layout.alignment: Qt.AlignVCenter
                                 }
                                 Text {
                                     text: "Koreksi Waktu Sholat (Ihtiath)"
@@ -728,18 +771,22 @@ Item {
                                 }
                             }
                             Text {
-                                text: "Geser menit untuk mencocokkan waktu azan masjid di lingkungan Anda"
+                                text: "Geser menit untuk mencocokkan azan masjid lokal"
                                 color: "#94a3b8"
-                                font.pixelSize: 9
+                                font.pixelSize: 8
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                                Layout.minimumWidth: 0
                             }
                         }
 
                         RowLayout {
                             spacing: 4
+                            Layout.alignment: Qt.AlignVCenter
 
                             Rectangle {
-                                width: 22
-                                height: 22
+                                Layout.preferredWidth: 20
+                                Layout.preferredHeight: 20
                                 radius: 4
                                 color: minBtnMouse.containsMouse ? "#2d334a" : "#1e2235"
                                 border.color: "#334155"
@@ -748,7 +795,7 @@ Item {
                                     anchors.centerIn: parent
                                     text: "–"
                                     color: "#e2e8f0"
-                                    font.pixelSize: 12
+                                    font.pixelSize: 11
                                     font.weight: Font.Bold
                                 }
                                 MouseArea {
@@ -761,26 +808,26 @@ Item {
                             }
 
                             Rectangle {
-                                height: 22
+                                Layout.preferredHeight: 20
                                 radius: 4
                                 color: "#0f172a"
                                 border.color: "#0284c7"
                                 border.width: 1
-                                implicitWidth: ihtiathTxt.implicitWidth + 12
+                                implicitWidth: ihtiathTxt.implicitWidth + 10
 
                                 Text {
                                     id: ihtiathTxt
                                     anchors.centerIn: parent
                                     text: (IslandController.locationIhtiathMinutes > 0 ? "+" : "") + IslandController.locationIhtiathMinutes + " mnt"
                                     color: "#38bdf8"
-                                    font.pixelSize: 10
+                                    font.pixelSize: 9
                                     font.weight: Font.Bold
                                 }
                             }
 
                             Rectangle {
-                                width: 22
-                                height: 22
+                                Layout.preferredWidth: 20
+                                Layout.preferredHeight: 20
                                 radius: 4
                                 color: plusBtnMouse.containsMouse ? "#2d334a" : "#1e2235"
                                 border.color: "#334155"
@@ -789,7 +836,7 @@ Item {
                                     anchors.centerIn: parent
                                     text: "+"
                                     color: "#e2e8f0"
-                                    font.pixelSize: 12
+                                    font.pixelSize: 11
                                     font.weight: Font.Bold
                                 }
                                 MouseArea {

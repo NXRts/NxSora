@@ -154,6 +154,7 @@ class IslandController(QObject):
         self._mascot_mode = False
         self._is_pinned = False
         self._is_settings_view_open = False
+        self._settings_scroll_y = 0
         self._low_battery_nudged = False
 
         # Island UI State:
@@ -973,6 +974,15 @@ class IslandController(QObject):
         self.isSettingsViewOpenChanged.emit(self._is_settings_view_open)
         if self._is_settings_view_open and not self._is_expanded:
             self.expandHub()
+
+    @pyqtProperty(int, notify=settingsChanged)
+    def settingsScrollY(self) -> int:
+        return self._settings_scroll_y
+
+    @pyqtSlot(int)
+    def scrollSettings(self, pos: int):
+        self._settings_scroll_y = int(pos)
+        self.settingsChanged.emit()
 
     # --- Network / Wi-Fi Peek Properties & Slots ---
     @pyqtProperty(str, notify=networkChanged)
