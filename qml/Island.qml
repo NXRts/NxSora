@@ -129,6 +129,7 @@ Item {
             case "hud-battery": return 310;
             case "hud-bluetooth": return 310;
             case "hud-network": return 310;
+            case "hud-prayer": return IslandController.prayerAlertType === "headsup" ? 310 : 360;
             case "hud-notification": return 330;
             case "hud-camera": return 340;
             case "expanded-music":
@@ -151,6 +152,7 @@ Item {
             case "hud-battery": return 60;
             case "hud-bluetooth": return 60;
             case "hud-network": return 60;
+            case "hud-prayer": return IslandController.prayerAlertType === "headsup" ? 36 : 44;
             case "hud-notification": return 56;
             case "hud-camera": return 240;
             case "expanded-music": return 245;
@@ -165,6 +167,7 @@ Item {
                 || IslandController.state === "hud-battery"
                 || IslandController.state === "hud-bluetooth"
                 || IslandController.state === "hud-network"
+                || IslandController.state === "hud-prayer"
                 || IslandController.state === "hud-camera") {
             return 20;
         }
@@ -485,6 +488,14 @@ Item {
             visible: opacity > 0
             opacity: IslandController.state === "hud-camera" ? 1.0 : 0.0
             Behavior on opacity { NumberAnimation { duration: 200 } }
+        }
+
+        // 5C. HUD Prayer (Heads-up 310x36px & Adzan Calm Popup 360x44px)
+        HudPrayer {
+            anchors.fill: parent
+            visible: opacity > 0
+            opacity: IslandController.state === "hud-prayer" ? 1.0 : 0.0
+            Behavior on opacity { NumberAnimation { duration: 180 } }
         }
 
         // 6. Expanded Multi-Page Control Hub

@@ -20,6 +20,12 @@ from services.network import NetworkService
 from services.workspace import WorkspaceService
 from services.weather import WeatherService
 from services.kdeconnect import KdeConnectService
+from services.prayer import PrayerService
+from services.visualizer import AudioVisualizerService
+from services.clipboard import ClipboardService
+from services.audio_devices import AudioDeviceService
+from services.voicenote import VoiceNoteService
+from services.colorpicker import ColorPickerService
 from PyQt6.QtCore import QVariant
 import config
 
@@ -89,6 +95,16 @@ class IslandController(QObject):
     kdeConnectChanged = pyqtSignal()
     cameraMirrorStateChanged = pyqtSignal(bool)
 
+    # Fase 5 signals: Prayer, Visualizer, Clipboard, Audio Devices, Voice Note, Color Picker
+    prayerChanged = pyqtSignal()
+    prayerChecklistChanged = pyqtSignal()
+    prayerAlertSignal = pyqtSignal(str, str, str)  # alert_type ("headsup"|"adzan"), title, time_or_sub
+    audioSpectrumChanged = pyqtSignal()
+    clipboardChanged = pyqtSignal()
+    audioDevicesChanged = pyqtSignal()
+    voiceNoteChanged = pyqtSignal()
+    colorPickerChanged = pyqtSignal()
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -109,6 +125,21 @@ class IslandController(QObject):
         self.workspace = WorkspaceService(self)
         self.weather = WeatherService(self)
         self.kdeconnect = KdeConnectService(self)
+        self.prayer = PrayerService(self)
+        self.visualizer = AudioVisualizerService(self)
+        self.clipboard = ClipboardService(self)
+        self.audio_devices = AudioDeviceService(self)
+        self.voicenote = VoiceNoteService(self.shelf, self)
+        self.colorpicker = ColorPickerService(self.clipboard, self)
+
+        # Fase 5 state
+        self._prayer_alert_type = ""
+        self._prayer_alert_name = ""
+        self._prayer_alert_extra = ""
+        self._show_prayer_page = config.CONFIG.get("show_prayer_page", True)
+        self._prayer_auto_pause = config.CONFIG.get("prayer_auto_pause", True)
+        self._prayer_reminder_headsup = config.CONFIG.get("prayer_reminder_headsup", True)
+        self._prayer_reminder_adzan = config.CONFIG.get("prayer_reminder_adzan", True)
 
         # Mascot mode toggle (Resting Eyes vs Digital Clock)
         self._mascot_mode = False
@@ -185,6 +216,20 @@ class IslandController(QObject):
         self.kdeconnect.devicesChanged.connect(lambda: self.kdeConnectChanged.emit())
         self.kdeconnect.shareStatusChanged.connect(lambda s, m: self.kdeConnectChanged.emit())
 
+        # Fase 5 signal connects
+        self.prayer.prayerChanged.connect(lambda: self.prayerChanged.emit())
+        self.prayer.checklistChanged.connect(lambda: self.prayerChecklistChanged.emit())
+        self.prayer.prayerHeadsUpTriggered.connect(self._on_prayer_headsup)
+        self.prayer.prayerAdzanTriggered.connect(self._on_prayer_adzan)
+        self.visualizer.spectrumChanged.connect(lambda: self.audioSpectrumChanged.emit())
+        self.clipboard.clipboardChanged.connect(lambda: self.clipboardChanged.emit())
+        self.audio_devices.devicesChanged.connect(lambda: self.audioDevicesChanged.emit())
+        self.audio_devices.deviceSwitched.connect(lambda _: self.audioDevicesChanged.emit())
+        self.voicenote.recordingStateChanged.connect(lambda: self.voiceNoteChanged.emit())
+        self.colorpicker.pickerChanged.connect(lambda: self.colorPickerChanged.emit())
+        self.colorpicker.colorPicked.connect(self._on_color_picked)
+        self.todo.taskDueReminder.connect(self._on_task_due_reminder)
+
         # Initial state setup
         if self.mpris.status in ("Playing", "Paused") and self.mpris.title:
             self._state = "music"
@@ -221,6 +266,11 @@ class IslandController(QObject):
         self.lyrics.update_track(
             self.mpris.title, self.mpris.artist, self.mpris.album, self.mpris.duration
         )
+        if self.mpris.status == "Playing":
+            self.visualizer.setEnabled(True)
+        else:
+            self.visualizer.setEnabled(False)
+
         if not self._is_expanded and not self._state.startswith("hud-"):
             if self.mpris.status == "Playing" or (self.mpris.title and self.mpris.status == "Paused"):
                 self._set_state("music")
@@ -281,6 +331,45 @@ class IslandController(QObject):
             self._set_state("hud-hardware")
             timeout = 1800 if hud_type == "capslock" else 2200
             self._hud_timer.start(timeout)
+
+    def _on_prayer_headsup(self, prayer_name: str, mins_left: int):
+        if not self._prayer_reminder_headsup:
+            return
+        self._prayer_alert_type = "headsup"
+        self._prayer_alert_name = prayer_name
+        self._prayer_alert_extra = f"{mins_left} min"
+        self.prayerAlertSignal.emit("headsup", prayer_name, f"{mins_left} min")
+        if not self._is_expanded:
+            self._set_state("hud-prayer")
+            self._hud_timer.start(5000)
+
+    def _on_prayer_adzan(self, prayer_name: str, time_str: str):
+        if self._prayer_auto_pause:
+            try:
+                self.mpris.pause()
+            except Exception:
+                pass
+        if not self._prayer_reminder_adzan:
+            return
+        self._prayer_alert_type = "adzan"
+        self._prayer_alert_name = prayer_name
+        self._prayer_alert_extra = time_str
+        self.prayerAlertSignal.emit("adzan", prayer_name, time_str)
+        if not self._is_expanded:
+            self._set_state("hud-prayer")
+            self._hud_timer.start(7000)
+
+    def _on_task_due_reminder(self, task_text: str, due_time: str):
+        self.notifications.trigger_test(
+            f"Tenggat Tugas: {task_text} ⏰",
+            f"Waktu jatuh tempo tugas adalah {due_time} WIB."
+        )
+
+    def _on_color_picked(self, hex_val: str, rgb_val: str):
+        self.notifications.trigger_test(
+            f"Warna Disalin: {hex_val} 🎨",
+            f"Format Hex {hex_val} dan {rgb_val} siap ditempel dari Clipboard."
+        )
 
     def _on_notification_received(self, app_name, summary, body):
         self._notif_app = app_name
@@ -646,10 +735,10 @@ class IslandController(QObject):
 
     @pyqtSlot(int)
     def setActiveHubPage(self, page_index):
-        clamped = max(0, min(int(page_index), 8))
+        clamped = max(0, min(int(page_index), 11))
         if self._active_hub_page != clamped:
             self._active_hub_page = clamped
-            if clamped == 5:
+            if clamped == 8:
                 self.notifications.select_notification(self.notifications.selected_index)
             self.activeHubPageChanged.emit(self._active_hub_page)
 
@@ -702,32 +791,46 @@ class IslandController(QObject):
         self._set_state("expanded-hub")
 
     @pyqtSlot()
-    def expandToBluetooth(self):
-        """Open Page 5 (Bluetooth & Perangkat)."""
+    def expandToPrayer(self):
+        """Open Page 4 (Jadwal Sholat & Sun Arc)."""
+        self._active_hub_page = 4
+        self.activeHubPageChanged.emit(4)
+        self._set_state("expanded-hub")
+
+    @pyqtSlot()
+    def expandToClipboard(self):
+        """Open Page 5 (Riwayat Clipboard)."""
         self._active_hub_page = 5
         self.activeHubPageChanged.emit(5)
         self._set_state("expanded-hub")
 
     @pyqtSlot()
+    def expandToBluetooth(self):
+        """Open Page 7 (Bluetooth & Perangkat)."""
+        self._active_hub_page = 7
+        self.activeHubPageChanged.emit(7)
+        self._set_state("expanded-hub")
+
+    @pyqtSlot()
     def expandToNotifications(self):
-        """Open Page 6 (Pusat Notifikasi) and select the latest notification."""
+        """Open Page 8 (Pusat Notifikasi) and select the latest notification."""
         self.notifications.refresh_relative_times()
         self.notifications.select_notification(0)
-        self._active_hub_page = 6
-        self.activeHubPageChanged.emit(6)
+        self._active_hub_page = 8
+        self.activeHubPageChanged.emit(8)
         self._set_state("expanded-hub")
 
     @pyqtSlot()
     def expandToShelf(self):
-        """Automatically expand to Page 9 (File Shelf) when a file is dragged over the notch."""
-        self._active_hub_page = 9
-        self.activeHubPageChanged.emit(9)
+        """Automatically expand to Page 11 (File Shelf) when a file is dragged over the notch."""
+        self._active_hub_page = 11
+        self.activeHubPageChanged.emit(11)
         self._set_state("expanded-hub")
 
     @pyqtSlot(int)
     def openHubPage(self, page_index):
-        self._active_hub_page = max(0, min(page_index, 9))
-        if self._active_hub_page == 6:
+        self._active_hub_page = max(0, min(page_index, 11))
+        if self._active_hub_page == 8:
             self.notifications.refresh_relative_times()
             self.notifications.select_notification(self.notifications.selected_index)
         self.activeHubPageChanged.emit(self._active_hub_page)
@@ -1360,4 +1463,285 @@ class IslandController(QObject):
     @pyqtSlot(str, str)
     def shareFileToPhone(self, file_path: str, device_id: str = ""):
         self.kdeconnect.shareFile(file_path, device_id)
+
+    # =========================================================================
+    # FASE 5: JADWAL SHOLAT & SUN ARC TRAJECTORY
+    # =========================================================================
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerCity(self) -> str:
+        return self.prayer.city
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerSubuh(self) -> str:
+        return self.prayer.subuh
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerTerbit(self) -> str:
+        return self.prayer.terbit
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerDzuhur(self) -> str:
+        return self.prayer.dzuhur
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerAshar(self) -> str:
+        return self.prayer.ashar
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerMaghrib(self) -> str:
+        return self.prayer.maghrib
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerIsya(self) -> str:
+        return self.prayer.isya
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerImsak(self) -> str:
+        return self.prayer.imsak
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerNextName(self) -> str:
+        return self.prayer.nextPrayerName
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerNextTime(self) -> str:
+        return self.prayer.nextPrayerTime
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerCountdown(self) -> str:
+        return self.prayer.countdownText
+
+    @pyqtProperty(int, notify=prayerChanged)
+    def prayerMinutesToNext(self) -> int:
+        return self.prayer.minutesToNext
+
+    @pyqtProperty(float, notify=prayerChanged)
+    def prayerSunPosition(self) -> float:
+        return self.prayer.sunPosition
+
+    @pyqtProperty(bool, notify=prayerChanged)
+    def prayerIsDaytime(self) -> bool:
+        return self.prayer.isDaytime
+
+    @pyqtProperty(int, notify=prayerChanged)
+    def prayerActiveIndex(self) -> int:
+        return self.prayer.activePrayerIndex
+
+    @pyqtProperty("QVariantMap", notify=prayerChecklistChanged)
+    def prayerChecklist(self) -> dict:
+        return self.prayer.checklist
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerAlertType(self) -> str:
+        return self._prayer_alert_type
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerAlertName(self) -> str:
+        return self._prayer_alert_name
+
+    @pyqtProperty(str, notify=prayerChanged)
+    def prayerAlertExtra(self) -> str:
+        return self._prayer_alert_extra
+
+    @pyqtProperty(bool, notify=settingsChanged)
+    def showPrayerPage(self) -> bool:
+        return self._show_prayer_page
+
+    @pyqtProperty(bool, notify=settingsChanged)
+    def prayerAutoPause(self) -> bool:
+        return self._prayer_auto_pause
+
+    @pyqtProperty(bool, notify=settingsChanged)
+    def prayerReminderHeadsup(self) -> bool:
+        return self._prayer_reminder_headsup
+
+    @pyqtProperty(bool, notify=settingsChanged)
+    def prayerReminderAdzan(self) -> bool:
+        return self._prayer_reminder_adzan
+
+    @pyqtSlot(str, bool)
+    def setPrayerChecked(self, prayer_name: str, checked: bool):
+        self.prayer.setPrayerChecked(prayer_name, checked)
+
+    @pyqtSlot(str)
+    def setPrayerCity(self, city_name: str):
+        self.prayer.setCity(city_name)
+
+    @pyqtSlot(bool)
+    def setShowPrayerPage(self, enabled: bool):
+        self._show_prayer_page = bool(enabled)
+        config.CONFIG["show_prayer_page"] = self._show_prayer_page
+        config.save_user_config(config.CONFIG)
+        self.settingsChanged.emit()
+
+    @pyqtSlot(bool)
+    def setPrayerAutoPause(self, enabled: bool):
+        self._prayer_auto_pause = bool(enabled)
+        config.CONFIG["prayer_auto_pause"] = self._prayer_auto_pause
+        config.save_user_config(config.CONFIG)
+        self.settingsChanged.emit()
+
+    @pyqtSlot(bool)
+    def setPrayerReminderHeadsup(self, enabled: bool):
+        self._prayer_reminder_headsup = bool(enabled)
+        config.CONFIG["prayer_reminder_headsup"] = self._prayer_reminder_headsup
+        config.save_user_config(config.CONFIG)
+        self.settingsChanged.emit()
+
+    @pyqtSlot(bool)
+    def setPrayerReminderAdzan(self, enabled: bool):
+        self._prayer_reminder_adzan = bool(enabled)
+        config.CONFIG["prayer_reminder_adzan"] = self._prayer_reminder_adzan
+        config.save_user_config(config.CONFIG)
+        self.settingsChanged.emit()
+
+    # =========================================================================
+    # FASE 5: REAL PIPEWIRE AUDIO SPECTRUM VISUALIZER
+    # =========================================================================
+
+    @pyqtProperty(list, notify=audioSpectrumChanged)
+    def audioSpectrum(self) -> list:
+        return self.visualizer.bands
+
+    @pyqtProperty(bool, notify=audioSpectrumChanged)
+    def isVisualizerActive(self) -> bool:
+        return self.visualizer.isEnabled
+
+    @pyqtSlot(bool)
+    def setVisualizerEnabled(self, enabled: bool):
+        self.visualizer.setEnabled(enabled)
+
+    # =========================================================================
+    # FASE 5: CLIPBOARD HISTORY & QUICK PASTE
+    # =========================================================================
+
+    @pyqtProperty(list, notify=clipboardChanged)
+    def clipboardHistory(self) -> list:
+        return self.clipboard.history
+
+    @pyqtProperty(int, notify=clipboardChanged)
+    def clipboardCount(self) -> int:
+        return self.clipboard.count
+
+    @pyqtProperty(int, notify=clipboardChanged)
+    def clipboardPinnedCount(self) -> int:
+        return self.clipboard.pinnedCount
+
+    @pyqtSlot(str)
+    def copyClipboardItem(self, item_id: str):
+        self.clipboard.copyItem(item_id)
+
+    @pyqtSlot(str)
+    def toggleClipboardPin(self, item_id: str):
+        self.clipboard.togglePin(item_id)
+
+    @pyqtSlot(str)
+    def deleteClipboardItem(self, item_id: str):
+        self.clipboard.deleteItem(item_id)
+
+    @pyqtSlot()
+    def clearClipboardUnpinned(self):
+        self.clipboard.clearUnpinned()
+
+    @pyqtSlot(str)
+    def setClipboardSearch(self, query: str):
+        self.clipboard.setSearchQuery(query)
+
+    # =========================================================================
+    # FASE 5: AUDIO OUTPUT & INPUT DEVICE SWITCHER
+    # =========================================================================
+
+    @pyqtProperty(list, notify=audioDevicesChanged)
+    def audioSinks(self) -> list:
+        return self.audio_devices.sinks
+
+    @pyqtProperty(list, notify=audioDevicesChanged)
+    def audioSources(self) -> list:
+        return self.audio_devices.sources
+
+    @pyqtProperty(str, notify=audioDevicesChanged)
+    def currentSinkName(self) -> str:
+        return self.audio_devices.currentSinkName
+
+    @pyqtProperty(str, notify=audioDevicesChanged)
+    def currentSourceName(self) -> str:
+        return self.audio_devices.currentSourceName
+
+    @pyqtSlot(int)
+    def setDefaultAudioSink(self, dev_id: int):
+        self.audio_devices.setDefaultSink(dev_id)
+
+    @pyqtSlot(int)
+    def setDefaultAudioSource(self, dev_id: int):
+        self.audio_devices.setDefaultSource(dev_id)
+
+    # =========================================================================
+    # FASE 5: QUICK VOICE NOTE RECORDER
+    # =========================================================================
+
+    @pyqtProperty(bool, notify=voiceNoteChanged)
+    def isRecordingVoiceNote(self) -> bool:
+        return self.voicenote.isRecording
+
+    @pyqtProperty(str, notify=voiceNoteChanged)
+    def voiceNoteDurationFormatted(self) -> str:
+        return self.voicenote.durationFormatted
+
+    @pyqtProperty(int, notify=voiceNoteChanged)
+    def voiceNoteDurationSeconds(self) -> int:
+        return self.voicenote.durationSeconds
+
+    @pyqtProperty(str, notify=voiceNoteChanged)
+    def voiceNoteLastPath(self) -> str:
+        return self.voicenote.lastSavedPath
+
+    @pyqtSlot()
+    def toggleVoiceNoteRecording(self):
+        self.voicenote.toggleRecording()
+
+    @pyqtSlot()
+    def startVoiceNoteRecording(self):
+        self.voicenote.startRecording()
+
+    @pyqtSlot()
+    def stopVoiceNoteRecording(self):
+        self.voicenote.stopRecording()
+
+    @pyqtSlot()
+    def cancelVoiceNoteRecording(self):
+        self.voicenote.cancelRecording()
+
+    # =========================================================================
+    # FASE 5: SCREEN COLOR PICKER (EYEDROPPER)
+    # =========================================================================
+
+    @pyqtProperty(str, notify=colorPickerChanged)
+    def lastPickedHex(self) -> str:
+        return self.colorpicker.lastHex
+
+    @pyqtProperty(str, notify=colorPickerChanged)
+    def lastPickedRgb(self) -> str:
+        return self.colorpicker.lastRgb
+
+    @pyqtProperty(bool, notify=colorPickerChanged)
+    def isColorPickerActive(self) -> bool:
+        return self.colorpicker.isActive
+
+    @pyqtSlot()
+    def pickScreenColor(self):
+        self.colorpicker.pickColor()
+
+    # =========================================================================
+    # FASE 5: TO-DO EDIT & DUE TIME
+    # =========================================================================
+
+    @pyqtSlot(int, str)
+    def editTodoTask(self, index: int, new_text: str):
+        self.todo.editTask(index, new_text)
+
+    @pyqtSlot(int, str)
+    def setTodoDueTime(self, index: int, due_time: str):
+        self.todo.setDueTime(index, due_time)
+
 
