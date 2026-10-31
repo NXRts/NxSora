@@ -8,7 +8,13 @@ import os
 import subprocess
 import threading
 import time
-import numpy as np
+
+try:
+    import numpy as np
+    HAS_NUMPY = True
+except ImportError:
+    np = None
+    HAS_NUMPY = False
 
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtProperty, pyqtSlot
 
@@ -30,15 +36,16 @@ class AudioVisualizerService(QObject):
         # Precompute logarithmic band index ranges for 16kHz sample rate & 512 FFT
         self._sample_rate = 16000
         self._n_fft = 512
-        freqs = np.fft.rfftfreq(self._n_fft, 1.0 / self._sample_rate)
-        band_edges = np.logspace(np.log10(60), np.log10(7000), self._num_bands + 1)
         self._band_indices = []
-        for i in range(self._num_bands):
-            low, high = band_edges[i], band_edges[i + 1]
-            idx = np.where((freqs >= low) & (freqs < high))[0]
-            if len(idx) == 0:
-                idx = np.array([min(len(freqs) - 1, int(round(low / (self._sample_rate / self._n_fft))))])
-            self._band_indices.append(idx)
+        if HAS_NUMPY:
+            freqs = np.fft.rfftfreq(self._n_fft, 1.0 / self._sample_rate)
+            band_edges = np.logspace(np.log10(60), np.log10(7000), self._num_bands + 1)
+            for i in range(self._num_bands):
+                low, high = band_edges[i], band_edges[i + 1]
+                idx = np.where((freqs >= low) & (freqs < high))[0]
+                if len(idx) == 0:
+                    idx = np.array([min(len(freqs) - 1, int(round(low / (self._sample_rate / self._n_fft))))])
+                self._band_indices.append(idx)
 
     @pyqtProperty(list, notify=spectrumChanged)
     def bands(self) -> list:
@@ -75,6 +82,11 @@ class AudioVisualizerService(QObject):
             self._proc = None
 
     def _worker_loop(self):
+        if not HAS_NUMPY:
+            while self._is_running:
+                time.sleep(0.1)
+            return
+
         cmd = [
             "ffmpeg",
             "-nostdin",

@@ -33,11 +33,14 @@ class ClipboardService(QObject):
         self._load_history()
 
         # Connect to Qt clipboard if available
-        qapp = QGuiApplication.instance()
-        if qapp:
-            clipboard = qapp.clipboard()
-            if clipboard:
-                clipboard.dataChanged.connect(self._on_qt_clipboard_changed)
+        try:
+            qapp = QGuiApplication.instance()
+            if qapp and hasattr(qapp, "clipboard"):
+                clipboard = qapp.clipboard()
+                if clipboard:
+                    clipboard.dataChanged.connect(self._on_qt_clipboard_changed)
+        except Exception:
+            pass
 
         # Polling fallback check every 1.5 seconds for external app copies on Wayland
         self._poll_timer = QTimer(self)
@@ -125,10 +128,12 @@ class ClipboardService(QObject):
     def _on_qt_clipboard_changed(self):
         try:
             qapp = QGuiApplication.instance()
-            if qapp and qapp.clipboard():
-                text = qapp.clipboard().text()
-                if text:
-                    self._add_text_entry(text)
+            if qapp and hasattr(qapp, "clipboard"):
+                cb = qapp.clipboard()
+                if cb:
+                    text = cb.text()
+                    if text:
+                        self._add_text_entry(text)
         except Exception:
             pass
 
@@ -176,9 +181,14 @@ class ClipboardService(QObject):
         self._last_text = text
 
         # Set to Qt clipboard
-        qapp = QGuiApplication.instance()
-        if qapp and qapp.clipboard():
-            qapp.clipboard().setText(text)
+        try:
+            qapp = QGuiApplication.instance()
+            if qapp and hasattr(qapp, "clipboard"):
+                cb = qapp.clipboard()
+                if cb:
+                    cb.setText(text)
+        except Exception:
+            pass
 
         # Also set via wl-copy for Wayland consistency
         try:

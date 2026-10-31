@@ -97,9 +97,14 @@ class ColorPickerService(QObject):
             self._last_rgb = "rgb(0, 0, 0)"
 
         # Set to clipboard
-        qapp = QGuiApplication.instance()
-        if qapp and qapp.clipboard():
-            qapp.clipboard().setText(self._last_hex)
+        try:
+            qapp = QGuiApplication.instance()
+            if qapp and hasattr(qapp, "clipboard"):
+                cb = qapp.clipboard()
+                if cb:
+                    cb.setText(self._last_hex)
+        except Exception:
+            pass
 
         try:
             subprocess.run(

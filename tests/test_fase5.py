@@ -21,6 +21,10 @@ from services.todo import TodoService
 
 
 class TestFase5Features(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        from PyQt6.QtCore import QCoreApplication
+        cls.app = QCoreApplication.instance() or QCoreApplication([])
 
     def test_prayer_astronomical_calculation(self):
         """Verify 100% offline mathematical prayer times calculation."""
