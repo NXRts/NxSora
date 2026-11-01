@@ -68,7 +68,8 @@ Item {
     HoverHandler {
         id: islandHover
         onHoveredChanged: {
-            if (!AppConfig.autoCollapseEnabled) return;
+            var enabled = IslandController ? IslandController.autoCollapseEnabled : AppConfig.autoCollapseEnabled;
+            if (!enabled) return;
             if (IslandController.isExpanded && !IslandController.isPinned) {
                 if (hovered) {
                     autoCollapseTimer.stop();
@@ -81,7 +82,7 @@ Item {
 
     Timer {
         id: autoCollapseTimer
-        interval: AppConfig.autoCollapseTimeout
+        interval: IslandController ? IslandController.autoCollapseTimeout : AppConfig.autoCollapseTimeout
         repeat: false
         onTriggered: {
             if (IslandController.isExpanded && !islandHover.hovered && !IslandController.isPinned) {
@@ -97,8 +98,9 @@ Item {
     Connections {
         target: IslandController
         function onIsExpandedChanged() {
+            var enabled = IslandController ? IslandController.autoCollapseEnabled : AppConfig.autoCollapseEnabled;
             if (IslandController.isExpanded) {
-                if (AppConfig.autoCollapseEnabled && !islandHover.hovered && !IslandController.isPinned) {
+                if (enabled && !islandHover.hovered && !IslandController.isPinned) {
                     autoCollapseTimer.restart();
                 } else {
                     autoCollapseTimer.stop();

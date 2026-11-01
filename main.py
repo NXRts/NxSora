@@ -210,6 +210,19 @@ def main():
         print(f"Error: Failed to load QML from {main_qml_path}")
         sys.exit(1)
 
+    root_window = engine.rootObjects()[0]
+    controller.setRootWindow(root_window)
+
+    def on_screen_changed(screen_name):
+        for s in app.screens():
+            if s.name() == screen_name:
+                try:
+                    root_window.setScreen(s)
+                except Exception as e:
+                    print(f"[NxSora] Warning switching screen to {screen_name}: {e}")
+                break
+    controller.screenChanged.connect(on_screen_changed)
+
     # Register Global D-Bus service org.nxsora.Island at /Island
     session_bus = QDBusConnection.sessionBus()
     dbus_service = IslandDBusService(controller, app)

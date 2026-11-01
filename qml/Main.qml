@@ -10,7 +10,7 @@ Window {
     // Wayland Layer-Shell Configuration
     LayerShell.Window.layer: LayerShell.Window.LayerOverlay
     LayerShell.Window.anchors: LayerShell.Window.AnchorTop
-    LayerShell.Window.margins.top: AppConfig.topMargin
+    LayerShell.Window.margins.top: (typeof IslandController !== "undefined" && IslandController) ? IslandController.topMargin : AppConfig.topMargin
     LayerShell.Window.exclusionZone: 0
     LayerShell.Window.scope: "dynamic-island"
 
