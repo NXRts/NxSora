@@ -962,6 +962,466 @@ Item {
             }
 
             // =================================================================
+            // SECTION 2C: KUSTOMISASI TAMPILAN, LAYAR & PERILAKU (FASE 6)
+            // =================================================================
+            Text {
+                text: "KUSTOMISASI TAMPILAN, LAYAR & PERILAKU (FASE 6)"
+                color: "#64748b"
+                font.pixelSize: 9
+                font.weight: Font.Bold
+                font.letterSpacing: 0.5
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                radius: 10
+                color: "#12131c"
+                border.color: "#24273a"
+                border.width: 1
+                implicitHeight: customCol.implicitHeight + 20
+
+                ColumnLayout {
+                    id: customCol
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    spacing: 12
+
+                    // 1. Pilihan Layar / Multi-Monitor
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 4
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 5
+
+                            Image {
+                                Layout.preferredWidth: 12
+                                Layout.preferredHeight: 12
+                                sourceSize: Qt.size(12, 12)
+                                source: "file://" + AppConfig.assetsDir + "/tv.svg"
+                                Layout.alignment: Qt.AlignVCenter
+                            }
+
+                            Text {
+                                text: "Layar / Monitor Aktif:"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                                font.weight: Font.Bold
+                                Layout.fillWidth: true
+                                Layout.minimumWidth: 0
+                            }
+
+                            Rectangle {
+                                Layout.preferredWidth: 20
+                                Layout.preferredHeight: 20
+                                radius: 4
+                                color: refScreenMouse.containsMouse ? "#273044" : "#1a2130"
+                                border.color: "#334155"
+                                border.width: 1
+                                Layout.alignment: Qt.AlignVCenter
+
+                                Image {
+                                    anchors.centerIn: parent
+                                    width: 10
+                                    height: 10
+                                    sourceSize: Qt.size(10, 10)
+                                    source: "file://" + AppConfig.assetsDir + "/refresh.svg"
+                                }
+
+                                MouseArea {
+                                    id: refScreenMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: IslandController.refreshScreens()
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: "Pilih monitor tempat Dynamic Island ditampilkan"
+                            color: "#94a3b8"
+                            font.pixelSize: 8
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                            Layout.minimumWidth: 0
+                        }
+
+                        Flickable {
+                            Layout.fillWidth: true
+                            height: 24
+                            contentWidth: screenRow.implicitWidth
+                            clip: true
+
+                            Row {
+                                id: screenRow
+                                spacing: 5
+
+                                Repeater {
+                                    model: IslandController.availableScreens
+
+                                    Rectangle {
+                                        required property var modelData
+                                        readonly property bool isSelected: (IslandController.currentScreen === modelData.name)
+
+                                        height: 22
+                                        radius: 11
+                                        color: isSelected ? "#0369a1" : (screenMouse.containsMouse ? "#27273a" : "#1a1b26")
+                                        border.color: isSelected ? "#38bdf8" : "#334155"
+                                        border.width: 1
+                                        implicitWidth: screenLabel.implicitWidth + 14
+
+                                        Text {
+                                            id: screenLabel
+                                            anchors.centerIn: parent
+                                            text: modelData.name + (modelData.isPrimary ? " (Utama)" : "") + " • " + (modelData.resolution || "")
+                                            color: isSelected ? "#ffffff" : "#94a3b8"
+                                            font.pixelSize: 9
+                                            font.weight: isSelected ? Font.Bold : Font.Normal
+                                        }
+
+                                        MouseArea {
+                                            id: screenMouse
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: IslandController.setScreen(modelData.name)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Divider
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 1
+                        color: "#1e2235"
+                    }
+
+                    // 2. Warna Aksen Tema
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 4
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 5
+
+                            Image {
+                                Layout.preferredWidth: 12
+                                Layout.preferredHeight: 12
+                                sourceSize: Qt.size(12, 12)
+                                source: "file://" + AppConfig.assetsDir + "/pipette.svg"
+                                Layout.alignment: Qt.AlignVCenter
+                            }
+
+                            Text {
+                                text: "Warna Aksen Tema:"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                                font.weight: Font.Bold
+                                Layout.fillWidth: true
+                                Layout.minimumWidth: 0
+                            }
+
+                            // Eyedropper button
+                            Rectangle {
+                                Layout.preferredHeight: 20
+                                Layout.preferredWidth: eyedropLabel.implicitWidth + 14
+                                radius: 4
+                                color: eyedropMouse.containsMouse ? "#273044" : "#1a2130"
+                                border.color: "#38bdf8"
+                                border.width: 1
+                                Layout.alignment: Qt.AlignVCenter
+
+                                RowLayout {
+                                    anchors.centerIn: parent
+                                    spacing: 4
+                                    Image {
+                                        width: 9
+                                        height: 9
+                                        sourceSize: Qt.size(9, 9)
+                                        source: "file://" + AppConfig.assetsDir + "/pipette.svg"
+                                    }
+                                    Text {
+                                        id: eyedropLabel
+                                        text: "Pipet Layar"
+                                        color: "#38bdf8"
+                                        font.pixelSize: 8
+                                        font.weight: Font.Bold
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: eyedropMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: IslandController.pickScreenColor()
+                                }
+                            }
+                        }
+
+                        Text {
+                            text: "Pilih palet warna aksen pendaran cahaya Dynamic Island"
+                            color: "#94a3b8"
+                            font.pixelSize: 8
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                            Layout.minimumWidth: 0
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 8
+
+                            Repeater {
+                                model: [
+                                    { name: "Sora Sky", hex: "#38bdf8" },
+                                    { name: "Violet", hex: "#818cf8" },
+                                    { name: "Emerald", hex: "#22c55e" },
+                                    { name: "Rose", hex: "#f43f5e" },
+                                    { name: "Amber", hex: "#f59e0b" },
+                                    { name: "Ruby", hex: "#ef4444" }
+                                ]
+
+                                Rectangle {
+                                    required property var modelData
+                                    readonly property bool isSelected: (IslandController.accentColor.toLowerCase() === modelData.hex.toLowerCase())
+
+                                    width: 22
+                                    height: 22
+                                    radius: 11
+                                    color: modelData.hex
+                                    border.color: isSelected ? "#ffffff" : "#334155"
+                                    border.width: isSelected ? 2 : 1
+
+                                    Image {
+                                        anchors.centerIn: parent
+                                        width: 10
+                                        height: 10
+                                        sourceSize: Qt.size(10, 10)
+                                        source: "file://" + AppConfig.assetsDir + "/check.svg"
+                                        visible: isSelected
+                                    }
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: IslandController.setAccentColor(modelData.hex)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Divider
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 1
+                        color: "#1e2235"
+                    }
+
+                    // 3. Jeda Tutup Otomatis (Auto-Collapse Timeout)
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 4
+
+                        RowLayout {
+                            spacing: 5
+                            Image {
+                                Layout.preferredWidth: 12
+                                Layout.preferredHeight: 12
+                                sourceSize: Qt.size(12, 12)
+                                source: "file://" + AppConfig.assetsDir + "/timer.svg"
+                                Layout.alignment: Qt.AlignVCenter
+                            }
+                            Text {
+                                text: "Jeda Tutup Otomatis Hub:"
+                                color: "#e2e8f0"
+                                font.pixelSize: 11
+                                font.weight: Font.Bold
+                            }
+                        }
+
+                        Text {
+                            text: "Waktu tunggu sebelum Island menutup saat kursor keluar"
+                            color: "#94a3b8"
+                            font.pixelSize: 8
+                            elide: Text.ElideRight
+                            Layout.fillWidth: true
+                            Layout.minimumWidth: 0
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 5
+
+                            Repeater {
+                                model: [
+                                    { label: "1.0s", ms: 1000 },
+                                    { label: "1.8s", ms: 1800 },
+                                    { label: "3.5s", ms: 3500 },
+                                    { label: "5.0s", ms: 5000 },
+                                    { label: "Tetap Buka", ms: 0 }
+                                ]
+
+                                Rectangle {
+                                    required property var modelData
+                                    readonly property bool isSelected: (IslandController.autoCollapseTimeout === modelData.ms)
+
+                                    Layout.fillWidth: true
+                                    height: 22
+                                    radius: 11
+                                    color: isSelected ? "#0369a1" : (toMouse.containsMouse ? "#27273a" : "#1a1b26")
+                                    border.color: isSelected ? "#38bdf8" : "#334155"
+                                    border.width: 1
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: modelData.label
+                                        color: isSelected ? "#ffffff" : "#94a3b8"
+                                        font.pixelSize: 9
+                                        font.weight: isSelected ? Font.Bold : Font.Normal
+                                    }
+
+                                    MouseArea {
+                                        id: toMouse
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: IslandController.setAutoCollapseTimeout(modelData.ms)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Divider
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 1
+                        color: "#1e2235"
+                    }
+
+                    // 4. Jarak Margin Atas Layar (Top Margin Offset)
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 8
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.minimumWidth: 0
+                            spacing: 1
+
+                            RowLayout {
+                                spacing: 5
+                                Image {
+                                    Layout.preferredWidth: 12
+                                    Layout.preferredHeight: 12
+                                    sourceSize: Qt.size(12, 12)
+                                    source: "file://" + AppConfig.assetsDir + "/arrow-down.svg"
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+                                Text {
+                                    text: "Jarak Margin Atas"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
+                            }
+
+                            Text {
+                                text: "Sesuaikan bila desktop memiliki panel bar atas"
+                                color: "#94a3b8"
+                                font.pixelSize: 8
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                                Layout.minimumWidth: 0
+                            }
+                        }
+
+                        RowLayout {
+                            spacing: 4
+                            Layout.alignment: Qt.AlignVCenter
+
+                            Rectangle {
+                                Layout.preferredWidth: 20
+                                Layout.preferredHeight: 20
+                                radius: 4
+                                color: marginMinMouse.containsMouse ? "#2d334a" : "#1e2235"
+                                border.color: "#334155"
+                                border.width: 1
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "–"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
+
+                                MouseArea {
+                                    id: marginMinMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: IslandController.setTopMargin(IslandController.topMargin - 2)
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.preferredHeight: 20
+                                radius: 4
+                                color: "#0f172a"
+                                border.color: "#0284c7"
+                                border.width: 1
+                                implicitWidth: marginTxt.implicitWidth + 10
+
+                                Text {
+                                    id: marginTxt
+                                    anchors.centerIn: parent
+                                    text: IslandController.topMargin + " px"
+                                    color: "#38bdf8"
+                                    font.pixelSize: 9
+                                    font.weight: Font.Bold
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.preferredWidth: 20
+                                Layout.preferredHeight: 20
+                                radius: 4
+                                color: marginPlusMouse.containsMouse ? "#2d334a" : "#1e2235"
+                                border.color: "#334155"
+                                border.width: 1
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "+"
+                                    color: "#e2e8f0"
+                                    font.pixelSize: 11
+                                    font.weight: Font.Bold
+                                }
+
+                                MouseArea {
+                                    id: marginPlusMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: IslandController.setTopMargin(IslandController.topMargin + 2)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // =================================================================
             // SECTION 3: PENGUJIAN PEEK OVERLAYS & FASE 4 FITUR
             // =================================================================
             RowLayout {

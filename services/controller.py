@@ -27,6 +27,7 @@ from services.audio_devices import AudioDeviceService
 from services.voicenote import VoiceNoteService
 from services.colorpicker import ColorPickerService
 from services.location import LocationService
+from services.screen_manager import ScreenManagerService
 from PyQt6.QtCore import QVariant
 import config
 
@@ -113,6 +114,13 @@ class IslandController(QObject):
     locationDetectingChanged = pyqtSignal()
     locationStatusMessageChanged = pyqtSignal(str)
 
+    # Fase 6: Multi-Monitor, Accent Colors & Auto-Collapse Customization
+    screenChanged = pyqtSignal(str)
+    screensListChanged = pyqtSignal()
+    accentColorChanged = pyqtSignal(str)
+    topMarginChanged = pyqtSignal(int)
+    autoCollapseTimeoutChanged = pyqtSignal(int)
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -140,6 +148,7 @@ class IslandController(QObject):
         self.voicenote = VoiceNoteService(self.shelf, self)
         self.colorpicker = ColorPickerService(self.clipboard, self)
         self.location = LocationService(self.weather, self.prayer, self)
+        self.screen_manager = ScreenManagerService(self)
 
         # Fase 5 state
         self._prayer_alert_type = ""
@@ -149,6 +158,12 @@ class IslandController(QObject):
         self._prayer_auto_pause = config.CONFIG.get("prayer_auto_pause", True)
         self._prayer_reminder_headsup = config.CONFIG.get("prayer_reminder_headsup", True)
         self._prayer_reminder_adzan = config.CONFIG.get("prayer_reminder_adzan", True)
+
+        # Fase 6: Kustomisasi Lanjutan
+        self._accent_color = config.CONFIG.get("accent_color", "#38bdf8")
+        self._top_margin = int(config.CONFIG.get("top_margin", 0))
+        self._auto_collapse_timeout = int(config.CONFIG.get("auto_collapse_leave_timeout", 3500))
+        self._auto_collapse_enabled = bool(config.CONFIG.get("auto_collapse_on_leave", True)) and (self._auto_collapse_timeout > 0)
 
         # Mascot mode toggle (Resting Eyes vs Digital Clock)
         self._mascot_mode = False
@@ -244,6 +259,8 @@ class IslandController(QObject):
         self.location.isSearchingChanged.connect(lambda: self.locationSearchingChanged.emit())
         self.location.isDetectingChanged.connect(lambda: self.locationDetectingChanged.emit())
         self.location.statusMessageChanged.connect(self.locationStatusMessageChanged.emit)
+        self.screen_manager.screenChanged.connect(self.screenChanged.emit)
+        self.screen_manager.screensListChanged.connect(self.screensListChanged.emit)
 
         # Initial state setup
         if self.mpris.status in ("Playing", "Paused") and self.mpris.title:
@@ -1827,5 +1844,70 @@ class IslandController(QObject):
     @pyqtSlot(int)
     def setLocationIhtiath(self, minutes: int):
         self.location.setIhtiathMinutes(minutes)
+
+    # =========================================================================
+    # FASE 6: MULTI-MONITOR, WARNA AKSEN, AUTO-COLLAPSE & MARGIN ATAS
+    # =========================================================================
+
+    def setRootWindow(self, window):
+        """Attaches root QQuickWindow for multi-monitor display switching."""
+        self.screen_manager.attachWindow(window)
+
+    @pyqtProperty(str, notify=screenChanged)
+    def currentScreen(self) -> str:
+        return self.screen_manager.currentScreen
+
+    @pyqtProperty(list, notify=screensListChanged)
+    def availableScreens(self) -> list:
+        return self.screen_manager.availableScreens
+
+    @pyqtSlot(str)
+    def setScreen(self, screen_name: str):
+        self.screen_manager.setScreen(screen_name)
+
+    @pyqtSlot()
+    def refreshScreens(self):
+        self.screen_manager.refreshScreens()
+
+    @pyqtProperty(str, notify=accentColorChanged)
+    def accentColor(self) -> str:
+        return self._accent_color
+
+    @pyqtSlot(str)
+    def setAccentColor(self, color_hex: str):
+        color_hex = color_hex.strip()
+        if color_hex.startswith("#") and len(color_hex) in (4, 7, 9):
+            self._accent_color = color_hex
+            config.CONFIG["accent_color"] = color_hex
+            config.save_user_config(config.CONFIG)
+            self.accentColorChanged.emit(self._accent_color)
+
+    @pyqtProperty(int, notify=topMarginChanged)
+    def topMargin(self) -> int:
+        return self._top_margin
+
+    @pyqtSlot(int)
+    def setTopMargin(self, margin_px: int):
+        self._top_margin = max(0, min(100, int(margin_px)))
+        config.CONFIG["top_margin"] = self._top_margin
+        config.save_user_config(config.CONFIG)
+        self.topMarginChanged.emit(self._top_margin)
+
+    @pyqtProperty(int, notify=autoCollapseTimeoutChanged)
+    def autoCollapseTimeout(self) -> int:
+        return self._auto_collapse_timeout
+
+    @pyqtProperty(bool, notify=autoCollapseTimeoutChanged)
+    def autoCollapseEnabled(self) -> bool:
+        return self._auto_collapse_enabled
+
+    @pyqtSlot(int)
+    def setAutoCollapseTimeout(self, timeout_ms: int):
+        self._auto_collapse_timeout = max(0, int(timeout_ms))
+        self._auto_collapse_enabled = (self._auto_collapse_timeout > 0)
+        config.CONFIG["auto_collapse_leave_timeout"] = self._auto_collapse_timeout
+        config.CONFIG["auto_collapse_on_leave"] = self._auto_collapse_enabled
+        config.save_user_config(config.CONFIG)
+        self.autoCollapseTimeoutChanged.emit(self._auto_collapse_timeout)
 
 

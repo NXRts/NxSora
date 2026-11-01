@@ -155,6 +155,10 @@ DEFAULT_CONFIG = {
     "accent_blue": "#38bdf8",
     "accent_green": "#22c55e",
     "accent_purple": "#818cf8",
+    "accent_color": "#38bdf8",
+
+    # Fase 6: Multi-Monitor & Kustomisasi Lanjutan
+    "preferred_screen": "",
 }
 
 
