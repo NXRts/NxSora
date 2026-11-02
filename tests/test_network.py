@@ -1,12 +1,12 @@
 import unittest
-from PyQt6.QtCore import QCoreApplication
+from PyQt6.QtWidgets import QApplication
 from services.network import NetworkService
 
 
 class TestNetworkService(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.app = QCoreApplication.instance() or QCoreApplication([])
+        cls.app = QApplication.instance() or QApplication([])
 
     def setUp(self):
         self.net = NetworkService()

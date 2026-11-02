@@ -42,7 +42,7 @@ class ScreenManagerService(QObject):
         app = QApplication.instance()
         screens_data = []
 
-        if app:
+        if app and hasattr(app, "screens") and hasattr(app, "primaryScreen"):
             primary = app.primaryScreen()
             for idx, s in enumerate(app.screens()):
                 name = s.name() or f"Screen-{idx + 1}"
@@ -76,7 +76,7 @@ class ScreenManagerService(QObject):
             return
 
         app = QApplication.instance()
-        if not app:
+        if not app or not hasattr(app, "screens"):
             return
 
         target_screen = None
@@ -105,7 +105,7 @@ class ScreenManagerService(QObject):
             return
 
         app = QApplication.instance()
-        if not app:
+        if not app or not hasattr(app, "screens"):
             return
 
         target = None
