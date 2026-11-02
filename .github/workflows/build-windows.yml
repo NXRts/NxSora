@@ -8,6 +8,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-windows:
     name: Build Standalone Windows EXE & Installer
@@ -81,4 +84,32 @@ jobs:
           name: NxSora-Windows-Setup-Installer
           path: dist/NxSora-Setup.exe
           if-no-files-found: error
+
+      - name: Create GitHub Release and Upload Binaries
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/NxSora-Setup.exe
+            dist/NxSora.exe
+          name: NxSora ${{ github.ref_name }} — The Living Sky-Notch
+          body: |
+            ## 🌌 NxSora (Nx空) — The Living Sky-Notch
+
+            Selamat datang di rilis resmi **NxSora**! NxSora menghadirkan pengalaman antarmuka *Dynamic Island* modern, elegan, dan adaptif untuk Windows 10/11 dan Linux (KDE Plasma 6 Wayland).
+
+            ### 📦 Pilihan Berkas Unduhan
+            * **`NxSora-Setup.exe`** — **Official Installer (Rekomendasi)**: Setup wizard instalasi lengkap dengan shortcut Desktop, Start Menu, dan opsi autostart.
+            * **`NxSora.exe`** — **Standalone Portable**: Siap pakai tanpa perlu instalasi. Cukup simpan di folder mana saja dan klik 2x untuk menjalankan.
+
+            ### ✨ Fitur Unggulan
+            * **Dynamic Topmost Overlay**: Menempel mulus di tengah atas layar tanpa muncul di Taskbar atau Alt+Tab.
+            * **Now Playing & Synchronized Lyrics**: Terintegrasi dengan Windows Media Transport Controls (SMTC) & real-time lirik (.lrc).
+            * **Pusat Kontrol Cepat**: Volume audio, kecerahan layar, status baterai & Bluetooth/TWS, serta status Wi-Fi.
+            * **Jadwal Sholat & Sun Arc Trajectory**: Kalkulasi astronomi posisi matahari 100% offline (Kemenag RI), hitung mundur adzan, dan azan quiet pop-up.
+            * **Produktivitas & Utilitas Pintar**: Shelf (rak berkas cepat), Clipboard History, Screen Color Picker, Quick Voice Note, dan To-Do reminder.
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+
 
