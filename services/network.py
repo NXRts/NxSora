@@ -6,6 +6,7 @@ Triggers the 310x60px Network Peek HUD on connection and disconnection events.
 
 import subprocess
 import shutil
+import sys
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtProperty, pyqtSlot, QTimer
 from PyQt6.QtDBus import QDBusConnection, QDBusInterface
 
@@ -26,8 +27,8 @@ class NetworkService(QObject):
         self._has_nmcli = shutil.which("nmcli") is not None
 
         # Listen to NetworkManager D-Bus system signals
-        self.bus = QDBusConnection.systemBus()
-        if self.bus.isConnected():
+        self.bus = QDBusConnection.systemBus() if sys.platform != "win32" else None
+        if self.bus and self.bus.isConnected():
             self.bus.connect(
                 "org.freedesktop.NetworkManager",
                 "/org/freedesktop/NetworkManager",
@@ -63,6 +64,20 @@ class NetworkService(QObject):
     @pyqtSlot()
     def check_status(self, emit_peek=True):
         if self._demo_override:
+            return
+
+        if sys.platform == "win32":
+            from services.windows_adapter import WindowsNetworkAdapter
+            ssid, connected, signal = WindowsNetworkAdapter.get_wifi_status()
+            changed = (connected != self._connected or ssid != self._ssid)
+            self._ssid = ssid
+            self._connected = connected
+            self._signal_pct = signal
+            self._net_type = "wifi"
+            if changed:
+                self.networkChanged.emit()
+                if emit_peek and connected and ssid:
+                    self.networkPeekTriggered.emit(ssid, True, signal, "wifi")
             return
 
         if not self._has_nmcli:

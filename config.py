@@ -4,8 +4,10 @@ Standardized XDG Base Directory Support with Auto-Migration & Security
 """
 
 import os
+import sys
 import json
 import shutil
+import tempfile
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -13,29 +15,40 @@ QML_DIR = BASE_DIR / "qml"
 ASSETS_DIR = BASE_DIR / "assets"
 
 # ==============================================================================
-# XDG Base Directory Specification
+# XDG & Cross-Platform Base Directory Specification
 # ==============================================================================
 def _resolve_xdg_dirs():
     home = Path.home()
     
-    # 1. Configuration: $XDG_CONFIG_HOME/nxsora (default: ~/.config/nxsora)
-    xdg_config = os.environ.get("XDG_CONFIG_HOME")
-    config_dir = Path(xdg_config) / "nxsora" if xdg_config else home / ".config" / "nxsora"
-    
-    # 2. Cache: $XDG_CACHE_HOME/nxsora (default: ~/.cache/nxsora)
-    xdg_cache = os.environ.get("XDG_CACHE_HOME")
-    cache_dir = Path(xdg_cache) / "nxsora" if xdg_cache else home / ".cache" / "nxsora"
-    
-    # 3. State: $XDG_STATE_HOME/nxsora (default: ~/.local/state/nxsora)
-    xdg_state = os.environ.get("XDG_STATE_HOME")
-    state_dir = Path(xdg_state) / "nxsora" if xdg_state else home / ".local" / "state" / "nxsora"
-    
-    # 4. Runtime: $XDG_RUNTIME_DIR/nxsora
-    xdg_runtime = os.environ.get("XDG_RUNTIME_DIR")
-    if xdg_runtime:
-        runtime_dir = Path(xdg_runtime) / "nxsora"
+    if sys.platform == "win32":
+        # Windows AppData / LocalAppData standards
+        appdata = os.environ.get("APPDATA")
+        localappdata = os.environ.get("LOCALAPPDATA")
+        config_dir = Path(appdata) / "nxsora" if appdata else home / "AppData" / "Roaming" / "nxsora"
+        cache_dir = Path(localappdata) / "nxsora" / "cache" if localappdata else home / "AppData" / "Local" / "nxsora" / "cache"
+        state_dir = Path(localappdata) / "nxsora" / "state" if localappdata else home / "AppData" / "Local" / "nxsora" / "state"
+        username = os.environ.get("USERNAME", "user")
+        runtime_dir = Path(tempfile.gettempdir()) / f"nxsora-{username}"
     else:
-        runtime_dir = Path(f"/tmp/nxsora-{os.getuid()}")
+        # Linux / POSIX XDG standards
+        # 1. Configuration: $XDG_CONFIG_HOME/nxsora (default: ~/.config/nxsora)
+        xdg_config = os.environ.get("XDG_CONFIG_HOME")
+        config_dir = Path(xdg_config) / "nxsora" if xdg_config else home / ".config" / "nxsora"
+        
+        # 2. Cache: $XDG_CACHE_HOME/nxsora (default: ~/.cache/nxsora)
+        xdg_cache = os.environ.get("XDG_CACHE_HOME")
+        cache_dir = Path(xdg_cache) / "nxsora" if xdg_cache else home / ".cache" / "nxsora"
+        
+        # 3. State: $XDG_STATE_HOME/nxsora (default: ~/.local/state/nxsora)
+        xdg_state = os.environ.get("XDG_STATE_HOME")
+        state_dir = Path(xdg_state) / "nxsora" if xdg_state else home / ".local" / "state" / "nxsora"
+        
+        # 4. Runtime: $XDG_RUNTIME_DIR/nxsora
+        xdg_runtime = os.environ.get("XDG_RUNTIME_DIR")
+        if xdg_runtime:
+            runtime_dir = Path(xdg_runtime) / "nxsora"
+        else:
+            runtime_dir = Path(f"/tmp/nxsora-{os.getuid()}")
         
     config_dir.mkdir(parents=True, exist_ok=True)
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -88,16 +101,24 @@ USER_CONFIG_FILE = CONFIG_DIR / "config.json"
 
 
 def safe_write_private_json(filepath: Path | str, data: dict | list) -> bool:
-    """Write data to JSON and enforce POSIX 0600 (read/write by owner only) for privacy."""
+    """Write data to JSON and enforce POSIX 0600 (read/write by owner only) on Linux/Unix for privacy."""
     try:
         p = Path(filepath)
         p.parent.mkdir(parents=True, exist_ok=True)
         temp_file = p.parent / f".tmp_{p.name}_{os.getpid()}"
         with open(temp_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        os.chmod(temp_file, 0o600)
+        if sys.platform != "win32":
+            try:
+                os.chmod(temp_file, 0o600)
+            except Exception:
+                pass
         temp_file.replace(p)
-        os.chmod(p, 0o600)
+        if sys.platform != "win32":
+            try:
+                os.chmod(p, 0o600)
+            except Exception:
+                pass
         return True
     except Exception as e:
         print(f"[NxSora Config] Error writing private file {filepath}: {e}")

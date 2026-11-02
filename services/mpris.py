@@ -17,7 +17,6 @@ class MprisService(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.bus = QDBusConnection.sessionBus()
         self.active_player = None
         self.title = ""
         self.artist = ""
@@ -27,6 +26,15 @@ class MprisService(QObject):
         self.status = "Stopped"  # Playing, Paused, Stopped
         self.position = 0.0
         self.duration = 0.0
+
+        if sys.platform == "win32":
+            from services.windows_adapter import WindowsMediaAdapter
+            self._win_adapter = WindowsMediaAdapter(self)
+            self._win_adapter.mediaChanged.connect(self._sync_from_win_adapter)
+            self._win_adapter.positionChanged.connect(self._sync_position_from_win_adapter)
+            return
+
+        self.bus = QDBusConnection.sessionBus()
         
         # Connect to DBus signals
         self.bus.connect(
@@ -53,6 +61,21 @@ class MprisService(QObject):
 
         # Initial detection
         self.refresh_players()
+
+    def _sync_from_win_adapter(self):
+        if hasattr(self, "_win_adapter"):
+            self.title = self._win_adapter.title
+            self.artist = self._win_adapter.artist
+            self.album = self._win_adapter.album
+            self.status = self._win_adapter.status
+            self.art_url = self._win_adapter.art_url
+            self.accent_color = self._win_adapter.accent_color
+            self.mediaChanged.emit()
+
+    def _sync_position_from_win_adapter(self, pos, dur):
+        self.position = pos
+        self.duration = dur
+        self.positionChanged.emit(self.position, self.duration)
 
     def refresh_players(self):
         iface = QDBusInterface("org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", self.bus)
@@ -197,6 +220,9 @@ class MprisService(QObject):
                 pass
 
     def play_pause(self):
+        if hasattr(self, "_win_adapter"):
+            self._win_adapter.play_pause()
+            return
         if not self.active_player:
             return
         p_iface = QDBusInterface(self.active_player, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", self.bus)
@@ -204,6 +230,9 @@ class MprisService(QObject):
         QTimer.singleShot(150, self._update_player_state)
 
     def next(self):
+        if hasattr(self, "_win_adapter"):
+            self._win_adapter.next_track()
+            return
         if not self.active_player:
             return
         p_iface = QDBusInterface(self.active_player, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", self.bus)
@@ -211,6 +240,9 @@ class MprisService(QObject):
         QTimer.singleShot(150, self._update_player_state)
 
     def previous(self):
+        if hasattr(self, "_win_adapter"):
+            self._win_adapter.prev_track()
+            return
         if not self.active_player:
             return
         p_iface = QDBusInterface(self.active_player, "/org/mpris/MediaPlayer2", "org.mpris.MediaPlayer2.Player", self.bus)
@@ -218,6 +250,9 @@ class MprisService(QObject):
         QTimer.singleShot(150, self._update_player_state)
 
     def seek_ratio(self, ratio):
+        if hasattr(self, "_win_adapter"):
+            self._win_adapter.seek_ratio(ratio)
+            return
         if not self.active_player or self.duration <= 0:
             return
         try:

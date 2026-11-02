@@ -13,6 +13,7 @@ import re
 import shutil
 import subprocess
 import time
+import sys
 import psutil
 
 
@@ -83,13 +84,14 @@ class SystemService(QObject):
 
         # System info
         self.kernel_info = platform.release()
-        self.os_info = "CachyOS (KDE Plasma 6)"
+        self.os_info = f"Windows {platform.version()}" if sys.platform == "win32" else "CachyOS (KDE Plasma 6)"
 
         # Night Light state
-        self.bus = QDBusConnection.sessionBus()
+        self.bus = QDBusConnection.sessionBus() if sys.platform != "win32" else None
         self.night_light_active = False
         self._night_light_cookie = 0
-        self._check_night_light()
+        if sys.platform != "win32":
+            self._check_night_light()
 
         # Check initial battery
         batt = psutil.sensors_battery()
@@ -187,6 +189,14 @@ class SystemService(QObject):
             pass
 
     def _refresh_power_profile(self):
+        if sys.platform == "win32":
+            from services.windows_adapter import WindowsHardwareAdapter
+            prof = WindowsHardwareAdapter.get_power_profile()
+            if prof != self.power_profile:
+                self.power_profile = prof
+                self.powerProfileChanged.emit(self.power_profile)
+            return
+
         try:
             res = subprocess.run(
                 ["powerprofilesctl", "get"],
@@ -205,6 +215,13 @@ class SystemService(QObject):
     def set_power_profile(self, profile: str):
         if profile not in ("power-saver", "balanced", "performance"):
             return
+        if sys.platform == "win32":
+            from services.windows_adapter import WindowsHardwareAdapter
+            if WindowsHardwareAdapter.set_power_profile(profile):
+                self.power_profile = profile
+                self.powerProfileChanged.emit(self.power_profile)
+            return
+
         try:
             subprocess.Popen(
                 ["powerprofilesctl", "set", profile],
@@ -337,7 +354,8 @@ class SystemService(QObject):
         # Every 3 seconds: update Disk, Top Process, and Power Profile
         if self._poll_tick_count % 3 == 1:
             try:
-                du = psutil.disk_usage("/")
+                root_path = (os.environ.get("SystemDrive", "C:") + "\\") if sys.platform == "win32" else "/"
+                du = psutil.disk_usage(root_path)
                 self.disk_percent = int(round(du.percent))
                 d_used = du.used / (1024 ** 3)
                 d_tot = du.total / (1024 ** 3)
@@ -394,19 +412,44 @@ class SystemService(QObject):
 
     # System Actions
     def take_screenshot(self):
-        """Take rectangle/area screenshot via Spectacle"""
+        """Take rectangle/area screenshot via Spectacle or Windows ScreenClip"""
+        if sys.platform == "win32":
+            try:
+                os.startfile("ms-screenclip:")
+            except Exception:
+                subprocess.Popen(["snippingtool.exe"], shell=True)
+            return
         subprocess.Popen(["spectacle", "-r"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def lock_screen(self):
         """Lock desktop session"""
+        if sys.platform == "win32":
+            try:
+                import ctypes
+                ctypes.windll.user32.LockWorkStation()
+            except Exception:
+                pass
+            return
         subprocess.Popen(["loginctl", "lock-session"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def open_terminal(self):
-        """Open default KDE terminal (Konsole)"""
+        """Open default terminal"""
+        if sys.platform == "win32":
+            try:
+                subprocess.Popen(["powershell.exe"], shell=True)
+            except Exception:
+                pass
+            return
         subprocess.Popen(["konsole"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def open_settings(self):
-        """Open KDE System Settings"""
+        """Open System Settings"""
+        if sys.platform == "win32":
+            try:
+                os.startfile("ms-settings:")
+            except Exception:
+                pass
+            return
         subprocess.Popen(["systemsettings"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def _check_night_light(self):

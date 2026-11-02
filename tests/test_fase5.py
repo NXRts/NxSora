@@ -25,8 +25,8 @@ from services.weather import WeatherService
 class TestFase5Features(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        from PyQt6.QtCore import QCoreApplication
-        cls.app = QCoreApplication.instance() or QCoreApplication([])
+        from PyQt6.QtWidgets import QApplication
+        cls.app = QApplication.instance() or QApplication([])
 
     def test_prayer_astronomical_calculation(self):
         """Verify 100% offline mathematical prayer times calculation."""

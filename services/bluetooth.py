@@ -8,6 +8,7 @@ Bluetooth & Perangkat Hub Page.
 
 import os
 import subprocess
+import sys
 from PyQt6.QtCore import QObject, pyqtSignal, QTimer
 from PyQt6.QtDBus import QDBusConnection, QDBusInterface
 
@@ -18,7 +19,7 @@ class BluetoothService(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.bus = QDBusConnection.systemBus()
+        self.bus = QDBusConnection.systemBus() if sys.platform != "win32" else None
 
         self.adapter_powered = True
         self.device_name = "soundcore R50i"
@@ -90,7 +91,21 @@ class BluetoothService(QObject):
                     pass
 
     def _poll_bluez(self):
-        if not self.bus.isConnected():
+        if sys.platform == "win32":
+            from services.windows_adapter import WindowsBluetoothAdapter
+            win_devs = WindowsBluetoothAdapter.get_connected_devices()
+            if win_devs:
+                self.devices_list = win_devs
+                self.connected_count = len(win_devs)
+                first = win_devs[0]
+                self.device_name = first["name"]
+                self.device_connected = True
+                self.device_battery = first.get("battery", 80)
+                self.device_type = self._classify_device(self.device_name, first.get("icon", ""))
+                self.bluetoothChanged.emit()
+            return
+
+        if not self.bus or not self.bus.isConnected():
             return
 
         try:

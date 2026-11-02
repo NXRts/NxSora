@@ -134,31 +134,38 @@ def main():
     if hasattr(signal, "SIGHUP"):
         signal.signal(signal.SIGHUP, signal.SIG_IGN)
 
-    # Force Wayland platform
-    os.environ["QT_QPA_PLATFORM"] = "wayland"
+    is_windows = (sys.platform == "win32")
+
+    # On Linux/BSD, force Wayland platform unless explicitly overridden
+    if not is_windows and "QT_QPA_PLATFORM" not in os.environ:
+        os.environ["QT_QPA_PLATFORM"] = "wayland"
 
     app = QApplication(sys.argv)
     app.setApplicationName("NxSora")
     app.setApplicationDisplayName("NxSora (Nx空)")
     app.setOrganizationName("NXRts")
 
-    # CLI Forwarding to running instance via D-Bus
-    cli_flags = {"--toggle", "--settings", "--expand", "--collapse", "--next", "--prev", "--dnd", "--mascot", "--camera", "--mirror", "--weather", "--prayer", "--clipboard"}
-    invoked = [arg for arg in sys.argv[1:] if arg in cli_flags]
-    if invoked:
-        probe_bus = QDBusConnection.sessionBus()
-        if probe_bus.isConnected():
-            iface = QDBusInterface("org.nxsora.Island", "/Island", "", probe_bus)
-            if iface.isValid():
-                for flag in invoked:
-                    method_name = flag.lstrip("-")
-                    iface.call(method_name)
-                print(f"[NxSora CLI] Forwarded action(s) {invoked} to active instance.")
-                sys.exit(0)
+    # CLI Forwarding to running instance via D-Bus (Linux)
+    if not is_windows:
+        cli_flags = {"--toggle", "--settings", "--expand", "--collapse", "--next", "--prev", "--dnd", "--mascot", "--camera", "--mirror", "--weather", "--prayer", "--clipboard"}
+        invoked = [arg for arg in sys.argv[1:] if arg in cli_flags]
+        if invoked:
+            probe_bus = QDBusConnection.sessionBus()
+            if probe_bus.isConnected():
+                iface = QDBusInterface("org.nxsora.Island", "/Island", "", probe_bus)
+                if iface.isValid():
+                    for flag in invoked:
+                        method_name = flag.lstrip("-")
+                        iface.call(method_name)
+                    print(f"[NxSora CLI] Forwarded action(s) {invoked} to active instance.")
+                    sys.exit(0)
 
     # Set Window Icon
+    ico_path = config.ASSETS_DIR / "logo.ico"
     logo_path = config.ASSETS_DIR / "logo.svg"
-    if logo_path.exists():
+    if is_windows and ico_path.exists():
+        app.setWindowIcon(QIcon(str(ico_path)))
+    elif logo_path.exists():
         app.setWindowIcon(QIcon(str(logo_path)))
 
     # Handle SIGTERM gracefully (e.g. systemctl stop / pkill)
@@ -202,8 +209,9 @@ def main():
     # Add QML import path
     engine.addImportPath(str(config.QML_DIR))
 
-    # Load main window
-    main_qml_path = config.QML_DIR / "Main.qml"
+    # Load main window (MainWindows.qml on Windows, Main.qml on Linux LayerShell)
+    main_qml_file = "MainWindows.qml" if is_windows else "Main.qml"
+    main_qml_path = config.QML_DIR / main_qml_file
     engine.load(QUrl.fromLocalFile(str(main_qml_path)))
 
     if not engine.rootObjects():
@@ -212,6 +220,11 @@ def main():
 
     root_window = engine.rootObjects()[0]
     controller.setRootWindow(root_window)
+
+    # Windows Native Overlay setup: Topmost & Toolwindow styling
+    if is_windows:
+        from services.windows_adapter import WindowsWindowHelper
+        WindowsWindowHelper.apply_overlay_styles(int(root_window.winId()))
 
     def on_screen_changed(screen_name):
         for s in app.screens():
@@ -223,12 +236,13 @@ def main():
                 break
     controller.screenChanged.connect(on_screen_changed)
 
-    # Register Global D-Bus service org.nxsora.Island at /Island
-    session_bus = QDBusConnection.sessionBus()
-    dbus_service = IslandDBusService(controller, app)
-    app._dbus_service = dbus_service
-    session_bus.registerService("org.nxsora.Island")
-    session_bus.registerObject("/Island", dbus_service, QDBusConnection.RegisterOption.ExportAllSlots)
+    # Register Global D-Bus service org.nxsora.Island at /Island (Linux)
+    if not is_windows:
+        session_bus = QDBusConnection.sessionBus()
+        dbus_service = IslandDBusService(controller, app)
+        app._dbus_service = dbus_service
+        session_bus.registerService("org.nxsora.Island")
+        session_bus.registerObject("/Island", dbus_service, QDBusConnection.RegisterOption.ExportAllSlots)
 
     # Initial CLI action trigger
     if "--settings" in sys.argv:
@@ -239,7 +253,9 @@ def main():
     # Setup System Tray Icon
     if QSystemTrayIcon.isSystemTrayAvailable():
         tray = QSystemTrayIcon(app)
-        if logo_path.exists():
+        if is_windows and ico_path.exists():
+            tray.setIcon(QIcon(str(ico_path)))
+        elif logo_path.exists():
             tray.setIcon(QIcon(str(logo_path)))
         else:
             tray.setIcon(QIcon(str(config.ASSETS_DIR / "settings.svg")))
@@ -283,7 +299,11 @@ def main():
 
         def restart_app():
             import subprocess
-            subprocess.Popen([str(config.BASE_DIR / "run.sh"), "--restart"])
+            if is_windows:
+                subprocess.Popen([sys.executable] + sys.argv)
+            else:
+                subprocess.Popen([str(config.BASE_DIR / "run.sh"), "--restart"])
+            QApplication.quit()
 
         restart_act = menu.addAction("🔄 Restart NxSora")
         restart_act.triggered.connect(restart_app)
@@ -300,7 +320,10 @@ def main():
         tray.show()
         app._tray = tray
 
-    print("🌌 NxSora (Nx空) successfully launched on KDE Plasma Wayland!")
+    if is_windows:
+        print("🌌 NxSora (Nx空) successfully launched on Windows (Topmost Overlay)!")
+    else:
+        print("🌌 NxSora (Nx空) successfully launched on KDE Plasma Wayland!")
     sys.exit(app.exec())
 
 

@@ -8,6 +8,8 @@ import os
 import subprocess
 import threading
 import time
+import math
+import sys
 
 try:
     import numpy as np
@@ -113,7 +115,12 @@ class AudioVisualizerService(QObject):
 
         while self._is_running:
             if not self._proc or self._proc.poll() is not None:
-                # If ffmpeg couldn't open default.monitor, fallback to gentle breathing bars
+                # If capture stream not available, fallback to gentle organic wave bars
+                t = time.time()
+                for i in range(self._num_bands):
+                    wave = 0.15 + 0.18 * math.sin(t * 3.5 + i * 0.55)
+                    self._smooth_bands[i] = round(max(0.05, min(0.7, wave)), 3)
+                self.spectrumChanged.emit()
                 time.sleep(0.05)
                 continue
 
