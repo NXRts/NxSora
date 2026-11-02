@@ -11,6 +11,7 @@ import os
 import re
 import subprocess
 import time
+import sys
 from datetime import datetime, timedelta
 from PyQt6.QtCore import QObject, pyqtSignal, QThread
 from PyQt6.QtGui import QGuiApplication
@@ -21,6 +22,10 @@ class NotificationWatcherThread(QThread):
     notificationReceived = pyqtSignal(str, str, str)  # app_name, summary, body
 
     def run(self):
+        if sys.platform == "win32":
+            # On Windows, UserNotificationListener requires UWP / WinRT permissions
+            return
+
         try:
             proc = subprocess.Popen(
                 [

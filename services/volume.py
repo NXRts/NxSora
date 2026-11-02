@@ -6,6 +6,7 @@ Handles real-time volume & mute monitoring for PipeWire / PulseAudio via wpctl a
 from PyQt6.QtCore import QObject, pyqtSignal, QThread
 import subprocess
 import re
+import sys
 
 
 class VolumeWatcherThread(QThread):
@@ -33,6 +34,14 @@ class VolumeService(QObject):
         super().__init__(parent)
         self.volume = 0.5
         self.is_muted = False
+
+        if sys.platform == "win32":
+            from services.windows_adapter import WindowsAudioAdapter
+            self._win_audio = WindowsAudioAdapter(self)
+            self._win_audio.volumeChanged.connect(self._sync_from_win_audio)
+            self.volume = self._win_audio.volume
+            self.is_muted = self._win_audio.is_muted
+            return
         
         # Initial read
         self._read_volume()
@@ -41,6 +50,11 @@ class VolumeService(QObject):
         self.watcher = VolumeWatcherThread(self)
         self.watcher.sinkChanged.connect(self._read_volume)
         self.watcher.start()
+
+    def _sync_from_win_audio(self, vol, muted):
+        self.volume = vol
+        self.is_muted = muted
+        self.volumeChanged.emit(self.volume, self.is_muted)
 
     def _read_volume(self):
         try:
@@ -66,6 +80,12 @@ class VolumeService(QObject):
     def set_volume(self, value):
         """Set volume to float 0.0 - 1.0"""
         val = max(0.0, min(1.0, float(value)))
+        if hasattr(self, "_win_audio"):
+            self._win_audio.set_volume(val)
+            self.volume = val
+            self.volumeChanged.emit(self.volume, self.is_muted)
+            return
+
         try:
             subprocess.run(
                 ["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", f"{val:.2f}"],
@@ -83,6 +103,12 @@ class VolumeService(QObject):
         self.set_volume(new_vol)
 
     def toggle_mute(self):
+        if hasattr(self, "_win_audio"):
+            self._win_audio.toggle_mute()
+            self.is_muted = self._win_audio.is_muted
+            self.volumeChanged.emit(self.volume, self.is_muted)
+            return
+
         try:
             subprocess.run(
                 ["wpctl", "set-mute", "@DEFAULT_AUDIO_SINK@", "toggle"],

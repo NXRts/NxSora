@@ -1,0 +1,18 @@
+# Windows Platform Runtime Dependencies for NxSora (Fase 7)
+-r requirements.txt
+
+# Windows Media & WinRT APIs (SMTC for Spotify/Browser, Bluetooth, Action Center)
+winsdk>=1.0.0b10; sys_platform == 'win32'
+
+# Windows Core Audio (Volume, Mute, Audio Device Switching)
+pycaw>=20240210; sys_platform == 'win32'
+
+# Screen Backlight & Brightness
+screen-brightness-control>=0.23.0; sys_platform == 'win32'
+
+# Windows Management Instrumentation (Hardware thermals & motherboard sensors)
+WMI>=1.5.1; sys_platform == 'win32'
+
+# Windows System & COM support
+pywin32>=306; sys_platform == 'win32'
+

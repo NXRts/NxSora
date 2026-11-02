@@ -7,6 +7,7 @@ and emits notification triggers.
 import subprocess
 import threading
 import shutil
+import sys
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtProperty, pyqtSlot
 from PyQt6.QtGui import QGuiApplication
 
@@ -48,8 +49,25 @@ class ColorPickerService(QObject):
     def _run_picker_thread(self):
         color_hex = None
 
+        if sys.platform == "win32":
+            try:
+                import ctypes
+                class POINT(ctypes.Structure):
+                    _fields_ = [("x", ctypes.c_long), ("y", ctypes.c_long)]
+                pt = POINT()
+                ctypes.windll.user32.GetCursorPos(ctypes.byref(pt))
+                hdc = ctypes.windll.user32.GetDC(0)
+                color = ctypes.windll.gdi32.GetPixel(hdc, pt.x, pt.y)
+                ctypes.windll.user32.ReleaseDC(0, hdc)
+                r = color & 0xFF
+                g = (color >> 8) & 0xFF
+                b = (color >> 16) & 0xFF
+                color_hex = f"#{r:02X}{g:02X}{b:02X}"
+            except Exception:
+                pass
+
         # Method 1: Try kdialog --getcolor (native KDE dialog with screen eyedropper)
-        if shutil.which("kdialog"):
+        if not color_hex and shutil.which("kdialog"):
             try:
                 res = subprocess.run(
                     ["kdialog", "--getcolor"],

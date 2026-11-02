@@ -1,0 +1,84 @@
+name: Build NxSora Windows (.exe & Installer)
+
+on:
+  push:
+    branches: [ main, "feat/**" ]
+    tags: [ "v*" ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    name: Build Standalone Windows EXE & Installer
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Windows Dependencies & PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-windows.txt
+          pip install pyinstaller pillow
+
+      - name: Build Standalone EXE with PyInstaller
+        run: |
+          pyinstaller nxsora.spec
+
+      - name: Verify Standalone EXE Build
+        shell: pwsh
+        run: |
+          if (Test-Path "dist\NxSora.exe") {
+              Write-Host "NxSora.exe successfully built!" -ForegroundColor Green
+              Get-Item "dist\NxSora.exe" | Select-Object Name, Length
+          } else {
+              Write-Error "dist\NxSora.exe not found!"
+              exit 1
+          }
+
+      - name: Install Inno Setup Compiler
+        run: |
+          choco install innosetup -y --no-progress
+
+      - name: Compile Inno Setup Installer (NxSora-Setup.exe)
+        shell: pwsh
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+              $iscc = "ISCC.exe"
+          }
+          & $iscc installer\setup.iss
+
+      - name: Verify Installer Artifact
+        shell: pwsh
+        run: |
+          if (Test-Path "dist\NxSora-Setup.exe") {
+              Write-Host "NxSora-Setup.exe successfully compiled!" -ForegroundColor Green
+              Get-Item "dist\NxSora-Setup.exe" | Select-Object Name, Length
+          } else {
+              Write-Error "dist\NxSora-Setup.exe not found!"
+              exit 1
+          }
+
+      - name: Upload Standalone EXE Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NxSora-Windows-Standalone-EXE
+          path: dist/NxSora.exe
+          if-no-files-found: error
+
+      - name: Upload Official Installer Setup Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NxSora-Windows-Setup-Installer
+          path: dist/NxSora-Setup.exe
+          if-no-files-found: error
+

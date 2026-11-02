@@ -6,6 +6,7 @@ using PipeWire / WirePlumber (wpctl).
 
 import re
 import subprocess
+import sys
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtProperty, pyqtSlot, QTimer
 
 
@@ -44,6 +45,18 @@ class AudioDeviceService(QObject):
 
     @pyqtSlot()
     def refresh(self):
+        if sys.platform == "win32":
+            from services.windows_adapter import WindowsAudioAdapter
+            adapter = WindowsAudioAdapter()
+            sinks, sources = adapter.list_devices()
+            self._sinks = sinks
+            self._sources = sources
+            if sinks:
+                self._current_sink_name = sinks[0]["name"]
+            if sources:
+                self._current_source_name = sources[0]["name"]
+            self.devicesChanged.emit()
+            return
         try:
             res = subprocess.run(
                 ["wpctl", "status"],

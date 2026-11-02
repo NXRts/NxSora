@@ -196,6 +196,12 @@ class ShelfService(QObject):
     def openItem(self, index: int):
         if 0 <= index < len(self._items):
             target_path = self._items[index]["path"]
+            if sys.platform == "win32":
+                try:
+                    os.startfile(target_path)
+                except Exception:
+                    pass
+                return
             subprocess.Popen(
                 ["xdg-open", target_path],
                 stdout=subprocess.DEVNULL,

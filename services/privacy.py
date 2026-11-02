@@ -7,6 +7,7 @@ and Fullscreen inhibitions (Video/Game Fullscreen Auto-Hide).
 import glob
 import os
 import subprocess
+import sys
 from PyQt6.QtCore import QObject, pyqtSignal, QTimer
 from PyQt6.QtDBus import QDBusConnection, QDBusInterface
 import config
@@ -19,7 +20,7 @@ class PrivacyService(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.bus = QDBusConnection.sessionBus()
+        self.bus = QDBusConnection.sessionBus() if sys.platform != "win32" else None
 
         self._mic_in_use = False
         self._cam_in_use = False
@@ -46,6 +47,18 @@ class PrivacyService(QObject):
         return self._fullscreen_active
 
     def _poll_status(self):
+        if sys.platform == "win32":
+            from services.windows_adapter import WindowsPrivacyAdapter
+            has_cam = WindowsPrivacyAdapter.is_camera_in_use()
+            has_mic = WindowsPrivacyAdapter.is_mic_in_use()
+            if has_mic != self._mic_in_use:
+                self._mic_in_use = has_mic
+                self.micInUseChanged.emit(self._mic_in_use)
+            if has_cam != self._cam_in_use:
+                self._cam_in_use = has_cam
+                self.camInUseChanged.emit(self._cam_in_use)
+            return
+
         # 1. Microphone capture check via pactl
         try:
             res = subprocess.run(

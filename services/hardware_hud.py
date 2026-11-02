@@ -10,6 +10,7 @@ from PyQt6.QtDBus import QDBusConnection, QDBusInterface
 import glob
 import os
 import subprocess
+import sys
 
 
 class HardwareHudService(QObject):
@@ -20,7 +21,7 @@ class HardwareHudService(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.bus = QDBusConnection.sessionBus()
+        self.bus = QDBusConnection.sessionBus() if sys.platform != "win32" else None
 
         # Current states
         self.brightness_percent = 100
@@ -39,20 +40,21 @@ class HardwareHudService(QObject):
         self._backlight_max_path = None
         self._backlight_max_val = 100
         self._capslock_paths = []
-        self._discover_paths()
+        if sys.platform != "win32":
+            self._discover_paths()
 
         # Read initial values silently (without firing HUD pop-ups on startup)
         self._read_brightness(emit_hud=False)
         self._read_capslock(emit_hud=False)
         self._read_mic(emit_hud=False)
 
-        # Fast poll timer (180ms) for sysfs Backlight & Caps Lock LED
+        # Fast poll timer (180ms) for sysfs / Win32 Backlight & Caps Lock LED
         self._fast_timer = QTimer(self)
         self._fast_timer.setInterval(180)
         self._fast_timer.timeout.connect(self._poll_fast)
         self._fast_timer.start()
 
-        # Medium poll timer (900ms) for PipeWire Microphone Mute state
+        # Medium poll timer (900ms) for PipeWire / Windows Microphone Mute state
         self._mic_timer = QTimer(self)
         self._mic_timer.setInterval(900)
         self._mic_timer.timeout.connect(lambda: self._read_mic(emit_hud=True))
@@ -82,6 +84,16 @@ class HardwareHudService(QObject):
         self._read_capslock(emit_hud=True)
 
     def _read_brightness(self, emit_hud=True):
+        if sys.platform == "win32":
+            from services.windows_adapter import WindowsHardwareAdapter
+            pct = WindowsHardwareAdapter.get_brightness()
+            if pct != self.brightness_percent:
+                self.brightness_percent = pct
+                self.brightnessChanged.emit(pct)
+                if emit_hud:
+                    self._trigger_hud("brightness", "Kecerahan Layar", pct, True)
+            return
+
         if not self._backlight_cur_path:
             return
         try:
@@ -97,6 +109,21 @@ class HardwareHudService(QObject):
             pass
 
     def _read_capslock(self, emit_hud=True):
+        if sys.platform == "win32":
+            from services.windows_adapter import WindowsHardwareAdapter
+            is_on = WindowsHardwareAdapter.get_caps_lock_state()
+            if is_on != self.caps_lock_on:
+                self.caps_lock_on = is_on
+                self.capsLockChanged.emit(is_on)
+                if emit_hud:
+                    self._trigger_hud(
+                        "capslock",
+                        "Caps Lock",
+                        100 if is_on else 0,
+                        is_on,
+                    )
+            return
+
         if not self._capslock_paths:
             return
         try:
@@ -163,9 +190,16 @@ class HardwareHudService(QObject):
         self.hardwareHudTriggered.emit(hud_type, label, val, active)
 
     def set_brightness(self, ratio: float):
-        """Set screen brightness (0.05..1.0) via KDE PowerManagement D-Bus."""
+        """Set screen brightness (0.05..1.0) via Windows API or KDE PowerManagement D-Bus."""
         clamped = max(0.05, min(1.0, float(ratio)))
         pct = int(round(clamped * 100.0))
+        if sys.platform == "win32":
+            from services.windows_adapter import WindowsHardwareAdapter
+            WindowsHardwareAdapter.set_brightness(pct)
+            self.brightness_percent = pct
+            self.brightnessChanged.emit(pct)
+            return
+
         try:
             iface = QDBusInterface(
                 "org.kde.Solid.PowerManagement",
