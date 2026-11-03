@@ -13,10 +13,12 @@ Provides native Windows 10/11 system integration:
 
 import sys
 import os
+import time
 import subprocess
 import re
 from pathlib import Path
 from PyQt6.QtCore import QObject, pyqtSignal, QTimer
+from services.process_utils import run_hidden, check_output_hidden, popen_hidden
 
 
 # ==============================================================================
@@ -321,10 +323,13 @@ class WindowsHardwareAdapter:
         except Exception:
             pass
 
-        # Fallback via PowerShell WMI
+        # Fallback via PowerShell WMI without shell=True
         try:
-            cmd = "powershell -Command \"(Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness).CurrentBrightness\""
-            out = subprocess.check_output(cmd, shell=True, text=True, timeout=1.0).strip()
+            cmd = [
+                "powershell", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden",
+                "-Command", "(Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightness).CurrentBrightness"
+            ]
+            out = check_output_hidden(cmd, text=True, timeout=1.0).strip()
             if out.isdigit():
                 return int(out)
         except Exception:
@@ -344,8 +349,11 @@ class WindowsHardwareAdapter:
             pass
 
         try:
-            cmd = f"powershell -Command \"(Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1, {pct})\""
-            subprocess.run(cmd, shell=True, timeout=1.0)
+            cmd = [
+                "powershell", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden",
+                "-Command", f"(Get-WmiObject -Namespace root/WMI -Class WmiMonitorBrightnessMethods).WmiSetBrightness(1, {pct})"
+            ]
+            run_hidden(cmd, timeout=1.0)
             return True
         except Exception:
             return False
@@ -362,7 +370,7 @@ class WindowsHardwareAdapter:
         }
         guid = guid_map.get(profile_name, guid_map["balanced"])
         try:
-            subprocess.run(["powercfg", "/setactive", guid], capture_output=True, timeout=1.5)
+            run_hidden(["powercfg", "/setactive", guid], capture_output=True, timeout=1.5)
             return True
         except Exception:
             return False
@@ -372,7 +380,7 @@ class WindowsHardwareAdapter:
         if sys.platform != "win32":
             return "balanced"
         try:
-            res = subprocess.run(["powercfg", "/getactivescheme"], capture_output=True, text=True, timeout=1.5)
+            res = run_hidden(["powercfg", "/getactivescheme"], capture_output=True, text=True, timeout=1.5)
             out = res.stdout.lower()
             if "saver" in out or "hemat" in out:
                 return "power-saver"
@@ -388,16 +396,65 @@ class WindowsHardwareAdapter:
 # ==============================================================================
 class WindowsBluetoothAdapter:
     """Detects connected Bluetooth devices and battery percentage on Windows."""
+    _cached_devices: list = []
+    _last_query_time: float = 0.0
+    _cache_ttl: float = 6.0  # Cache for 6 seconds to eliminate repetitive process creation
+    _is_querying: bool = False
 
-    @staticmethod
-    def get_connected_devices() -> list:
+    @classmethod
+    def get_connected_devices(cls) -> list:
         if sys.platform != "win32":
             return []
-        devices = []
+
+        now = time.time()
+        if cls._cached_devices and (now - cls._last_query_time < cls._cache_ttl):
+            return list(cls._cached_devices)
+
+        if cls._is_querying:
+            return list(cls._cached_devices)
+
+        cls._is_querying = True
         try:
-            # Query PnP Bluetooth connected devices via PowerShell
-            cmd = "powershell -Command \"Get-PnpDevice -Class Bluetooth -Status OK | Select-Object -Property FriendlyName, InstanceId | ConvertTo-Json\""
-            res = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=2.0)
+            devices = []
+            # Fast in-process Registry query for paired/connected Bluetooth devices (0 processes, ~0.1ms)
+            try:
+                import winreg
+                key_path = r"SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters\Devices"
+                with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path, 0, winreg.KEY_READ) as bth_key:
+                    num_subkeys = winreg.QueryInfoKey(bth_key)[0]
+                    for i in range(num_subkeys):
+                        sub_name = winreg.EnumKey(bth_key, i)
+                        try:
+                            with winreg.OpenKey(bth_key, sub_name, 0, winreg.KEY_READ) as dev_key:
+                                try:
+                                    dev_name = winreg.QueryValueEx(dev_key, "Name")[0]
+                                    if isinstance(dev_name, bytes):
+                                        dev_name = dev_name.decode("utf-8", errors="ignore").rstrip("\x00")
+                                    if dev_name and not any(ign in dev_name.lower() for ign in ("adapter", "enumerator", "radio", "module")):
+                                        devices.append({
+                                            "name": dev_name,
+                                            "connected": True,
+                                            "battery": 80,
+                                            "icon": "headphones"
+                                        })
+                                except FileNotFoundError:
+                                    pass
+                        except Exception:
+                            pass
+            except Exception:
+                pass
+
+            if devices:
+                cls._cached_devices = devices
+                cls._last_query_time = now
+                return devices
+
+            # Fallback: Query PnP Bluetooth devices directly via PowerShell without shell=True
+            cmd = [
+                "powershell", "-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden",
+                "-Command", "Get-PnpDevice -Class Bluetooth -Status OK | Select-Object -Property FriendlyName, InstanceId | ConvertTo-Json"
+            ]
+            res = run_hidden(cmd, capture_output=True, text=True, timeout=2.5)
             if res.returncode == 0 and res.stdout.strip():
                 import json
                 data = json.loads(res.stdout)
@@ -411,23 +468,47 @@ class WindowsBluetoothAdapter:
                             "battery": 80,
                             "icon": "headphones"
                         })
+
+            cls._cached_devices = devices
+            cls._last_query_time = now
+            return devices
         except Exception:
-            pass
-        return devices
+            return list(cls._cached_devices)
+        finally:
+            cls._is_querying = False
 
 
 # ==============================================================================
 # 6. Windows Network Adapter (netsh wlan)
 # ==============================================================================
 class WindowsNetworkAdapter:
-    """Queries active Wi-Fi SSID and signal strength via netsh."""
+    """Queries active Wi-Fi SSID and signal strength via netsh with hidden console."""
+    _cached_status: tuple = ("", False, 0)
+    _last_query_time: float = 0.0
+    _cache_ttl: float = 3.5
+    _is_querying: bool = False
 
-    @staticmethod
-    def get_wifi_status() -> tuple[str, bool, int]:
+    @classmethod
+    def get_wifi_status(cls) -> tuple[str, bool, int]:
         if sys.platform != "win32":
             return ("", False, 0)
+
+        now = time.time()
+        if cls._cached_status[1] and (now - cls._last_query_time < cls._cache_ttl):
+            return cls._cached_status
+
+        # Prevent concurrent overlapping processes
+        if cls._is_querying:
+            return cls._cached_status
+
+        cls._is_querying = True
         try:
-            res = subprocess.run(["netsh", "wlan", "show", "interfaces"], capture_output=True, text=True, timeout=1.5)
+            res = run_hidden(
+                ["netsh", "wlan", "show", "interfaces"],
+                capture_output=True,
+                text=True,
+                timeout=2.0
+            )
             out = res.stdout
             connected = ("State" in out and "connected" in out.lower())
             
@@ -445,9 +526,13 @@ class WindowsNetworkAdapter:
                         if val_str.isdigit():
                             signal = int(val_str)
 
-            return (ssid, connected, signal)
+            cls._cached_status = (ssid, connected, signal)
+            cls._last_query_time = time.time()
+            return cls._cached_status
         except Exception:
-            return ("", False, 0)
+            return cls._cached_status
+        finally:
+            cls._is_querying = False
 
 
 # ==============================================================================

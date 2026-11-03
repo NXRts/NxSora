@@ -15,6 +15,7 @@ import subprocess
 import time
 import sys
 import psutil
+from services.process_utils import run_hidden, check_output_hidden, popen_hidden
 
 
 class SystemService(QObject):
@@ -280,7 +281,7 @@ class SystemService(QObject):
             # NVIDIA proprietary fallback via nvidia-smi if not found in sysfs
             if not found_gpu and shutil.which("nvidia-smi"):
                 try:
-                    nv_out = subprocess.check_output(
+                    nv_out = check_output_hidden(
                         ["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"],
                         timeout=0.4,
                         stderr=subprocess.DEVNULL
@@ -417,7 +418,7 @@ class SystemService(QObject):
             try:
                 os.startfile("ms-screenclip:")
             except Exception:
-                subprocess.Popen(["snippingtool.exe"], shell=True)
+                popen_hidden(["snippingtool.exe"])
             return
         subprocess.Popen(["spectacle", "-r"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
@@ -436,7 +437,7 @@ class SystemService(QObject):
         """Open default terminal"""
         if sys.platform == "win32":
             try:
-                subprocess.Popen(["powershell.exe"], shell=True)
+                subprocess.Popen(["powershell.exe"])
             except Exception:
                 pass
             return

@@ -4,7 +4,7 @@
 ; ==============================================================================
 
 #define MyAppName "NxSora"
-#define MyAppVersion "0.1.0"
+#define MyAppVersion "1.0.0"
 #define MyAppPublisher "NXRts"
 #define MyAppURL "https://github.com/NXRts/NxSora"
 #define MyAppExeName "NxSora.exe"

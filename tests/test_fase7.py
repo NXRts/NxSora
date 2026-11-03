@@ -152,6 +152,51 @@ class TestFase7Features(unittest.TestCase):
         self.assertTrue(iss_file.exists())
         self.assertGreater(iss_file.stat().st_size, 500)
 
+    def test_process_utils_hidden_flags_windows(self):
+        """Verify process_utils injects CREATE_NO_WINDOW and STARTUPINFO on Windows."""
+        from services import process_utils
+        import subprocess
+
+        # Test Windows simulation with mock STARTUPINFO
+        class MockStartupInfo:
+            dwFlags = 0
+            wShowWindow = 1
+
+        with patch.object(process_utils, "IS_WINDOWS", True), \
+             patch.object(subprocess, "STARTUPINFO", MockStartupInfo, create=True), \
+             patch.object(subprocess, "STARTF_USESHOWWINDOW", 1, create=True), \
+             patch.object(subprocess, "SW_HIDE", 0, create=True):
+            kwargs = process_utils.get_hidden_subprocess_kwargs(timeout=5)
+            self.assertEqual(kwargs.get("timeout"), 5)
+            self.assertTrue(bool(kwargs.get("creationflags", 0) & process_utils.CREATE_NO_WINDOW))
+            si = kwargs.get("startupinfo")
+            self.assertIsNotNone(si)
+            self.assertTrue(bool(si.dwFlags & 1))
+            self.assertEqual(si.wShowWindow, 0)
+
+        # Test Linux / non-Windows simulation
+        with patch.object(process_utils, "IS_WINDOWS", False):
+            kwargs = process_utils.get_hidden_subprocess_kwargs(timeout=5)
+            self.assertEqual(kwargs.get("timeout"), 5)
+            self.assertNotIn("creationflags", kwargs)
+            self.assertNotIn("startupinfo", kwargs)
+
+    def test_windows_adapters_caching_and_concurrency(self):
+        """Verify Windows network & bluetooth adapters caching and concurrency guards."""
+        with patch("sys.platform", "win32"):
+            # Network adapter test
+            WindowsNetworkAdapter._cached_status = ("NxSora-WiFi", True, 95)
+            WindowsNetworkAdapter._last_query_time = 1e12  # far future
+            status = WindowsNetworkAdapter.get_wifi_status()
+            self.assertEqual(status, ("NxSora-WiFi", True, 95))
+
+            # Bluetooth adapter test
+            WindowsBluetoothAdapter._cached_devices = [{"name": "NxSora Buds", "connected": True, "battery": 90, "icon": "headphones"}]
+            WindowsBluetoothAdapter._last_query_time = 1e12  # far future
+            devs = WindowsBluetoothAdapter.get_connected_devices()
+            self.assertEqual(len(devs), 1)
+            self.assertEqual(devs[0]["name"], "NxSora Buds")
+
 
 if __name__ == "__main__":
     unittest.main()

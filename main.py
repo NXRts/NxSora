@@ -136,6 +136,31 @@ def main():
 
     is_windows = (sys.platform == "win32")
 
+    # Set Windows Process AppUserModelID for Task Manager identification & notification routing
+    if is_windows:
+        try:
+            import ctypes
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("NXRts.NxSora.TheLivingSkyNotch.1.0")
+        except Exception:
+            pass
+
+        # Redirect stdout and stderr to persistent log file on Windows
+        try:
+            log_file = config.STATE_DIR / "nxsora.log"
+            _log_stream = open(str(log_file), "a", encoding="utf-8")
+            sys.stdout = _log_stream
+            sys.stderr = _log_stream
+        except Exception:
+            pass
+
+        def _windows_excepthook(exc_type, exc_value, exc_traceback):
+            import traceback
+            trace_str = "".join(traceback.format_exception(exc_type, exc_value, exc_traceback))
+            print(f"[NxSora Fatal Error] Uncaught exception:\n{trace_str}", file=sys.stderr, flush=True)
+            sys.__excepthook__(exc_type, exc_value, exc_traceback)
+
+        sys.excepthook = _windows_excepthook
+
     # On Linux/BSD, force Wayland platform unless explicitly overridden
     if not is_windows and "QT_QPA_PLATFORM" not in os.environ:
         os.environ["QT_QPA_PLATFORM"] = "wayland"
@@ -300,7 +325,8 @@ def main():
         def restart_app():
             import subprocess
             if is_windows:
-                subprocess.Popen([sys.executable] + sys.argv)
+                from services.process_utils import popen_hidden
+                popen_hidden([sys.executable] + sys.argv)
             else:
                 subprocess.Popen([str(config.BASE_DIR / "run.sh"), "--restart"])
             QApplication.quit()

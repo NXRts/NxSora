@@ -1345,8 +1345,11 @@ class IslandController(QObject):
     @pyqtSlot()
     def openConfigFile(self):
         try:
-            import subprocess
-            subprocess.Popen(["xdg-open", str(config.USER_CONFIG_FILE)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if sys.platform == "win32":
+                os.startfile(str(config.USER_CONFIG_FILE))
+            else:
+                import subprocess
+                subprocess.Popen(["xdg-open", str(config.USER_CONFIG_FILE)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception:
             pass
 

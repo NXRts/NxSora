@@ -6,6 +6,7 @@ Integrates with Spotify, Chrome, Firefox, VLC, and other MPRIS-compliant players
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot, QTimer
 from PyQt6.QtDBus import QDBusConnection, QDBusInterface, QDBusMessage
 import os
+import sys
 import time
 import subprocess
 from services.color_extractor import ColorExtractor

@@ -6,6 +6,7 @@ without copying file contents into memory, and supports native Wayland Drag-Out 
 
 import json
 import os
+import sys
 import subprocess
 from pathlib import Path
 from urllib.parse import unquote, urlparse
