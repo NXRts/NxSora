@@ -39,7 +39,7 @@ class AudioVisualizerService(QObject):
         self._sample_rate = 16000
         self._n_fft = 512
         self._band_indices = []
-        if HAS_NUMPY:
+        if HAS_NUMPY and np is not None:
             freqs = np.fft.rfftfreq(self._n_fft, 1.0 / self._sample_rate)
             band_edges = np.logspace(np.log10(60), np.log10(7000), self._num_bands + 1)
             for i in range(self._num_bands):
@@ -48,6 +48,14 @@ class AudioVisualizerService(QObject):
                 if len(idx) == 0:
                     idx = np.array([min(len(freqs) - 1, int(round(low / (self._sample_rate / self._n_fft))))])
                 self._band_indices.append(idx)
+        else:
+            # Pure Python precomputed band frequency ranges (60Hz - 7000Hz)
+            df = self._sample_rate / self._n_fft
+            edges = [60 * ((7000 / 60) ** (i / self._num_bands)) for i in range(self._num_bands + 1)]
+            for i in range(self._num_bands):
+                low_bin = max(1, int(edges[i] / df))
+                high_bin = max(low_bin + 1, int(edges[i + 1] / df))
+                self._band_indices.append((low_bin, high_bin))
 
     @pyqtProperty(list, notify=spectrumChanged)
     def bands(self) -> list:
@@ -84,11 +92,6 @@ class AudioVisualizerService(QObject):
             self._proc = None
 
     def _worker_loop(self):
-        if not HAS_NUMPY:
-            while self._is_running:
-                time.sleep(0.1)
-            return
-
         cmd = [
             "ffmpeg",
             "-nostdin",
@@ -130,20 +133,36 @@ class AudioVisualizerService(QObject):
                     time.sleep(0.02)
                     continue
 
-                samples = np.frombuffer(raw, dtype=np.int16).astype(np.float32)
-                # Apply Hann window to reduce spectral leakage
-                windowed = samples * np.hanning(len(samples))
-                fft_vals = np.abs(np.fft.rfft(windowed))
+                if HAS_NUMPY and np is not None:
+                    samples = np.frombuffer(raw, dtype=np.int16).astype(np.float32)
+                    # Apply Hann window to reduce spectral leakage
+                    windowed = samples * np.hanning(len(samples))
+                    fft_vals = np.abs(np.fft.rfft(windowed))
 
-                # Normalize FFT magnitudes
-                max_val = np.max(fft_vals) if len(fft_vals) > 0 else 1.0
-                scale = max(1000.0, max_val)
+                    # Normalize FFT magnitudes
+                    max_val = np.max(fft_vals) if len(fft_vals) > 0 else 1.0
+                    scale = max(1000.0, max_val)
 
-                new_bands = []
-                for idx in self._band_indices:
-                    val = np.mean(fft_vals[idx]) / scale if len(idx) > 0 else 0.0
-                    val = min(1.0, max(0.05, float(val)))
-                    new_bands.append(val)
+                    new_bands = []
+                    for idx in self._band_indices:
+                        val = np.mean(fft_vals[idx]) / scale if len(idx) > 0 else 0.0
+                        val = min(1.0, max(0.05, float(val)))
+                        new_bands.append(val)
+                else:
+                    # Pure Python RMS chunk processing without NumPy
+                    import struct
+                    count = len(raw) // 2
+                    samples = struct.unpack(f"<{count}h", raw)
+                    chunk_len = max(1, count // self._num_bands)
+                    new_bands = []
+                    for i in range(self._num_bands):
+                        chunk = samples[i * chunk_len : (i + 1) * chunk_len]
+                        if chunk:
+                            rms = math.sqrt(sum(s * s for s in chunk) / len(chunk))
+                            mag = min(1.0, max(0.05, rms / 8000.0))
+                        else:
+                            mag = 0.05
+                        new_bands.append(mag)
 
                 # Exponential smoothing (attack fast, decay smooth)
                 for i in range(self._num_bands):
