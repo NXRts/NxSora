@@ -11,8 +11,11 @@
 | **Fase 1** | Karaoke LRCLIB, File Shelf Drag-Out, Pomodoro Ring, Water Tracker, Navigasi Swipe, Telemetri TDP | ✅ Selesai |
 | **Fase 2** | Smart Peek Overlays `310x60px` (Bluetooth TWS, Cas), Hardware HUD (Kecerahan, Caps Lock), Pusat Notifikasi Split-View | ✅ Selesai |
 | **Fase 3** | Polesan Repo, Paket AUR, Kemudahan Instalasi, Standarisasi XDG, Tray Icon, Fullscreen Auto-Hide, Privacy Dots, Unit Test & CI | 🚀 Selesai |
-| **Fase 4** | Indikator Workspace Virtual KDE, Live Weather (Open-Meteo), Camera Mirror, Quick Share KDE Connect | ⏳ Direncanakan |
-| **Fase 5** | Jadwal Sholat Kemenag RI (Sun Arc Trajectory), Real PipeWire Audio Spectrum (`cava`), Portabilitas Windows (`.exe`) | ⏳ Direncanakan |
+| **Fase 4** | Indikator Workspace Virtual KDE, Live Weather (Open-Meteo), Camera Mirror, Quick Share KDE Connect | ✅ Selesai |
+| **Fase 5** | Jadwal Sholat Kemenag RI (Sun Arc Trajectory), Real Audio Spectrum, Clipboard History, Quick Voice Note | ✅ Selesai |
+| **Fase 6** | Halaman Pengaturan Terpisah, Multi-Monitor Picker, Accent Color, Custom Auto-Collapse Timeout | ✅ Selesai |
+| **Fase 7** | Dukungan Cross-Platform Windows 10/11 (`NxSora.exe` & `NxSora-Setup.exe` Inno Setup) | ✅ Selesai |
+| **Fase 8** | Pangkas Ukuran Binary (Zero-Pillow, Zero-Numpy), Adaptive Polling Rate (Battery Eco-Mode) | 🚀 Selesai |
 
 ---
 
