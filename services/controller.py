@@ -262,6 +262,10 @@ class IslandController(QObject):
         self.screen_manager.screenChanged.connect(self.screenChanged.emit)
         self.screen_manager.screensListChanged.connect(self.screensListChanged.emit)
 
+        # Adaptive Polling: Eco-Mode (4s) when closed vs High-Speed (0.8s) when expanded
+        self.isExpandedChanged.connect(self.system.set_adaptive_polling)
+        self.isExpandedChanged.connect(self.bluetooth.set_adaptive_polling)
+
         # Initial state setup
         if self.mpris.status in ("Playing", "Paused") and self.mpris.title:
             self._state = "music"

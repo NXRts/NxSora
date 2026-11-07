@@ -1,12 +1,13 @@
 """
 Color Extractor Service
 Extracts dominant vibrant colors from album artwork for adaptive dynamic glow.
+Uses native PyQt6 QImage for C++ performance and zero external dependencies.
 """
 
 import os
 import colorsys
 from urllib.parse import urlparse, unquote
-from PIL import Image
+from PyQt6.QtGui import QImage
 
 
 class ColorExtractor:
@@ -28,17 +29,32 @@ class ColorExtractor:
             return default_color
 
         try:
-            img = Image.open(local_path).convert("RGB")
-            img = img.resize((32, 32))
-            colors = img.getcolors(maxcolors=1024)
-            if not colors:
+            qimg = QImage(local_path)
+            if qimg.isNull():
+                return default_color
+
+            # Resize to 32x32 for instantaneous color sampling
+            scaled = qimg.scaled(32, 32)
+            w = scaled.width()
+            h = scaled.height()
+            if w <= 0 or h <= 0:
+                return default_color
+
+            color_counts = {}
+            for y in range(h):
+                for x in range(w):
+                    qc = scaled.pixelColor(x, y)
+                    rgb = (qc.red(), qc.green(), qc.blue())
+                    color_counts[rgb] = color_counts.get(rgb, 0) + 1
+
+            if not color_counts:
                 return default_color
 
             best_color = None
             best_score = -1.0
 
-            for count, (r, g, b) in colors:
-                h, s, v = colorsys.rgb_to_hsv(r / 255.0, g / 255.0, b / 255.0)
+            for (r, g, b), count in color_counts.items():
+                h_val, s, v = colorsys.rgb_to_hsv(r / 255.0, g / 255.0, b / 255.0)
                 # Filter out pure blacks, harsh whites, and low saturation grays
                 if v < 0.25 or v > 0.98 or s < 0.28:
                     continue
@@ -49,9 +65,9 @@ class ColorExtractor:
                     best_color = (r, g, b)
 
             if not best_color:
-                colors.sort(reverse=True, key=lambda x: x[0])
-                for count, (r, g, b) in colors:
-                    h, s, v = colorsys.rgb_to_hsv(r / 255.0, g / 255.0, b / 255.0)
+                sorted_colors = sorted(color_counts.items(), key=lambda item: item[1], reverse=True)
+                for (r, g, b), count in sorted_colors:
+                    h_val, s, v = colorsys.rgb_to_hsv(r / 255.0, g / 255.0, b / 255.0)
                     if v > 0.15:
                         best_color = (r, g, b)
                         break

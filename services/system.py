@@ -105,13 +105,25 @@ class SystemService(QObject):
         # Prime process cpu_percent counters
         self._prime_process_cpu()
 
-        # Timer to poll stats every 1 second
+        # Timer to poll stats (starts in Eco-Mode 4000ms, accelerates to 800ms when expanded)
         self.timer = QTimer(self)
-        self.timer.setInterval(1000)
+        self.timer.setInterval(4000)
         self.timer.timeout.connect(self._poll)
         self.timer.start()
 
         self._poll()
+
+    def set_adaptive_polling(self, expanded: bool):
+        """
+        Adjusts polling rate based on UI state (Eco-Mode vs High-Performance):
+        - Expanded: 800ms (fast, responsive for live graphs, dials, and telemetry meters)
+        - Idle/Closed: 4000ms (battery saver, reduces background CPU wakeups by ~80%)
+        """
+        new_interval = 800 if expanded else 4000
+        if self.timer.interval() != new_interval:
+            self.timer.setInterval(new_interval)
+            if expanded:
+                self._poll()  # Immediate refresh on opening Hub
 
     def _detect_cpu_model(self):
         try:

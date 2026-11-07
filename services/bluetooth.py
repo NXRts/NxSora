@@ -38,13 +38,25 @@ class BluetoothService(QObject):
         self._initialized = False
         self._demo_override = False
 
-        # Poll BlueZ ObjectManager every 1.5 seconds
+        # Poll BlueZ ObjectManager (starts at Eco-Mode 4000ms, accelerates to 1500ms when expanded)
         self.poll_timer = QTimer(self)
-        self.poll_timer.setInterval(1500)
+        self.poll_timer.setInterval(4000)
         self.poll_timer.timeout.connect(self._poll_bluez)
         self.poll_timer.start()
 
         self._poll_bluez()
+
+    def set_adaptive_polling(self, expanded: bool):
+        """
+        Adjusts polling rate based on UI state (Eco-Mode vs High-Performance):
+        - Expanded: 1500ms (fast response when managing devices in Hub)
+        - Idle/Closed: 4000ms (battery saver, reduces BlueZ D-Bus and WinRT traffic)
+        """
+        new_interval = 1500 if expanded else 4000
+        if self.poll_timer.interval() != new_interval:
+            self.poll_timer.setInterval(new_interval)
+            if expanded:
+                self._poll_bluez()
 
     @staticmethod
     def _classify_device(name: str, icon: str) -> str:

@@ -197,6 +197,53 @@ class TestFase7Features(unittest.TestCase):
             self.assertEqual(len(devs), 1)
             self.assertEqual(devs[0]["name"], "NxSora Buds")
 
+    def test_color_extractor_native_qimage(self):
+        """Verify ColorExtractor works using native QImage with zero Pillow dependency."""
+        import tempfile
+        from PyQt6.QtGui import QImage, QColor
+        from services.color_extractor import ColorExtractor
+
+        # Create 32x32 image with solid sky blue
+        img = QImage(32, 32, QImage.Format.Format_RGB32)
+        img.fill(QColor(56, 189, 248))
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+            tmp_path = f.name
+        try:
+            img.save(tmp_path)
+            accent = ColorExtractor.get_accent_color(tmp_path)
+            self.assertTrue(accent.startswith("#"))
+            self.assertEqual(len(accent), 7)
+            # Default fallback on invalid path
+            fallback = ColorExtractor.get_accent_color("/nonexistent/image.png", "#123456")
+            self.assertEqual(fallback, "#123456")
+        finally:
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+
+    def test_adaptive_polling_intervals(self):
+        """Verify System and Bluetooth services adjust polling interval adaptively."""
+        from services.system import SystemService
+        from services.bluetooth import BluetoothService
+
+        sys_svc = SystemService()
+        # Default is eco-mode (4000ms)
+        self.assertEqual(sys_svc.timer.interval(), 4000)
+
+        # Expand -> High speed (800ms)
+        sys_svc.set_adaptive_polling(True)
+        self.assertEqual(sys_svc.timer.interval(), 800)
+
+        # Collapse -> Eco mode (4000ms)
+        sys_svc.set_adaptive_polling(False)
+        self.assertEqual(sys_svc.timer.interval(), 4000)
+
+        bt_svc = BluetoothService()
+        self.assertEqual(bt_svc.poll_timer.interval(), 4000)
+        bt_svc.set_adaptive_polling(True)
+        self.assertEqual(bt_svc.poll_timer.interval(), 1500)
+        bt_svc.set_adaptive_polling(False)
+        self.assertEqual(bt_svc.poll_timer.interval(), 4000)
+
 
 if __name__ == "__main__":
     unittest.main()
